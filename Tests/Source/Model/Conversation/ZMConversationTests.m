@@ -550,9 +550,9 @@
     
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *mA = [conversation appendMessageWithText:@"A"];
+    ZMMessage *mA = (id)[conversation appendMessageWithText:@"A"];
     mA.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:10000];
-    ZMMessage *mB = [conversation appendMessageWithText:@"B"];
+    ZMMessage *mB = (id)[conversation appendMessageWithText:@"B"];
     mB.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:20000];
     [self performIgnoringZMLogError:^{
         [conversation sortMessages];
@@ -573,11 +573,11 @@
 {
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *message1 = [conversation appendMessageWithText:@"hallo"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"hallo"];
     message1.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-50];
-    ZMMessage *message2 = [conversation appendMessageWithText:@"hallo"];
+    ZMMessage *message2 = (id)[conversation appendMessageWithText:@"hallo"];
     message2.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-40];
-    ZMMessage *message3 = [conversation appendMessageWithText:@"hallo"];
+    ZMMessage *message3 = (id)[conversation appendMessageWithText:@"hallo"];
     message3.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-30];
 
     NSOrderedSet *messages = [NSOrderedSet orderedSetWithArray:@[message1, message2, message3]];
@@ -600,11 +600,11 @@
     NSDate *date3 = [NSDate dateWithTimeIntervalSinceReferenceDate:4000];
     
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *message1 = [conversation appendMessageWithText:@"hallo 1"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"hallo 1"];
     message1.serverTimestamp = date1;
-    ZMMessage *message2 = [conversation appendMessageWithText:@"hallo 2"];
+    ZMMessage *message2 = (id)[conversation appendMessageWithText:@"hallo 2"];
     message2.serverTimestamp = date3;
-    ZMMessage *message3 = [conversation appendMessageWithText:@"hallo 3"];
+    ZMMessage *message3 = (id)[conversation appendMessageWithText:@"hallo 3"];
     
     NSOrderedSet *messages = [NSOrderedSet orderedSetWithArray:@[message1, message2, message3]];
     XCTAssertEqualObjects(messages, conversation.messages);
@@ -772,7 +772,7 @@
     NSString *longText = [@"" stringByPaddingToLength:ZMConversationMaxTextMessageLength + 1000 withString:@"😋" startingAtIndex:0];
     
     // then
-    id<ZMConversationMessage> message = [conversation appendMessageWithText:longText];
+    id<ZMConversationMessage> message = (id)[conversation appendMessageWithText:longText];
 
     XCTAssertEqualObjects(message.textMessageData.messageText, longText);
     XCTAssertEqual(conversation.messages.count, 1lu);
@@ -998,7 +998,7 @@
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.lastModifiedDate = [NSDate.date dateByAddingTimeInterval:-100];
-    ZMMessage *firstMessage = [conversation appendMessageWithText:@"Test Message"];
+    ZMMessage *firstMessage = (id)[conversation appendMessageWithText:@"Test Message"];
     
     // then
     XCTAssertEqualObjects(conversation.lastModifiedDate, firstMessage.serverTimestamp);
@@ -1058,7 +1058,7 @@
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
     conversation.lastModifiedDate = [NSDate.date dateByAddingTimeInterval:-100];
-    ZMMessage *firstMessage = [conversation appendMessageWithText:@"Test Message"];
+    ZMMessage *firstMessage = (id)[conversation appendMessageWithText:@"Test Message"];
     
     // then
     XCTAssertEqualObjects(conversation.lastModifiedDate, firstMessage.serverTimestamp);
@@ -1077,7 +1077,7 @@
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
     conversation.lastModifiedDate = [NSDate.date dateByAddingTimeInterval:-100];
-    ZMMessage *firstMessage = [conversation appendMessageWithText:@"Test Message"];
+    ZMMessage *firstMessage = (id)[conversation appendMessageWithText:@"Test Message"];
     
     NSDate *postingDate = firstMessage.serverTimestamp;
     // then
@@ -2470,7 +2470,7 @@
     NSArray *users = @[user0, user1, selfUser];
     ZMConversation *conversation = [self insertConversationWithParticipants:users callParticipants:users callStateNeedsToBeUpdatedFromBackend:NO];
     ZMEventID *clearedEventID = self.createEventID;
-    ZMMessage *message = [conversation appendMessageWithText:@"0"];
+    ZMMessage *message = (id)[conversation appendMessageWithText:@"0"];
     message.eventID = clearedEventID;
     
     ZMConversationList *activeList = [ZMConversationList conversationsInUserSession:self.mockUserSessionWithUIMOC];
@@ -2496,13 +2496,13 @@
         ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
         conversation.lastEventID = clearedEventID;
         
-        ZMMessage *message1 = [conversation appendMessageWithText:@"B"];
+        ZMMessage *message1 = (id)[conversation appendMessageWithText:@"B"];
         [message1 expire];
         
-        ZMMessage *message2 = [conversation appendMessageWithText:@"A"];
+        ZMMessage *message2 = (id)[conversation appendMessageWithText:@"A"];
         message2.eventID = clearedEventID;
         
-        ZMMessage *message3 = [conversation appendMessageWithText:@"B"];
+        ZMMessage *message3 = (id)[conversation appendMessageWithText:@"B"];
         [message3 expire];
         conversation.lastServerTimeStamp = message3.serverTimestamp;
         
@@ -2522,17 +2522,17 @@
     [self.syncMOC performGroupedBlockAndWait:^{
         ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
         
-        ZMMessage *message1 = [conversation appendMessageWithText:@"A"];
+        ZMMessage *message1 = (id)[conversation appendMessageWithText:@"A"];
         [message1 expire];
         
         NSDate *clearedTimestamp = [NSDate date];
-        ZMMessage *message2 = [conversation appendMessageWithText:@"B"];
+        ZMMessage *message2 = (id)[conversation appendMessageWithText:@"B"];
         message2.serverTimestamp = clearedTimestamp;
         conversation.lastServerTimeStamp = clearedTimestamp;
         
         [self spinMainQueueWithTimeout:1];
         
-        ZMMessage *message3 = [conversation appendMessageWithText:@"C"];
+        ZMMessage *message3 = (id)[conversation appendMessageWithText:@"C"];
         [message3 expire];
         
         // when
@@ -2552,12 +2552,12 @@
     [self.syncMOC performGroupedBlockAndWait:^{
         ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
         
-        ZMMessage *message1 = [conversation appendMessageWithText:@"A"];
+        ZMMessage *message1 = (id)[conversation appendMessageWithText:@"A"];
         message1.serverTimestamp = [NSDate date];
         
         NSDate *clearedTimestamp = [message1.serverTimestamp dateByAddingTimeInterval:10];
         
-        ZMMessage *message2 = [conversation appendMessageWithText:@"B"];
+        ZMMessage *message2 = (id)[conversation appendMessageWithText:@"B"];
         message2.serverTimestamp = [clearedTimestamp dateByAddingTimeInterval:10];
         
         // when
@@ -2577,7 +2577,7 @@
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.lastServerTimeStamp = clearedTimeStamp;
 
-    ZMMessage *message1 = [conversation appendMessageWithText:@"B"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"B"];
     message1.serverTimestamp = clearedTimeStamp;
     
     XCTAssertNil(conversation.lastReadServerTimeStamp);
@@ -2597,7 +2597,7 @@
     NSDate *clearedTimeStamp = [NSDate date];
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.lastServerTimeStamp = clearedTimeStamp;
-    ZMMessage *message1 = [conversation appendMessageWithText:@"B"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"B"];
     message1.serverTimestamp = clearedTimeStamp;
     
     XCTAssertNil(conversation.clearedTimeStamp);
@@ -2622,11 +2622,11 @@
     NSArray *users = @[user1, user2, selfUser];
     ZMConversation *conversation = [self insertConversationWithParticipants:users callParticipants:users callStateNeedsToBeUpdatedFromBackend:NO];
     
-    ZMMessage *message1 = [conversation appendMessageWithText:@"1"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"1"];
     message1.eventID = self.createEventID;
     message1.serverTimestamp = [NSDate date];
     
-    ZMMessage *message2 = [conversation appendMessageWithText:@"2"];
+    ZMMessage *message2 = (id)[conversation appendMessageWithText:@"2"];
     message2.eventID = self.createEventID;
     message2.serverTimestamp = [NSDate date];
     
@@ -2662,7 +2662,7 @@
 {
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *message1 = [conversation appendMessageWithText:@"B"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"B"];
     message1.eventID = self.createEventID;
     conversation.lastEventID = message1.eventID;
     
@@ -2681,7 +2681,7 @@
 {
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *message1 = [conversation appendMessageWithText:@"A"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"A"];
     message1.eventID = self.createEventID;
     
     conversation.lastEventID = message1.eventID;
@@ -2703,7 +2703,7 @@
     // given
     
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *message1 = [conversation appendMessageWithText:@"A"];
+    ZMMessage *message1 = (id)[conversation appendMessageWithText:@"A"];
     message1.eventID = [ZMEventID eventIDWithMajor:100 minor:0];
     
     conversation.lastEventID = message1.eventID;

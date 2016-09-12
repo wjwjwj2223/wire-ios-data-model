@@ -28,25 +28,25 @@ extension ClientMessageTests_OTR {
 
     func testThatCreatesEncryptedDataAndAddsItToGenericMessageAsBlob() {
         self.syncMOC.performGroupedBlockAndWait { 
-            let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.syncMOC)
-            otherUser.remoteIdentifier = NSUUID.createUUID()
-            let firstClient = self.createClientForUser(otherUser, createSessionWithSelfUser: true)
-            let secondClient = self.createClientForUser(otherUser, createSessionWithSelfUser: true)
-            let selfClients = ZMUser.selfUserInContext(self.syncMOC).clients
-            let selfClient = ZMUser.selfUserInContext(self.syncMOC).selfClient()
+            let otherUser = ZMUser.insertNewObject(in:self.syncMOC)
+            otherUser.remoteIdentifier = UUID.create()
+            let firstClient = self.createClient(for: otherUser, createSessionWithSelfUser: true)
+            let secondClient = self.createClient(for: otherUser, createSessionWithSelfUser: true)
+            let selfClients = ZMUser.selfUser(in: self.syncMOC).clients!
+            let selfClient = ZMUser.selfUser(in: self.syncMOC).selfClient()
             let notSelfClients = selfClients.filter { $0 != selfClient }
             
-            let nonce = NSUUID.createUUID()
-            let builder = ZMGenericMessage.builder()
-            let textBuilder = ZMText.builder()
+            let nonce = UUID.create()
+            let builder = ZMGenericMessage.builder()!
+            let textBuilder = ZMText.builder()!
             textBuilder.setContent(self.textMessageRequiringExternalMessage(2))
-            builder.setText(textBuilder.build())
+            builder.setText(textBuilder.build()!)
             builder.setMessageId(nonce.transportString())
-            let textMessage = builder.build()
+            let textMessage = builder.build()!
             
-            let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.syncMOC)
-            conversation.conversationType = .Group
-            conversation.remoteIdentifier = NSUUID.createUUID()
+            let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
+            conversation.conversationType = .group
+            conversation.remoteIdentifier = UUID.create()
             conversation.addParticipant(otherUser)
             XCTAssertTrue(self.syncMOC.saveOrRollback())
             
@@ -57,7 +57,7 @@ extension ClientMessageTests_OTR {
             }
             
             // then
-            guard let createdMessage = ZMNewOtrMessage.builder().mergeFromData(dataAndStrategy.data).build() as? ZMNewOtrMessage else {
+            guard let createdMessage = ZMNewOtrMessage.builder()!.merge(from: dataAndStrategy.data).build()! as? ZMNewOtrMessage else {
                 XCTFail()
                 return
             }
@@ -81,7 +81,7 @@ extension ClientMessageTests_OTR {
         self.syncMOC.performGroupedBlockAndWait {
             
             //given
-            let message = self.conversation.appendOTRMessageWithText(self.name, nonce: NSUUID.createUUID())
+            let message = self.conversation.appendOTRMessage(withText: self.name!, nonce: UUID.create())
             
             //when
             guard let payloadAndStrategy = message.encryptedMessagePayloadData() else {
@@ -92,7 +92,7 @@ extension ClientMessageTests_OTR {
             //then
             self.assertMessageMetadata(payloadAndStrategy.data)
             switch payloadAndStrategy.strategy {
-            case .DoNotIgnoreAnyMissingClient:
+            case .doNotIgnoreAnyMissingClient:
                 break
             default:
                 XCTFail()
@@ -104,11 +104,11 @@ extension ClientMessageTests_OTR {
         self.syncMOC.performGroupedBlockAndWait {
             // given
 
-            self.conversation.lastReadServerTimeStamp = NSDate()
-            self.conversation.remoteIdentifier = NSUUID()
-            let message = ZMConversation.appendSelfConversationWithLastReadOfConversation(self.conversation)
+            self.conversation.lastReadServerTimeStamp = Date()
+            self.conversation.remoteIdentifier = UUID()
+            let message = ZMConversation.appendSelfConversation(withLastReadOf: self.conversation)
             
-            self.expectedRecipients = [self.selfUser.remoteIdentifier!.transportString(): [self.selfClient2.remoteIdentifier]]
+            self.expectedRecipients = [self.selfUser.remoteIdentifier!.transportString()!: [self.selfClient2.remoteIdentifier]]
             
             // when
             guard let payloadAndStrategy = message.encryptedMessagePayloadData() else {
@@ -119,7 +119,7 @@ extension ClientMessageTests_OTR {
             // then
             self.assertMessageMetadata(payloadAndStrategy.data)
             switch payloadAndStrategy.strategy {
-            case .DoNotIgnoreAnyMissingClient:
+            case .doNotIgnoreAnyMissingClient:
                 break
             default:
                 XCTFail()
@@ -130,11 +130,11 @@ extension ClientMessageTests_OTR {
     func testThatItCreatesPayloadForZMClearedMessages() {
         self.syncMOC.performGroupedBlockAndWait {
             // given
-            self.conversation.clearedTimeStamp = NSDate()
-            self.conversation.remoteIdentifier = NSUUID()
-            let message = ZMConversation.appendSelfConversationWithClearedOfConversation(self.conversation)
+            self.conversation.clearedTimeStamp = Date()
+            self.conversation.remoteIdentifier = UUID()
+            let message = ZMConversation.appendSelfConversation(withClearedOf: self.conversation)
             
-            self.expectedRecipients = [self.selfUser.remoteIdentifier!.transportString(): [self.selfClient2.remoteIdentifier]]
+            self.expectedRecipients = [self.selfUser.remoteIdentifier!.transportString()!: [self.selfClient2.remoteIdentifier]]
             
             // when
             guard let payloadAndStrategy = message.encryptedMessagePayloadData() else {
@@ -145,7 +145,7 @@ extension ClientMessageTests_OTR {
             // then
             self.assertMessageMetadata(payloadAndStrategy.data)
             switch payloadAndStrategy.strategy {
-            case .DoNotIgnoreAnyMissingClient:
+            case .doNotIgnoreAnyMissingClient:
                 break
             default:
                 XCTFail()
@@ -157,7 +157,7 @@ extension ClientMessageTests_OTR {
         
         syncMOC.performGroupedBlockAndWait {
             // given
-            let message = self.conversation.appendOTRMessageWithText(self.name, nonce: NSUUID.createUUID())
+            let message = self.conversation.appendOTRMessage(withText: self.name!, nonce: UUID.create())
             
             //when
             // when
@@ -169,7 +169,7 @@ extension ClientMessageTests_OTR {
             // then
             self.assertMessageMetadata(payloadAndStrategy.data)
             switch payloadAndStrategy.strategy {
-            case .DoNotIgnoreAnyMissingClient:
+            case .doNotIgnoreAnyMissingClient:
                 break
             default:
                 XCTFail()
@@ -186,25 +186,25 @@ extension ClientMessageTests_OTR {
             
             //given
             let senderID = self.user1.clients.first!.remoteIdentifier
-            let textMessage = self.conversation.appendOTRMessageWithText(self.stringLargeEnoughToRequireExternal, nonce: NSUUID.createUUID())
+            let textMessage = self.conversation.appendOTRMessage(withText: self.stringLargeEnoughToRequireExternal, nonce: UUID.create())
             textMessage.sender = self.user1
             textMessage.senderClientID = senderID
             let confirmationMessage = textMessage.confirmReception()
             
             //when
-            guard let payloadAndStrategy = confirmationMessage.encryptedMessagePayloadData() else {
+            guard let payloadAndStrategy = confirmationMessage?.encryptedMessagePayloadData() else {
                 XCTFail()
                 return
             }
             
             //then
             switch payloadAndStrategy.strategy {
-            case .IgnoreAllMissingClientsNotFromUser(let user):
+            case .ignoreAllMissingClientsNotFromUser(let user):
                 XCTAssertEqual(user, self.user1)
             default:
                 XCTFail()
             }
-            guard let messageMetadata = ZMNewOtrMessageBuilder().mergeFromData(payloadAndStrategy.data).build() as? ZMNewOtrMessage else {
+            guard let messageMetadata = ZMNewOtrMessageBuilder().merge(from: payloadAndStrategy.data).build()! as? ZMNewOtrMessage else {
                 XCTFail()
                 return
             }
@@ -213,7 +213,7 @@ extension ClientMessageTests_OTR {
                 let payloadClients = recipients.flatMap { user -> [String] in
                     return (user.clients as? [ZMClientEntry])?.map({ String(format: "%llx", $0.client.client) }) ?? []
                 }.flatMap { $0 }
-                XCTAssertEqual(payloadClients.sort(), self.user1.clients.map { $0.remoteIdentifier }.sort())
+                XCTAssertEqual(payloadClients.sorted(), self.user1.clients.map { $0.remoteIdentifier }.sorted())
             } else {
                 XCTFail("Metadata does not contain recipients")
             }
@@ -226,17 +226,17 @@ extension ClientMessageTests_OTR {
 extension ClientMessageTests_OTR {
     
     /// Returns a string large enough to have to be encoded in an external message
-    private var stringLargeEnoughToRequireExternal: String {
+    fileprivate var stringLargeEnoughToRequireExternal: String {
         var text = "Hello"
-        while (text.dataUsingEncoding(NSUTF8StringEncoding)?.length < Int(ZMClientMessageByteSizeExternalThreshold)) {
-            text.appendContentsOf(text)
+        while (text.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold)) {
+            text.append(text)
         }
         return text
     }
     
     /// Asserts that the message metadata is as expected
-    private func assertMessageMetadata(payload: NSData!, file: StaticString = #file, line: UInt = #line) {
-        guard let messageMetadata = ZMNewOtrMessageBuilder().mergeFromData(payload).build() as? ZMNewOtrMessage else {
+    fileprivate func assertMessageMetadata(_ payload: Data!, file: StaticString = #file, line: UInt = #line) {
+        guard let messageMetadata = ZMNewOtrMessageBuilder().merge(from: payload).build()! as? ZMNewOtrMessage else {
             XCTFail(file: file, line: line)
             return
         }
@@ -253,9 +253,9 @@ extension ClientMessageTests_OTR {
     }
     
     /// Returns a string that is big enough to require external message payload
-    private func textMessageRequiringExternalMessage(numberOfClients: UInt) -> String {
+    fileprivate func textMessageRequiringExternalMessage(_ numberOfClients: UInt) -> String {
         var string = "Exponential growth!"
-        while string.dataUsingEncoding(NSUTF8StringEncoding)!.length < Int(ZMClientMessageByteSizeExternalThreshold / numberOfClients) {
+        while string.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold / numberOfClients) {
             string = string + string
         }
         return string

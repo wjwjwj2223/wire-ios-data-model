@@ -1436,7 +1436,7 @@ NSString * const ReactionsKey = @"reactions";
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMMessage *oldMessage = [conversation appendMessageWithText:@"Hi!"];
+    ZMMessage *oldMessage = (id)[conversation appendMessageWithText:@"Hi!"];
     oldMessage.serverTimestamp = [NSDate dateWithTimeIntervalSince1970:1234567];
     conversation.lastServerTimeStamp = oldMessage.serverTimestamp;
     conversation.lastReadServerTimeStamp = oldMessage.serverTimestamp;
@@ -2129,7 +2129,7 @@ NSString * const ReactionsKey = @"reactions";
 {
     // given
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    ZMMessage *pendingMessage1 = [conversation appendMessageWithText:@"P1"];
+    ZMMessage *pendingMessage1 = (id)[conversation appendMessageWithText:@"P1"];
     pendingMessage1.visibleInConversation = conversation;
     
     ZMTextMessage *lastServerMessage = [ZMTextMessage insertNewObjectInManagedObjectContext:self.uiMOC];
@@ -2147,10 +2147,10 @@ NSString * const ReactionsKey = @"reactions";
     middleServerMessage.visibleInConversation = conversation;
     middleServerMessage.serverTimestamp = [NSDate dateWithTimeIntervalSince1970:5*1000];
     
-    ZMMessage *pendingMessage2 = [conversation appendMessageWithText:@"P2"];
+    ZMMessage *pendingMessage2 = (id)[conversation appendMessageWithText:@"P2"];
     pendingMessage2.visibleInConversation = conversation;
 
-    ZMMessage *pendingMessage3 = [conversation appendMessageWithText:@"P3"];
+    ZMMessage *pendingMessage3 = (id)[conversation appendMessageWithText:@"P3"];
     pendingMessage2.visibleInConversation = conversation;
     
     NSArray *expectedOrder = @[firstServerMessage, middleServerMessage, lastServerMessage, pendingMessage1, pendingMessage2, pendingMessage3];
@@ -2475,7 +2475,7 @@ NSString * const ReactionsKey = @"reactions";
     conversation.remoteIdentifier = [NSUUID createUUID];
     conversation.lastReadEventID = self.createEventID;
 
-    ZMMessage *message = [conversation appendMessageWithText:self.name];
+    ZMMessage *message = (id)[conversation appendMessageWithText:self.name];
     [message markAsSent];
     [self.uiMOC saveOrRollback];
     XCTAssertEqual(message.deliveryState, ZMDeliveryStateSent);
@@ -2500,7 +2500,7 @@ NSString * const ReactionsKey = @"reactions";
     conversation.remoteIdentifier = [NSUUID createUUID];
     conversation.lastReadEventID = self.createEventID;
 
-    ZMMessage *message = [conversation appendMessageWithText:self.name];
+    ZMMessage *message = (id)[conversation appendMessageWithText:self.name];
     [self.uiMOC saveOrRollback];
     XCTAssertEqual(message.deliveryState, ZMDeliveryStatePending);
 

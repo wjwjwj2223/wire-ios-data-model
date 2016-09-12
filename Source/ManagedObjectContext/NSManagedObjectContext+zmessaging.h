@@ -114,8 +114,7 @@
 /// immediately if the receiver has a lot of pending changes.
 - (void)enqueueDelayedSaveWithGroup:(ZMSDispatchGroup *)group;
 
-/// Executes a fetch request and asserts in case of error
-- (NSArray *)executeFetchRequestOrAssert:(NSFetchRequest *)request;
+
 
 + (NSURL *)storeURL;
 

@@ -24,10 +24,10 @@ class CallingInitialisationNotificationTests : ZMBaseManagedObjectTest {
     
     func testThatItSendTheCorrectNotification() {
         
-        func checkThatItNotifiyWithErrorType(errorCode: ZMVoiceChannelErrorCode) -> Bool {
+        func checkThatItNotifiyWithErrorType(_ errorCode: ZMVoiceChannelErrorCode) -> Bool {
             var isCorrectErrorType = false
             // given
-            NSNotificationCenter.defaultCenter().addObserverForName(CallingInitialisationNotificationName, object: nil, queue: nil) { (note: NSNotification) in
+            NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: CallingInitialisationNotificationName), object: nil, queue: nil) { (note: Notification) in
                 //then
                 let callingNotification = note as! CallingInitialisationNotification
                 if (callingNotification.errorCode == errorCode) {
@@ -42,15 +42,15 @@ class CallingInitialisationNotificationTests : ZMBaseManagedObjectTest {
         }
         
         //when
-        XCTAssertTrue(checkThatItNotifiyWithErrorType(.OngoingGSMCall))
+        XCTAssertTrue(checkThatItNotifiyWithErrorType(.ongoingGSMCall))
         
         //when
-        XCTAssertTrue(checkThatItNotifiyWithErrorType(.SwitchToAudioNotAllowed))
+        XCTAssertTrue(checkThatItNotifiyWithErrorType(.switchToAudioNotAllowed))
         
         //when
-        XCTAssertTrue(checkThatItNotifiyWithErrorType(.SwitchToVideoNotAllowed))
+        XCTAssertTrue(checkThatItNotifiyWithErrorType(.switchToVideoNotAllowed))
         
         //when
-        XCTAssertTrue(checkThatItNotifiyWithErrorType(.VideoCallingNotSupported))
+        XCTAssertTrue(checkThatItNotifiyWithErrorType(.videoCallingNotSupported))
     }
 }

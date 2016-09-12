@@ -1,4 +1,4 @@
-// 
+//
 // Wire
 // Copyright (C) 2016 Wire Swiss GmbH
 // 
@@ -25,16 +25,16 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     override func setUp() {
         super.setUp()
         XCTAssertNotNil(self.syncMOC.globalManagedObjectContextObserver)
-        NSNotificationCenter.defaultCenter().postNotificationName("ZMApplicationDidEnterEventProcessingStateNotification", object: nil)
-        NSNotificationCenter.defaultCenter().postNotificationName(UIApplicationDidBecomeActiveNotification, object: nil)
-        XCTAssert(waitForAllGroupsToBeEmptyWithTimeout(0.5))
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "ZMApplicationDidEnterEventProcessingStateNotification"), object: nil)
+        NotificationCenter.default.post(name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
+        XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
     }
     
     class TestConversationObserver : NSObject, ZMConversationObserver {
         
         var receivedChangeInfo : [ConversationChangeInfo] = []
         
-        func conversationDidChange(changes: ConversationChangeInfo) {
+        func conversationDidChange(_ changes: ConversationChangeInfo) {
             receivedChangeInfo.append(changes)
         }
         func clearNotifications() {
@@ -42,7 +42,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         }
     }
     
-    func checkThatItNotifiesTheObserverOfAChange(conversation : ZMConversation,
+    func checkThatItNotifiesTheObserverOfAChange(_ conversation : ZMConversation,
         modifier: (ZMConversation, TestConversationObserver) -> Void,
         expectedChangedField : String?,
         expectedChangedKeys: KeySet) {
@@ -53,14 +53,14 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
                 expectedChangedKeys: expectedChangedKeys)
     }
     
-    func checkThatItNotifiesTheObserverOfAChange(conversation : ZMConversation,
+    func checkThatItNotifiesTheObserverOfAChange(_ conversation : ZMConversation,
         modifier: (ZMConversation, TestConversationObserver) -> Void,
         expectedChangedFields : KeySet,
         expectedChangedKeys: KeySet) {
             
         // given
         let observer = TestConversationObserver()
-        let token = conversation.addConversationObserver(observer)
+        let token = conversation.add(observer)
 
         // when
         modifier(conversation, observer)
@@ -101,7 +101,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
                 if expectedChangedFields.contains(key) {
                     continue
                 }
-                if let value = changes.valueForKey(key) as? NSNumber {
+                if let value = changes.value(forKey: key) as? NSNumber {
                     XCTAssertFalse(value.boolValue, "\(key) was supposed to be false")
                 }
                 else {
@@ -111,15 +111,15 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
             XCTAssertEqual(KeySet(Array(changes.changedKeysAndOldValues.keys)), expectedChangedKeys)
         }
         
-        ZMConversation.removeConversationObserverForToken(token)
+        ZMConversation.removeObserver(for: token)
     }
     
     
     func testThatItNotifiesTheObserverOfANameChange()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
         conversation.userDefinedName = "George"
         
         
@@ -132,7 +132,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         
     }
     
-    func notifyNameChange(user: ZMUser, name: String) {
+    func notifyNameChange(_ user: ZMUser, name: String) {
         user.name = name
         self.uiMOC.saveOrRollback()
     }
@@ -140,11 +140,11 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverIfTheVoiceChannelStateChanges()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
         otherUser.name = "Foo"
-        conversation.mutableOtherActiveParticipants.addObject(otherUser)
+        conversation.mutableOtherActiveParticipants.add(otherUser)
         self.uiMOC.saveOrRollback()
         
         // when
@@ -158,17 +158,17 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
             expectedChangedKeys: KeySet(["voiceChannelState", "conversationListIndicator"])
         )
         
-        XCTAssertTrue(waitForAllGroupsToBeEmptyWithTimeout(0.5))
+        XCTAssertTrue(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
     }
     
     func testThatItNotifiesTheObserverOfANameChangeBecauseOfActiveParticipants()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
         otherUser.name = "Foo"
-        conversation.mutableOtherActiveParticipants.addObject(otherUser)
+        conversation.mutableOtherActiveParticipants.add(otherUser)
         self.uiMOC.saveOrRollback()
         
         // when
@@ -185,8 +185,8 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfANameChangeBecauseAnActiveParticipantWasAdded()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
         
         self.uiMOC.saveOrRollback()
         
@@ -194,10 +194,10 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { _ in
                 
-                let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+                let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
                 otherUser.name = "Foo"
-                conversation.mutableOtherActiveParticipants.addObject(otherUser)
-                self.updateDisplayNameGeneratorWithUsers([otherUser])
+                conversation.mutableOtherActiveParticipants.add(otherUser)
+                self.updateDisplayNameGenerator(withUsers: [otherUser])
             },
             expectedChangedFields: KeySet(["nameChanged", "participantsChanged"]),
             expectedChangedKeys: KeySet(["displayName", "otherActiveParticipants"])
@@ -208,12 +208,12 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfANameChangeBecauseOfActiveParticipantsMultipleTimes()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let user = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.mutableOtherActiveParticipants.addObject(user)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let user = ZMUser.insertNewObject(in:self.uiMOC)
+        conversation.mutableOtherActiveParticipants.add(user)
         let observer = TestConversationObserver()
-        let token = conversation.addConversationObserver(observer)
+        let token = conversation.add(observer)
         self.uiMOC.saveOrRollback()
         
         // when
@@ -232,24 +232,24 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         
         // and when
         self.uiMOC.saveOrRollback()
-        ZMConversation.removeConversationObserverForToken(token)
+        ZMConversation.removeObserver(for: token)
     }
     
     
     func testThatItDoesNotNotifyTheObserverBecauseAUsersAccentColorChanged()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
-        otherUser.accentColorValue = .BrightOrange
-        conversation.mutableOtherActiveParticipants.addObject(otherUser)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
+        otherUser.accentColorValue = .brightOrange
+        conversation.mutableOtherActiveParticipants.add(otherUser)
         self.uiMOC.saveOrRollback()
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { _ in
-                otherUser.accentColorValue = ZMAccentColor.SoftPink
+                otherUser.accentColorValue = ZMAccentColor.softPink
             },
             expectedChangedField: nil,
             expectedChangedKeys: KeySet()
@@ -259,15 +259,15 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfANameChangeBecauseOfOtherUserNameChange()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = .OneOnOne
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = .oneOnOne
         
-        let otherUser = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
         otherUser.name = "Foo"
         
-        let connection = ZMConnection.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let connection = ZMConnection.insertNewObject(in: self.uiMOC)
         connection.to = otherUser
-        connection.status = .Accepted
+        connection.status = .accepted
         conversation.connection = connection
         
         self.uiMOC.saveOrRollback()
@@ -286,12 +286,12 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfANameChangeBecauseAUserWasAdded()
     {
         // given
-        let user1 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let user1 = ZMUser.insertNewObject(in:self.uiMOC)
         user1.name = "Foo A"
         
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        conversation.mutableOtherActiveParticipants.addObject(user1)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        conversation.mutableOtherActiveParticipants.add(user1)
         
         self.uiMOC.saveOrRollback()
         
@@ -300,7 +300,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { _ in
-                let user2 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+                let user2 = ZMUser.insertNewObject(in:self.uiMOC)
                 user2.name = "Foo B"
                 self.uiMOC.saveOrRollback()
                 XCTAssertEqual(user1.displayName, "Foo A")
@@ -313,17 +313,17 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfANameChangeBecauseAUserWasAddedAndLaterItsNameChanged()
     {
         // given
-        let user1 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let user1 = ZMUser.insertNewObject(in:self.uiMOC)
         user1.name = "Foo A"
         
-        let user2 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let user2 = ZMUser.insertNewObject(in:self.uiMOC)
         user2.name = "Bar"
         
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        conversation.mutableOtherActiveParticipants.addObject(user1)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        conversation.mutableOtherActiveParticipants.add(user1)
         
-        self.updateDisplayNameGeneratorWithUsers([user1, user2])
+        self.updateDisplayNameGenerator(withUsers: [user1, user2])
         
         XCTAssertEqual(user1.displayName, "Foo")
         
@@ -331,7 +331,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { _ in
                 user2.name = "Foo B"
-                self.updateDisplayNameGeneratorWithUsers([user2])
+                self.updateDisplayNameGenerator(withUsers: [user2])
                 XCTAssertEqual(user1.displayName, "Foo A")
             },
             expectedChangedField: "nameChanged",
@@ -342,26 +342,26 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItDoesNotNotifyTheObserverOfANameChangeBecauseAUserWasRemovedAndLaterItsNameChanged()
     {
         // given
-        let user1 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let user1 = ZMUser.insertNewObject(in:self.uiMOC)
         user1.name = "Foo A"
         
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        conversation.mutableOtherActiveParticipants.addObject(user1)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        conversation.mutableOtherActiveParticipants.add(user1)
         
-        self.updateDisplayNameGeneratorWithUsers([user1])
+        self.updateDisplayNameGenerator(withUsers: [user1])
         
         XCTAssertTrue(user1.displayName == "Foo")
-        XCTAssertTrue(conversation.otherActiveParticipants.containsObject(user1))
+        XCTAssertTrue(conversation.otherActiveParticipants.contains(user1))
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { conversation, observer in
-                conversation.mutableOtherActiveParticipants.removeObject(user1)
+                conversation.mutableOtherActiveParticipants.remove(user1)
                 self.uiMOC.saveOrRollback()
                 observer.clearNotifications()
                 user1.name = "Bar"
-                self.updateDisplayNameGeneratorWithUsers([user1])
+                self.updateDisplayNameGenerator(withUsers: [user1])
             },
             expectedChangedField: nil,
             expectedChangedKeys: KeySet()
@@ -371,11 +371,11 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifysTheObserverOfANameChangeBecauseAUserWasAddedLaterAndHisNameChanged()
     {
         // given
-        let user1 = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let user1 = ZMUser.insertNewObject(in:self.uiMOC)
         user1.name = "Foo A"
         
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
         self.uiMOC.saveOrRollback()
         
         XCTAssertTrue(user1.displayName == "Foo")
@@ -383,7 +383,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { conversation, observer in
-                conversation.mutableOtherActiveParticipants.addObject(user1)
+                conversation.mutableOtherActiveParticipants.add(user1)
                 self.uiMOC.saveOrRollback()
                 observer.clearNotifications()
                 self.notifyNameChange(user1, name: "Bar")
@@ -396,13 +396,15 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfAnInsertedMessage()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.lastReadServerTimeStamp = NSDate()
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.lastReadServerTimeStamp = Date()
         self.uiMOC.saveOrRollback()
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
-            modifier: { conversation, _ in conversation.appendMessageWithText("foo"); return },
+            modifier: { conversation, _ in
+                _ = conversation.appendMessage(withText: "foo")
+            },
             expectedChangedField: "messagesChanged",
             expectedChangedKeys: KeySet(key: "messages"))
     }
@@ -410,13 +412,13 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfAnAddedParticipant()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let user = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let user = ZMUser.insertNewObject(in:self.uiMOC)
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
-            modifier: { conversation, _ in conversation.mutableOtherActiveParticipants.addObject(user) },
+            modifier: { conversation, _ in conversation.mutableOtherActiveParticipants.add(user) },
             expectedChangedField: "participantsChanged",
             expectedChangedKeys: KeySet(key: "otherActiveParticipants"))
         
@@ -425,15 +427,15 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfAnRemovedParticipant()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        let user = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.mutableOtherActiveParticipants.addObject(user)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        let user = ZMUser.insertNewObject(in:self.uiMOC)
+        conversation.mutableOtherActiveParticipants.add(user)
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
-            modifier: {conversation, _ in conversation.mutableOtherActiveParticipants.removeObject(user) },
+            modifier: {conversation, _ in conversation.mutableOtherActiveParticipants.remove(user) },
             expectedChangedField: "participantsChanged",
             expectedChangedKeys: KeySet(key: "otherActiveParticipants"))
     }
@@ -441,8 +443,8 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverIfTheSelfUserIsAdded()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
         conversation.isSelfAnActiveMember = false
         self.uiMOC.saveOrRollback()
         
@@ -457,9 +459,9 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverWhenTheUserLeavesTheConversation()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
-        _ = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
+        _ = ZMUser.insertNewObject(in:self.uiMOC)
         conversation.isSelfAnActiveMember = true
         
         // when
@@ -473,12 +475,12 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedLastModifiedDate()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
-            modifier: { conversation, _ in conversation.lastModifiedDate = NSDate() },
+            modifier: { conversation, _ in conversation.lastModifiedDate = Date() },
             expectedChangedField: "lastModifiedDateChanged",
             expectedChangedKeys: KeySet(key: "lastModifiedDate"))
         
@@ -488,14 +490,14 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     {
         // given
         self.syncMOC.performGroupedBlockAndWait{
-            let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.syncMOC)
-            conversation.lastReadServerTimeStamp = NSDate()
-            let message = ZMMessage.insertNewObjectInManagedObjectContext(self.syncMOC)
+            let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
+            conversation.lastReadServerTimeStamp = Date()
+            let message = ZMMessage.insertNewObject(in: self.syncMOC)
             message.visibleInConversation = conversation
-            message.serverTimestamp = conversation.lastReadServerTimeStamp.dateByAddingTimeInterval(10)
+            message.serverTimestamp = conversation.lastReadServerTimeStamp?.addingTimeInterval(10)
             self.syncMOC.saveOrRollback()
             
-            conversation.didUpdateConversationWhileFetchingUnreadMessages()
+            conversation.didUpdateWhileFetchingUnreadMessages()
             self.syncMOC.saveOrRollback()
             XCTAssertEqual(conversation.estimatedUnreadCount, 1)
             
@@ -514,8 +516,8 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedDisplayName()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.Group
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.group
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
@@ -528,15 +530,15 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedConnectionStatusWhenInsertingAConnection()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.OneOnOne
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.oneOnOne
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { conversation, _ in
-                conversation.connection = ZMConnection.insertNewObjectInManagedObjectContext(self.uiMOC)
-                conversation.connection.status = ZMConnectionStatus.Pending
+                conversation.connection = ZMConnection.insertNewObject(in: self.uiMOC)
+                conversation.connection!.status = ZMConnectionStatus.pending
             },
             expectedChangedField: "connectionStateChanged" ,
             expectedChangedKeys: KeySet(key: "relatedConnectionState"))
@@ -545,16 +547,16 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedConnectionStatusWhenUpdatingAConnection()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.conversationType = ZMConversationType.OneOnOne
-        conversation.connection = ZMConnection.insertNewObjectInManagedObjectContext(self.uiMOC)
-        conversation.connection.status = ZMConnectionStatus.Pending
-        conversation.connection.to = ZMUser.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
+        conversation.conversationType = ZMConversationType.oneOnOne
+        conversation.connection = ZMConnection.insertNewObject(in: self.uiMOC)
+        conversation.connection!.status = ZMConnectionStatus.pending
+        conversation.connection!.to = ZMUser.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
-            modifier: { conversation, _ in conversation.connection.status = ZMConnectionStatus.Accepted },
+            modifier: { conversation, _ in conversation.connection!.status = ZMConnectionStatus.accepted },
             expectedChangedField: "connectionStateChanged" ,
             expectedChangedKeys: KeySet(key: "relatedConnectionState"))
         
@@ -564,7 +566,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedArchivedStatus()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
@@ -578,7 +580,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfChangedSilencedStatus()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
@@ -589,12 +591,12 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         
     }
     
-    func addUnreadMissedCall(conversation: ZMConversation) {
-        let systemMessage = ZMSystemMessage.insertNewObjectInManagedObjectContext(conversation.managedObjectContext)
-        systemMessage.systemMessageType = .MissedCall;
-        systemMessage.serverTimestamp = NSDate(timeIntervalSince1970:1231234)
+    func addUnreadMissedCall(_ conversation: ZMConversation) {
+        let systemMessage = ZMSystemMessage.insertNewObject(in: conversation.managedObjectContext!)
+        systemMessage.systemMessageType = .missedCall;
+        systemMessage.serverTimestamp = Date(timeIntervalSince1970:1231234)
         systemMessage.visibleInConversation = conversation
-        conversation.updateUnreadMessagesWithMessage(systemMessage)
+        conversation.updateUnreadMessages(with: systemMessage)
     }
     
     
@@ -602,7 +604,7 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     {
         // given
         self.syncMOC.performGroupedBlockAndWait{
-            let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.syncMOC)
+            let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
             self.syncMOC.saveOrRollback()
             
             // when
@@ -618,13 +620,13 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItNotifiesTheObserverOfAChangedClearedTimeStamp()
     {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { conversation, _ in
-                conversation.clearedTimeStamp = NSDate()
+                conversation.clearedTimeStamp = Date()
             },
             expectedChangedField: "clearedChanged" ,
             expectedChangedKeys: KeySet(key: "clearedTimeStamp"))
@@ -632,13 +634,13 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     
     func testThatItNotifiesTheObserverOfASecurityLevelChange() {
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(conversation,
             modifier: { conversation, _ in
-                conversation.securityLevel = .Secure
+                conversation.securityLevel = .secure
             },
             expectedChangedField: "securityLevelChanged" ,
             expectedChangedKeys: KeySet(key: "securityLevel"))
@@ -647,12 +649,12 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
     func testThatItStopsNotifyingAfterUnregisteringTheToken() {
         
         // given
-        let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+        let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         self.uiMOC.saveOrRollback()
         
         let observer = TestConversationObserver()
-        let token = conversation.addConversationObserver(observer)
-        ZMConversation.removeConversationObserverForToken(token)
+        let token = conversation.add(observer)
+        ZMConversation.removeObserver(for: token)
         
         
         // when
@@ -669,20 +671,20 @@ class ConversationObserverTokenTests : ZMBaseManagedObjectTest {
         
         self.measureMetrics([XCTPerformanceMetric_WallClockTime], automaticallyStartMeasuring: false) {
             
-            let conversation = ZMConversation.insertNewObjectInManagedObjectContext(self.uiMOC)
+            let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
             self.uiMOC.saveOrRollback()
             
             let observer = TestConversationObserver()
-            let token = conversation.addConversationObserver(observer)
+            let token = conversation.add(observer)
             
             self.startMeasuring()
             for _ in 1...count {
-                conversation.appendMessageWithText("hello")
+                conversation.appendMessage(withText: "hello")
                 self.uiMOC.processPendingChanges()
             }
             XCTAssertEqual(observer.receivedChangeInfo.count, count)
             self.stopMeasuring()
-            ZMConversation.removeConversationObserverForToken(token)
+            ZMConversation.removeObserver(for: token)
         }
     }
 }

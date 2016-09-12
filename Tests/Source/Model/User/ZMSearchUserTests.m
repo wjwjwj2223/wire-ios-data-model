@@ -184,7 +184,7 @@
     XCTAssertFalse(searchUser.isPendingApprovalByOtherUser);
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [searchUser connectWithMessageText:@"Hey!" completionHandler:^{
         [callbackCalled fulfill];
         NSArray *connections = [self.uiMOC executeFetchRequestOrAssert:[ZMConnection sortedFetchRequest]];
@@ -214,7 +214,7 @@
     id userToken = [ZMUser addUserObserver:self forUsers:@[searchUser] managedObjectContext:self.uiMOC];
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     
     // when
     [searchUser connectWithMessageText:@"Hey!" completionHandler:^{
@@ -241,7 +241,7 @@
     user.remoteIdentifier = nil;
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [user connectWithMessageText:@"Hey!" completionHandler:^{
         [callbackCalled fulfill];
     }];
@@ -270,7 +270,7 @@
     NSString *connectionMessage = @"very unique connection message";
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [searchUser connectWithMessageText:connectionMessage completionHandler:^{
         [callbackCalled fulfill];
     }];
@@ -324,7 +324,7 @@
     searchUser.remoteIdentifier = nil;
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [searchUser connectWithMessageText:@"Hey!" completionHandler:^{
         [callbackCalled fulfill];
     }];
@@ -360,7 +360,7 @@
     id userToken2 = [ZMUser addUserObserver:userObserver forUsers:@[searchUser] managedObjectContext:self.uiMOC];
 
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [(id<ZMUserObserver>)[userObserver expect] userDidChange:[OCMArg checkWithBlock:^BOOL(UserChangeInfo *changeInfo) {
         if (changeInfo.connectionStateChanged) {
             [callbackCalled fulfill];
@@ -408,7 +408,7 @@
     searchUser.remoteIdentifier = nil;
     
     // expect
-    XCTestExpectation *callbackCalled = [self expectationWithDescription:@"Callback called"];
+    XCTestExpectation *callbackCalled = [self expectation(description: :@"Callback called"];
     [searchUser connectWithMessageText:@"Hey!" completionHandler:^{
         [callbackCalled fulfill];
     }];

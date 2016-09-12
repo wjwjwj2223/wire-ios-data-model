@@ -24,11 +24,11 @@ extension NSString {
     
     /// Returns whether the string represents a video mime type
     public func isVideoMimeType() -> Bool {
-        return self.zm_conformsToUTI(kUTTypeMovie)
+        return self.zm_conforms(to: kUTTypeMovie)
     }
     
     /// Returns whether the string represents an audio mime type
     public func isAudioMimeType() -> Bool {
-        return self.zm_conformsToUTI(kUTTypeAudio)
+        return self.zm_conforms(to: kUTTypeAudio)
     }
 }

@@ -273,6 +273,8 @@
 		F9B71FFE1CB2C4C6001DB03F /* ZMChangedIndexesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B71FEB1CB2C4C6001DB03F /* ZMChangedIndexesTests.m */; };
 		F9B720041CB2C770001DB03F /* UserClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B720021CB2C68B001DB03F /* UserClientTests.swift */; };
 		F9B720051CB2C795001DB03F /* ZMGenericMessage_ExternalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F9B71FFF1CB2C4FC001DB03F /* ZMGenericMessage_ExternalTests.m */; };
+		F9C862291D86E606009AAC33 /* NSManagedObjectContext+FetchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C862281D86E606009AAC33 /* NSManagedObjectContext+FetchRequest.swift */; };
+		F9C8622B1D87DC18009AAC33 /* MessagingTest+UUID.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9C8622A1D87DC18009AAC33 /* MessagingTest+UUID.swift */; };
 		F9C9A5071CAD5DF10039E10C /* ZMCDataModel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A4FC1CAD5DF10039E10C /* ZMCDataModel.framework */; };
 		F9C9A65F1CAD76A50039E10C /* ZMCDataModel.h in Headers */ = {isa = PBXBuildFile; fileRef = F9C9A60C1CAD76A50039E10C /* ZMCDataModel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F9C9A66D1CAD778C0039E10C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A66C1CAD778C0039E10C /* Foundation.framework */; };
@@ -666,6 +668,8 @@
 		F9B71FEB1CB2C4C6001DB03F /* ZMChangedIndexesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZMChangedIndexesTests.m; sourceTree = "<group>"; };
 		F9B71FFF1CB2C4FC001DB03F /* ZMGenericMessage_ExternalTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZMGenericMessage_ExternalTests.m; sourceTree = "<group>"; };
 		F9B720021CB2C68B001DB03F /* UserClientTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserClientTests.swift; sourceTree = "<group>"; };
+		F9C862281D86E606009AAC33 /* NSManagedObjectContext+FetchRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+FetchRequest.swift"; sourceTree = "<group>"; };
+		F9C8622A1D87DC18009AAC33 /* MessagingTest+UUID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MessagingTest+UUID.swift"; sourceTree = "<group>"; };
 		F9C9A4FC1CAD5DF10039E10C /* ZMCDataModel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ZMCDataModel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C9A5061CAD5DF10039E10C /* ZMCDataModelTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZMCDataModelTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9C9A5DC1CAD76A50039E10C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Resources/Info.plist; sourceTree = SOURCE_ROOT; };
@@ -1029,6 +1033,7 @@
 				F9A706491CAEE01D00C2F5FE /* UserImageLocalCache.swift */,
 				F9A7064B1CAEE01D00C2F5FE /* ZMFetchRequestBatch.h */,
 				F9A7064C1CAEE01D00C2F5FE /* ZMFetchRequestBatch.m */,
+				F9C862281D86E606009AAC33 /* NSManagedObjectContext+FetchRequest.swift */,
 				F9A7064D1CAEE01D00C2F5FE /* ZMManagedObjectContextProvider.h */,
 				F9A7064E1CAEE01D00C2F5FE /* ZMUpdateEvent+ZMCDataModel.h */,
 				F9A7064F1CAEE01D00C2F5FE /* ZMUpdateEvent+ZMCDataModel.m */,
@@ -1175,6 +1180,7 @@
 				F9A708621CAEF26C00C2F5FE /* NotificationObservers.m */,
 				F9A7085E1CAEEF4700C2F5FE /* MessagingTest+EventFactory.h */,
 				F9A7085F1CAEEF4700C2F5FE /* MessagingTest+EventFactory.m */,
+				F9C8622A1D87DC18009AAC33 /* MessagingTest+UUID.swift */,
 				CEE525A81CCA4C97001D06F9 /* NSString+RandomString.h */,
 				CEE525A91CCA4C97001D06F9 /* NSString+RandomString.m */,
 			);
@@ -1675,13 +1681,16 @@
 					F9C9A4FB1CAD5DF10039E10C = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = W5KEQBF9B5;
+						LastSwiftMigration = 0800;
 					};
 					F9C9A5051CAD5DF10039E10C = {
 						CreatedOnToolsVersion = 7.2;
+						LastSwiftMigration = 0800;
 						TestTargetID = F9C9A7F21CAED9510039E10C;
 					};
 					F9C9A7F21CAED9510039E10C = {
 						CreatedOnToolsVersion = 7.2;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -1803,6 +1812,7 @@
 				F9B71F091CB264DF001DB03F /* ZMConversationList.m in Sources */,
 				F9A706941CAEE01D00C2F5FE /* UserClient+Protobuf.swift in Sources */,
 				F9331C921CB42FCF00139ECC /* zmessaging.xcdatamodeld in Sources */,
+				F9C862291D86E606009AAC33 /* NSManagedObjectContext+FetchRequest.swift in Sources */,
 				16313D621D227DC1001B2AB3 /* LinkPreview+ProtocolBuffer.swift in Sources */,
 				F9A706A11CAEE01D00C2F5FE /* ZMOrderedSetState.mm in Sources */,
 				F9A706721CAEE01D00C2F5FE /* AssetCache.swift in Sources */,
@@ -1836,6 +1846,7 @@
 				54363A011D7876200048FD7D /* ZMClientMessage+Encryption.swift in Sources */,
 				F9A706B81CAEE01D00C2F5FE /* VoiceChannelObserverToken.swift in Sources */,
 				F9A706A91CAEE01D00C2F5FE /* KeyPath.swift in Sources */,
+				F9C8622B1D87DC18009AAC33 /* MessagingTest+UUID.swift in Sources */,
 				16D68E971CEF2EC4003AB9E0 /* ZMFileMetadata.swift in Sources */,
 				F9A706591CAEE01D00C2F5FE /* ZMSyncMergePolicy.m in Sources */,
 				F9A706811CAEE01D00C2F5FE /* ZMMessage.m in Sources */,
@@ -2128,6 +2139,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -2154,6 +2166,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.wire.ZMCDataModel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -2178,6 +2191,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.wire.ZMCDataModelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Tests/Resources/Test-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZMDataModelTestHost.app/ZMDataModelTestHost";
 			};
 			name = Debug;
@@ -2203,6 +2217,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.wire.ZMCDataModelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/Tests/Resources/Test-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZMDataModelTestHost.app/ZMDataModelTestHost";
 			};
 			name = Release;
@@ -2223,6 +2238,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.wire.ZMDataModelTestTarget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -2242,6 +2258,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.wire.ZMDataModelTestTarget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

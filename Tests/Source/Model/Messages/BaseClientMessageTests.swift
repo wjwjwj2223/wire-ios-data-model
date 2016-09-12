@@ -1,4 +1,4 @@
-// 
+//
 // Wire
 // Copyright (C) 2016 Wire Swiss GmbH
 // 
@@ -43,35 +43,35 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
         super.setUp()
         setUpCaches()
 
-        syncSelfUser = ZMUser.selfUserInContext(self.syncMOC);
+        syncSelfUser = ZMUser.selfUser(in: self.syncMOC);
         
         selfClient1 = createSelfClient()
         syncMOC.setPersistentStoreMetadata(selfClient1.remoteIdentifier, forKey: "PersistedClientId")
         
-        selfClient2 = createClientForUser(syncSelfUser, createSessionWithSelfUser: true)
+        selfClient2 = createClient(for: syncSelfUser, createSessionWithSelfUser: true)
         
-        user1 = ZMUser.insertNewObjectInManagedObjectContext(self.syncMOC);
-        user1Client1 = createClientForUser(user1, createSessionWithSelfUser: true)
-        user1Client2 = createClientForUser(user1, createSessionWithSelfUser: true)
+        user1 = ZMUser.insertNewObject(in:self.syncMOC);
+        user1Client1 = createClient(for: user1, createSessionWithSelfUser: true)
+        user1Client2 = createClient(for: user1, createSessionWithSelfUser: true)
         
-        user2 = ZMUser.insertNewObjectInManagedObjectContext(self.syncMOC);
-        user2Client1 = createClientForUser(user2, createSessionWithSelfUser: true)
-        user2Client2 = createClientForUser(user2, createSessionWithSelfUser: false)
+        user2 = ZMUser.insertNewObject(in:self.syncMOC);
+        user2Client1 = createClient(for: user2, createSessionWithSelfUser: true)
+        user2Client2 = createClient(for: user2, createSessionWithSelfUser: false)
         
-        user3 = ZMUser.insertNewObjectInManagedObjectContext(self.syncMOC);
-        user3Client1 = createClientForUser(user3, createSessionWithSelfUser: false)
+        user3 = ZMUser.insertNewObject(in:self.syncMOC);
+        user3Client1 = createClient(for: user3, createSessionWithSelfUser: false)
         
-        conversation = ZMConversation.insertGroupConversationIntoManagedObjectContext(self.syncMOC, withParticipants: [user1, user2, user3])
+        conversation = ZMConversation.insertGroupConversation(into: self.syncMOC, withParticipants: [user1, user2, user3])
         
         expectedRecipients = [
-            syncSelfUser.remoteIdentifier!.transportString(): [
+            syncSelfUser.remoteIdentifier!.transportString()!: [
                 selfClient2.remoteIdentifier
             ],
-            user1.remoteIdentifier!.transportString(): [
+            user1.remoteIdentifier!.transportString()!: [
                 user1Client1.remoteIdentifier,
                 user1Client2.remoteIdentifier
             ],
-            user2.remoteIdentifier!.transportString(): [
+            user2.remoteIdentifier!.transportString()!: [
                 user2Client1.remoteIdentifier
             ]
         ]
@@ -84,16 +84,19 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
         super.tearDown()
     }
     
-    func assertRecipients(recipients: [ZMUserEntry], file: StaticString = #file, line: UInt = #line) {
+    func assertRecipients(_ recipients: [ZMUserEntry], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(recipients.count, expectedRecipients.count, file: file, line: line)
         
         for recipientEntry in recipients {
-            let uuid = NSUUID(UUIDBytes: UnsafePointer(recipientEntry.user.uuid.bytes)).transportString()
-            guard let expectedClientsIds = self.expectedRecipients[uuid]?.sort() else {
+            var uuid : NSUUID!
+            recipientEntry.user.uuid.withUnsafeBytes({ bytes in
+                uuid = NSUUID(uuidBytes: bytes)
+            })
+            guard let expectedClientsIds : [String] = self.expectedRecipients[uuid.transportString()]?.sorted() else {
                 XCTFail("Unexpected otr client in recipients", file: file, line: line)
                 return
             }
-            let clientIds = (recipientEntry.clients as! [ZMClientEntry]).map { String(format: "%llx", $0.client.client) } .sort()
+            let clientIds = (recipientEntry.clients as! [ZMClientEntry]).map { String(format: "%llx", $0.client.client) }.sorted()
             XCTAssertEqual(clientIds, expectedClientsIds, file: file, line: line)
             let hasTexts = (recipientEntry.clients as! [ZMClientEntry]).map { $0.hasText() }
             XCTAssertFalse(hasTexts.contains(false), file: file, line: line)
@@ -101,24 +104,24 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
         }
     }
     
-    func createUpdateEvent(nonce: NSUUID, conversationID: NSUUID, genericMessage: ZMGenericMessage, senderID: NSUUID = .createUUID(), eventSource: ZMUpdateEventSource = .Download) -> ZMUpdateEvent {
-        let payload = [
-            "id": NSUUID.createUUID().transportString(),
+    func createUpdateEvent(_ nonce: UUID, conversationID: UUID, genericMessage: ZMGenericMessage, senderID: UUID = .create(), eventSource: ZMUpdateEventSource = .download) -> ZMUpdateEvent {
+        let payload : [String : Any] = [
+            "id": UUID.create().transportString(),
             "conversation": conversationID.transportString(),
             "from": senderID.transportString(),
-            "time": NSDate().transportString(),
+            "time": Date().transportString(),
             "data": [
                 "text": genericMessage.data().base64String()
             ],
             "type": "conversation.otr-message-add"
         ]
         switch eventSource {
-        case .Download:
-            return ZMUpdateEvent(fromEventStreamPayload: payload, uuid: nonce)
+        case .download:
+            return ZMUpdateEvent(fromEventStreamPayload: payload as ZMTransportData, uuid: nonce)
         default:
             let streamPayload = ["payload" : [payload],
-                                 "id" : NSUUID.createUUID().transportString()]
-            let event = ZMUpdateEvent.eventsArrayFromTransportData(streamPayload,
+                                 "id" : UUID.create().transportString()] as [String : Any]
+            let event = ZMUpdateEvent.eventsArray(from: streamPayload as ZMTransportData,
                                                                    source: eventSource)!.first!
             XCTAssertNotNil(event)
             return event

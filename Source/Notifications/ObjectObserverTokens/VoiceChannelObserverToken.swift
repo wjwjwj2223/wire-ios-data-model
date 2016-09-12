@@ -1,4 +1,4 @@
-// 
+//
 // Wire
 // Copyright (C) 2016 Wire Swiss GmbH
 // 
@@ -23,12 +23,26 @@ extension ZMVoiceChannel : ObjectInSnapshot {
     
     public var observableKeys : [String] {return []}
 
-    public func keyPathsForValuesAffectingValueForKey(key: String) -> Set<String> {
-        return ZMVoiceChannel.keyPathsForValuesAffectingValueForKey(key) 
+    public func keyPathsForValuesAffectingValueForKey(_ key: String) -> Set<String> {
+        return ZMVoiceChannel.keyPathsForValuesAffectingValue(forKey: key) 
     }
-    
 }
 
+
+extension NSOrderedSet {
+
+    func subtracted(orderedSet: NSOrderedSet) -> NSOrderedSet {
+        let mutableSelf = mutableCopy() as! NSMutableOrderedSet
+        mutableSelf.remove(orderedSet)
+        return NSOrderedSet(orderedSet: mutableSelf)
+    }
+    
+    func added(orderedSet: NSOrderedSet) -> NSOrderedSet {
+        let mutableSelf = mutableCopy() as! NSMutableOrderedSet
+        mutableSelf.add(orderedSet)
+        return NSOrderedSet(orderedSet: mutableSelf)
+    }
+}
 
 
 ///////////////////
@@ -46,7 +60,7 @@ extension ZMVoiceChannel : ObjectInSnapshot {
     public var previousState : ZMVoiceChannelState {
         guard let rawValue = (changedKeysAndOldValues["voiceChannelState"] as? NSInteger),
               let previousState = ZMVoiceChannelState(rawValue: UInt8(rawValue))
-        else { return .Invalid }
+        else { return .invalid }
         
         return previousState
     }
@@ -56,7 +70,7 @@ extension ZMVoiceChannel : ObjectInSnapshot {
             let state = conversation.voiceChannel?.state {
             return state
         }
-        return .Invalid
+        return .invalid
     }
     public var voiceChannel : ZMVoiceChannel? { return (self.object as? ZMConversation)?.voiceChannel }
     
@@ -69,15 +83,15 @@ extension ZMVoiceChannel : ObjectInSnapshot {
 extension ZMVoiceChannelState: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .Invalid: return "Invalid"
-        case .NoActiveUsers: return "NoActiveUsers"
-        case .OutgoingCall: return "OutgoingCall"
-        case .OutgoingCallInactive: return "OutgoingCallInactive"
-        case .IncomingCall: return "IncomingCall"
-        case .IncomingCallInactive: return "IncomingCallInactive"
-        case .SelfIsJoiningActiveChannel: return "SelfIsJoiningActiveChannel"
-        case .SelfConnectedToActiveChannel: return "SelfConnectedToActiveChannel"
-        case .DeviceTransferReady: return "DeviceTransferReady"
+        case .invalid: return "Invalid"
+        case .noActiveUsers: return "NoActiveUsers"
+        case .outgoingCall: return "OutgoingCall"
+        case .outgoingCallInactive: return "OutgoingCallInactive"
+        case .incomingCall: return "IncomingCall"
+        case .incomingCallInactive: return "IncomingCallInactive"
+        case .selfIsJoiningActiveChannel: return "SelfIsJoiningActiveChannel"
+        case .selfConnectedToActiveChannel: return "SelfConnectedToActiveChannel"
+        case .deviceTransferReady: return "DeviceTransferReady"
         }
     }
 }
@@ -88,7 +102,7 @@ extension ZMVoiceChannelState: CustomStringConvertible {
     typealias ChangeInfo = VoiceChannelStateChangeInfo
     typealias GlobalObserver = GlobalConversationObserver
     
-    private weak var observer : ZMVoiceChannelStateObserver?
+    fileprivate weak var observer : ZMVoiceChannelStateObserver?
     weak var globalObserver : GlobalConversationObserver?
 
     init(observer: ZMVoiceChannelStateObserver, globalObserver: GlobalConversationObserver){
@@ -96,7 +110,7 @@ extension ZMVoiceChannelState: CustomStringConvertible {
         self.globalObserver = globalObserver
     }
     
-    func notifyObserver(note: VoiceChannelStateChangeInfo) {
+    func notifyObserver(_ note: VoiceChannelStateChangeInfo) {
         observer?.voiceChannelStateDidChange(note)
     }
     
@@ -108,15 +122,17 @@ extension ZMVoiceChannelState: CustomStringConvertible {
 
 public final class GlobalVoiceChannelStateObserverToken : NSObject {
     
-    private weak var observer : ZMVoiceChannelStateObserver?
+    fileprivate weak var observer : ZMVoiceChannelStateObserver?
     weak var globalObserver : GlobalConversationObserver?
 
     public init(observer: ZMVoiceChannelStateObserver) {
         self.observer = observer
     }
     
-    public func notifyObserver(changeInfo: VoiceChannelStateChangeInfo?) {
-        self.observer?.voiceChannelStateDidChange(changeInfo)
+    public func notifyObserver(_ changeInfo: VoiceChannelStateChangeInfo?) {
+        if let changeInfo = changeInfo {
+            self.observer?.voiceChannelStateDidChange(changeInfo)
+        }
     }
     
     public func tearDown() {
@@ -151,16 +167,16 @@ public final class GlobalVoiceChannelStateObserverToken : NSObject {
     typealias ChangeInfo = VoiceChannelParticipantsChangeInfo
     typealias GlobalObserver = GlobalConversationObserver
 
-    private weak var observer : ZMVoiceChannelParticipantsObserver?
-    private weak var globalObserver : GlobalConversationObserver?
-    private var videoParticipantsChanged = false
+    fileprivate weak var observer : ZMVoiceChannelParticipantsObserver?
+    fileprivate weak var globalObserver : GlobalConversationObserver?
+    fileprivate var videoParticipantsChanged = false
     
     init(observer: ZMVoiceChannelParticipantsObserver, globalObserver: GlobalConversationObserver) {
         self.observer = observer
         self.globalObserver = globalObserver
     }
     
-    func notifyObserver(note: ChangeInfo) {
+    func notifyObserver(_ note: ChangeInfo) {
         observer?.voiceChannelParticipantsDidChange(note)
     }
     
@@ -172,22 +188,22 @@ public final class GlobalVoiceChannelStateObserverToken : NSObject {
 
 class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeDelegate  {
 
-    private var state : SetSnapshot
-    private var activeFlowParticipantsState : OrderedSet<NSObject>
+    fileprivate var state : SetSnapshot
+    fileprivate var activeFlowParticipantsState : NSOrderedSet
     
-    private weak var globalObserver : GlobalConversationObserver?
-    private var conversation : ZMConversation
+    fileprivate weak var globalObserver : GlobalConversationObserver?
+    fileprivate var conversation : ZMConversation
     
-    private var shouldRecalculate = false
+    fileprivate var shouldRecalculate = false
     var isTornDown : Bool = false
-    private var videoParticipantsChanged = false
+    fileprivate var videoParticipantsChanged = false
 
     init(observer: GlobalConversationObserver, conversation: ZMConversation) {
         self.globalObserver = observer
         self.conversation = conversation
         
-        self.state = SetSnapshot(set: OrderedSet(orderedSet: self.conversation.voiceChannel.participants()), moveType: .UICollectionView)
-        self.activeFlowParticipantsState = OrderedSet(orderedSet: self.conversation.activeFlowParticipants)
+        self.state = SetSnapshot(set: self.conversation.voiceChannel.participants(), moveType: .uiCollectionView)
+        self.activeFlowParticipantsState = self.conversation.activeFlowParticipants
         
         super.init()
     }
@@ -196,14 +212,14 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
         self.tearDown()
     }
     
-    func conversationDidChange(note: GeneralConversationChangeInfo) {
+    func conversationDidChange(_ note: GeneralConversationChangeInfo) {
         if note.callParticipantsChanged { // || note.activeFlowParticipantsChanged {
             self.videoParticipantsChanged = note.videoParticipantsChanged
             self.shouldRecalculate = true
         }
     }
     
-    func objectsDidChange(changes: ManagedObjectChanges) {
+    func objectsDidChange(_ changes: ManagedObjectChanges) {
         if self.shouldRecalculate {
             self.recalculateSet()
         }
@@ -212,18 +228,18 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
     func recalculateSet() {
         
         self.shouldRecalculate = false
-        let participants = OrderedSet(orderedSet: self.conversation.voiceChannel.participants())
-        let activeFlowParticipants = OrderedSet(orderedSet: self.conversation.activeFlowParticipants)
+        let participants = self.conversation.voiceChannel.participants() ?? NSOrderedSet()
+        let activeFlowParticipants = self.conversation.activeFlowParticipants
         
         // participants who have an updated flow, but are still in the voiceChannel
-        let newConnected = activeFlowParticipants.minus(self.activeFlowParticipantsState)
-        let newDisconnected = self.activeFlowParticipantsState.minus(activeFlowParticipants)
+        let newConnected = activeFlowParticipants.subtracted(orderedSet: self.activeFlowParticipantsState)
+        let newDisconnected = self.activeFlowParticipantsState.subtracted(orderedSet: activeFlowParticipants)
         
         // participants who left the voiceChannel / call
-        let newAdded = participants.minus(self.state.set) 
-        let newLeft = self.state.set.minus(participants)
+        let newAdded = participants.subtracted(orderedSet: self.state.set)
+        let newLeft = self.state.set.subtracted(orderedSet: participants)
         
-        let updated = newConnected.union(newDisconnected).minus(newLeft).minus(newAdded)
+        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: newLeft).subtracted(orderedSet: newAdded)
         
         // calculate inserts / deletes / moves
         if let newStateUpdate = self.state.updatedState(updated, observedObject: self.conversation, newSet: participants) {
@@ -243,8 +259,8 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
     
     
     func tearDown() {
-        state = SetSnapshot(set: OrderedSet(), moveType: ZMSetChangeMoveType.None)
-        activeFlowParticipantsState = OrderedSet()
+        state = SetSnapshot(set: NSOrderedSet(), moveType: ZMSetChangeMoveType.none)
+        activeFlowParticipantsState = NSOrderedSet()
         isTornDown = true
     }
     
