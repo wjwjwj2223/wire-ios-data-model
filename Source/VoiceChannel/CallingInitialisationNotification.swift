@@ -99,43 +99,38 @@ open class ZMVoiceChannelError: NSError {
 }
 
 
-public let CallingInitialisationNotificationName = "CallingInitialisationNotification"
 
 
-open class CallingInitialisationNotification : ZMNotification {
+public class CallingInitialisationNotification : NSObject  {
     
-    open var error : NSError!
-    internal var errorCode : ZMVoiceChannelErrorCode!
+    public let error : NSError
+    internal let errorCode : ZMVoiceChannelErrorCode
     
-    init() {
-        super.init(name: CallingInitialisationNotificationName, object: nil)
+    public static let Name = "CallingInitialisationNotification"
+    
+    init(error: NSError, errorCode: ZMVoiceChannelErrorCode) {
+        self.error = error
+        self.errorCode = errorCode
     }
     
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    public static func notifyCallingFailedWithErrorCode(_ errorCode: ZMVoiceChannelErrorCode) {
+        let note = CallingInitialisationNotification(error: ZMVoiceChannelError(errorCode: errorCode), errorCode:errorCode)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: self.Name), object:note)
     }
     
-    open static func notifyCallingFailedWithErrorCode(_ errorCode: ZMVoiceChannelErrorCode) {
-        let note = CallingInitialisationNotification()
-        note.error = ZMVoiceChannelError.init(errorCode: errorCode)
-        note.errorCode = errorCode
-        NotificationCenter.default.post(note as Notification)
-    }
-    
-    @objc open static func addObserverWithBlock(_ block: @escaping (CallingInitialisationNotification) -> Void) -> CallingInitialisationObserverToken {
-        let internalToken = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: CallingInitialisationNotificationName), object: nil, queue: OperationQueue.current) { (note: Notification) in
-            // TODO Sabine
-            if let note = note as? CallingInitialisationNotification {
-                block(note)
+    @objc public static func addObserverWithBlock(_ block: @escaping (CallingInitialisationNotification) -> Void) -> CallingInitialisationObserverToken {
+        let internalToken = NotificationCenter.default.addObserver(forName: Notification.Name(rawValue: self.Name), object: nil, queue: OperationQueue.current) { (note: Notification) in
+            if let object = note.object as? CallingInitialisationNotification {
+                block(object)
             }
         }
         
         return (CallingInitialisationObserverTokenImpl(observerToken: internalToken)) as CallingInitialisationObserverToken
     }
     
-    open static func removeObserver(_ observer: CallingInitialisationObserverToken) {
+    public static func removeObserver(_ observer: CallingInitialisationObserverToken) {
         let internalObserver = observer as! CallingInitialisationObserverTokenImpl
-        NotificationCenter.default.removeObserver(internalObserver.observerToken, name: NSNotification.Name(rawValue: CallingInitialisationNotificationName), object: nil)
+        NotificationCenter.default.removeObserver(internalObserver.observerToken, name: NSNotification.Name(rawValue: self.Name), object: nil)
     }
     
 

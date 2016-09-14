@@ -483,7 +483,7 @@ static NSString *const UserBotEmailRegex = @"^(welcome|anna)(|\\+(.*))@wire\\.co
     }
     
     NSArray *picture = [transportData optionalArrayForKey:@"picture"];
-    if ((picture.count > 0 || authoritative) && ![self hasLocalModificationsForKeys:[NSSet setWithArray:@[ImageMediumDataKey, ImageSmallProfileDataKey]]]) {
+    if ((picture != nil || authoritative) && ![self hasLocalModificationsForKeys:[NSSet setWithArray:@[ImageMediumDataKey, ImageSmallProfileDataKey]]]) {
         [self updateImageWithTransportData:picture];
     }
     
@@ -957,13 +957,13 @@ static NSString *const UserBotEmailRegex = @"^(welcome|anna)(|\\+(.*))@wire\\.co
 
 - (void)setImageData:(NSData *)imageData forKey:(NSString *)key format:(ZMImageFormat)format
 {
+    [self willChangeValueForKey:key];
+    
     if (imageData == nil) {
-        // TODO Sabine what to do here?
-        ZMLogError(@"Can not set nil values for image cache");
+        [self.managedObjectContext.zm_userImageCache removeAllUserImages:self];
         return;
     }
     
-    [self willChangeValueForKey:key];
     if (self.isSelfUser) {
         [self setPrimitiveValue:imageData forKey:key];
         

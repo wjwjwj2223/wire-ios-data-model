@@ -1069,6 +1069,14 @@ static dispatch_once_t clearStoreOnceToken;
     return result;
 }
 
+- (NSArray *)executeFetchRequestOrAssert:(NSFetchRequest *)request;
+{
+    NSError *error;
+    NSArray *result = [self executeFetchRequest:request error:&error];
+    RequireString(result != nil, "Error in fetching: %lu", (long) error.code);
+    return result;
+}
+
 - (void)continuouslyCheckForUnsavedChanges;
 {
     static dispatch_once_t onceToken;

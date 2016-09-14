@@ -27,14 +27,15 @@ class CallingInitialisationNotificationTests : ZMBaseManagedObjectTest {
         func checkThatItNotifiyWithErrorType(_ errorCode: ZMVoiceChannelErrorCode) -> Bool {
             var isCorrectErrorType = false
             // given
-            NotificationCenter.default.addObserver(forName: Notification.Name(rawValue: CallingInitialisationNotificationName), object: nil, queue: nil) { _ in
-                // TODO Sabine
-                //(note: NSNotification) in
-                //then
-                //let callingNotification = note as! CallingInitialisationNotification
-                //if (callingNotification.errorCode == errorCode) {
-                  //  isCorrectErrorType = true
-                //}
+            NotificationCenter.default.addObserver(forName: Notification.Name(rawValue: CallingInitialisationNotification.Name), object: nil, queue: nil) {
+                // then
+                guard let callingNotification = $0.object as? CallingInitialisationNotification else {
+                    XCTFail()
+                    return
+                }
+                if (callingNotification.errorCode == errorCode) {
+                    isCorrectErrorType = true
+                }
             }
             // when
             CallingInitialisationNotification.notifyCallingFailedWithErrorCode(errorCode)

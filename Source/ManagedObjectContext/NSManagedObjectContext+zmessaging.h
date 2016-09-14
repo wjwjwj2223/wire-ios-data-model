@@ -114,7 +114,9 @@
 /// immediately if the receiver has a lot of pending changes.
 - (void)enqueueDelayedSaveWithGroup:(ZMSDispatchGroup *)group;
 
-
+/// Executes a fetch request and asserts in case of error
+/// For generic requests in Swift please refer to `func fetchOrAssert<T>(request: NSFetchRequest<T>) -> [T]`
+- (NSArray *)executeFetchRequestOrAssert:(NSFetchRequest *)request;
 
 + (NSURL *)storeURL;
 

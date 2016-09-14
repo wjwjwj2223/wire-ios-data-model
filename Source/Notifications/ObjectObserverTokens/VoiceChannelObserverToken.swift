@@ -241,13 +241,13 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
         print("newConnected: \(newConnected.count), newDisconnected: \(newDisconnected.count)")
 
         // participants who left the voiceChannel / call
-//        let addedUsers = participants.subtracted(orderedSet: self.state.set)
-//        let removedUsers = self.state.set.subtracted(orderedSet: participants)
-        let addedUsers = NSOrderedSet(array: participants.filter{ !self.state.set.contains($0)})
-        let removedUsers = NSOrderedSet(array: self.state.set.filter{ !participants.contains($0)})
+        let addedUsers = participants.subtracted(orderedSet: self.state.set)
+        let removedUsers = self.state.set.subtracted(orderedSet: participants)
+//        let addedUsers = NSOrderedSet(array: participants.filter{ !self.state.set.contains($0)})
+//        let removedUsers = NSOrderedSet(array: self.state.set.filter{ !participants.contains($0)})
 
         print("newAdded: \(addedUsers.count), newLeft: \(removedUsers.count)")
-        print("currentPart: \(self.state.set), newParticipants: \(participants)")
+//        print("currentPart: \(self.state.set), newParticipants: \(participants)")
 
 //        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)
         let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)

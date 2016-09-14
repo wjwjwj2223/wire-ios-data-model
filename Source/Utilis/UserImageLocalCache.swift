@@ -84,6 +84,16 @@ extension NSManagedObjectContext
         super.init()
     }
     
+    /// Removes all images for user
+    open func removeAllUserImages(_ user: ZMUser) {
+        if let largeId = user.largeImageCacheKey {
+            self.largeUserImageCache.removeObject(forKey: largeId)
+        }
+        if let smallId = user.smallImageCacheKey {
+            self.smallUserImageCache.removeObject(forKey: smallId)
+        }
+    }
+    
     /// Large image for user
     open func largeUserImage(_ user: ZMUser) -> Data? {
         if let largeId = user.largeImageCacheKey
