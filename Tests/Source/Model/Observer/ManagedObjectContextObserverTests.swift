@@ -306,7 +306,7 @@ class ManagedObjectContextObserverTests : ZMBaseManagedObjectTest {
         
         // given
         self.uiMOC.globalManagedObjectContextObserver.isTesting = true
-        let filename = "foo.mp4"
+        let filename = "video.mp4"
         let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
         let documentsURL = URL(fileURLWithPath: documents)
         let fileURL =  documentsURL.appendingPathComponent(filename)

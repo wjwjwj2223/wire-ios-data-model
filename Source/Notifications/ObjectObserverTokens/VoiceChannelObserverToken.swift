@@ -230,21 +230,34 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
         self.shouldRecalculate = false
         let participants = self.conversation.voiceChannel.participants() ?? NSOrderedSet()
         let activeFlowParticipants = self.conversation.activeFlowParticipants
-        
+        print("participants: \(state.set.count), activeFlowParticipants: \(activeFlowParticipantsState.count)")
+        print("newParticipants: \(participants.count), newActiveFlowParticipants: \(activeFlowParticipants.count)")
+
         // participants who have an updated flow, but are still in the voiceChannel
-        let newConnected = activeFlowParticipants.subtracted(orderedSet: self.activeFlowParticipantsState)
-        let newDisconnected = self.activeFlowParticipantsState.subtracted(orderedSet: activeFlowParticipants)
-        
+//        let newConnected = activeFlowParticipants.subtracted(orderedSet: self.activeFlowParticipantsState)
+//        let newDisconnected = self.activeFlowParticipantsState.subtracted(orderedSet: activeFlowParticipants)
+        let newConnected = NSOrderedSet(array: activeFlowParticipants.filter{ !self.activeFlowParticipantsState.contains($0)})
+        let newDisconnected = NSOrderedSet(array: self.activeFlowParticipantsState.filter{ !activeFlowParticipants.contains($0)})
+        print("newConnected: \(newConnected.count), newDisconnected: \(newDisconnected.count)")
+
         // participants who left the voiceChannel / call
-        let newAdded = participants.subtracted(orderedSet: self.state.set)
-        let newLeft = self.state.set.subtracted(orderedSet: participants)
-        
-        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: newLeft).subtracted(orderedSet: newAdded)
-        
+//        let addedUsers = participants.subtracted(orderedSet: self.state.set)
+//        let removedUsers = self.state.set.subtracted(orderedSet: participants)
+        let addedUsers = NSOrderedSet(array: participants.filter{ !self.state.set.contains($0)})
+        let removedUsers = NSOrderedSet(array: self.state.set.filter{ !participants.contains($0)})
+
+        print("newAdded: \(addedUsers.count), newLeft: \(removedUsers.count)")
+        print("currentPart: \(self.state.set), newParticipants: \(participants)")
+
+//        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)
+        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)
+
+        print("updated: \(updated.count)")
+
         // calculate inserts / deletes / moves
         if let newStateUpdate = self.state.updatedState(updated, observedObject: self.conversation, newSet: participants) {
             self.state = newStateUpdate.newSnapshot
-            self.activeFlowParticipantsState = activeFlowParticipants
+            self.activeFlowParticipantsState = (self.conversation.activeFlowParticipants.copy() as? NSOrderedSet) ?? NSOrderedSet()
             
             let changeInfo = VoiceChannelParticipantsChangeInfo(setChangeInfo: newStateUpdate.changeInfo)
             changeInfo.otherActiveVideoCallParticipantsChanged = videoParticipantsChanged

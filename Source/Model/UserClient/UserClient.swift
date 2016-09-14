@@ -240,9 +240,10 @@ public extension UserClient {
         let fetchRequest = NSFetchRequest<UserClient>(entityName: UserClient.entityName())
         fetchRequest.predicate = NSPredicate(format: "%K == %@", ZMUserClientRemoteIdentifierKey, id)
         fetchRequest.fetchLimit = 1
-        let fetchedClient = context.executeFetchOrAssert(request: fetchRequest).first
-        let client = fetchedClient ?? UserClient.insertNewObject(in: context)
         
+        let fetchedClient = context.fetchOrAssert(request: fetchRequest).first
+        let client = fetchedClient ?? UserClient.insertNewObject(in: context)
+
         client.label = label
         client.type = type
         client.activationAddress = activationAddress
@@ -334,14 +335,14 @@ public extension UserClient {
     public var failedToEstablishSession: Bool {
         set {
             if newValue {
-                managedObjectContext?.zm_failedToEstablishSessionStore.add(self)
+                managedObjectContext?.zm_failedToEstablishSessionStore?.add(self)
             } else {
-                managedObjectContext?.zm_failedToEstablishSessionStore.remove(self)
+                managedObjectContext?.zm_failedToEstablishSessionStore?.remove(self)
             }
         }
         
         get {
-            return managedObjectContext?.zm_failedToEstablishSessionStore.contains(self) ?? false
+            return managedObjectContext?.zm_failedToEstablishSessionStore?.contains(self) ?? false
         }
     }
 }
@@ -510,17 +511,13 @@ extension UserClient {
     {
         let conversations : Set<ZMConversation> = clients.map{$0.user}.reduce(Set()){
             guard let user = $1 else {return Set()}
-            if user.isSelfUser {
-                let fetchRequest = NSFetchRequest<ZMConversation>(entityName: ZMConversation.entityName())
-                fetchRequest.predicate = ZMConversation.predicateForConversationsIncludingArchived()
-                let result = user.managedObjectContext?.executeFetchOrAssert(request: fetchRequest)
-                if let conversations = result {
-                    return $0.union(conversations)
-                }
-                return Set()
-            } else {
+            guard user.isSelfUser else {
                 return $0.union(user.activeConversations.array as! [ZMConversation])
             }
+            let fetchRequest = NSFetchRequest<ZMConversation>(entityName: ZMConversation.entityName())
+            fetchRequest.predicate = ZMConversation.predicateForConversationsIncludingArchived()
+            let conversations = managedObjectContext!.fetchOrAssert(request: fetchRequest)
+            return $0.union(conversations)
         }
         return conversations
     }

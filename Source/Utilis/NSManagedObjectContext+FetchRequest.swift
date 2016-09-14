@@ -9,14 +9,14 @@
 import Foundation
 
 
-
 public extension NSManagedObjectContext {
     
     /// Executes a fetch request and asserts in case of error
-    func executeFetchOrAssert<T : NSFetchRequestResult>(request: NSFetchRequest<T>) -> [T] {
+    func fetchOrAssert<T : NSFetchRequestResult>(request: NSFetchRequest<T>) -> [T] where T: NSManagedObject {
         do {
+//            let subRequest : NSFetchRequest<NSManagedObject> = request as! NSFetchRequest<NSManagedObject>
             let result = try fetch(request)
-            return result
+            return result //.flatMap{$0 as? T}
         } catch let error {
             fatal("Error in fetching \(error.localizedDescription)")
         }

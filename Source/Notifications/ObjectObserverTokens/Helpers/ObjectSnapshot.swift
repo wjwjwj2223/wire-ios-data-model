@@ -71,9 +71,8 @@ public struct ObjectSnapshot : Equatable, CustomDebugStringConvertible
                     
                 case let set as [NSObject]:
                     snapshotValues[key] = set.map { $0 } as NSObject? // This is to materialize potential faults
-                
-                case let set as NSCopying:
-                    if let copy = set.copy(with: nil) as? NSObject {
+                case let set as NSObject where set is NSCopying:
+                    if let copy = (set as! NSCopying).copy(with: nil) as? NSObject {
                         snapshotValues[key] = copy
                     } else {
                         fatal("Can't copy snapshot value for key \(key)")

@@ -219,7 +219,7 @@ static int32_t eventIdCounter;
     if (createSessionWithSeflUser) {
         UserClient *selfClient = [ZMUser selfUserInContext:self.syncMOC].selfClient;
         NSError *error;
-        NSString *key = [selfClient.keysStore lastPreKeyAndReturnError:&error];
+        NSString *key = [[(UserClient*)selfClient keysStore] lastPreKeyAndReturnError:&error];
         [selfClient establishSessionWithClient:userClient usingPreKey:key];
     }
     return userClient;

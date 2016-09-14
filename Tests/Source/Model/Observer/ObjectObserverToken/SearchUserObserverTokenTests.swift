@@ -41,13 +41,13 @@ class SearchUserObserverTokenTests : ZMBaseManagedObjectTest {
         
         // given
         let remoteID = UUID.create()
-        let searchUser = ZMSearchUser(name: "Hans", accentColor: .brightOrange, remoteID: remoteID, user: nil, syncManagedObjectContext: self.syncMOC, uiManagedObjectContext:self.uiMOC)
+        let searchUser = ZMSearchUser(name: "Hans", accentColor: .brightOrange, remoteID: remoteID, user: nil, syncManagedObjectContext: self.syncMOC, uiManagedObjectContext:self.uiMOC)!
         
         let testObserver = TestSearchUserObserver()
         let token = ZMUser.add(testObserver, forUsers:[searchUser], managedObjectContext: self.uiMOC)
         
         // when
-        searchUser?.notifyNewSmallImageData(self.verySmallJPEGData()!, managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
+        searchUser.notifyNewSmallImageData(self.verySmallJPEGData()!, managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
         
         // then
         XCTAssertEqual(testObserver.receivedChangeInfo.count, 1)
@@ -63,7 +63,7 @@ class SearchUserObserverTokenTests : ZMBaseManagedObjectTest {
         let user = ZMUser.insertNewObject(in:self.uiMOC)
         user.remoteIdentifier = UUID.create()
         self.uiMOC.saveOrRollback()
-        let searchUser = ZMSearchUser(name: "Foo", accentColor: .brightYellow, remoteID: user.remoteIdentifier, user: user, syncManagedObjectContext: self.syncMOC, uiManagedObjectContext:self.uiMOC)
+        let searchUser = ZMSearchUser(name: "Foo", accentColor: .brightYellow, remoteID: user.remoteIdentifier, user: user, syncManagedObjectContext: self.syncMOC, uiManagedObjectContext:self.uiMOC)!
         
         let testObserver = TestSearchUserObserver()
         let token = ZMUser.add(testObserver, forUsers:[searchUser], managedObjectContext: self.uiMOC)

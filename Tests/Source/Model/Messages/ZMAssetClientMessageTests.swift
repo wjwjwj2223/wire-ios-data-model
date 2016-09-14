@@ -20,6 +20,8 @@
 import Foundation
 @testable import ZMCDataModel
 
+// TODO Sabine - add back to project
+
 class ZMAssetClientMessageTests : BaseZMClientMessageTests {
     
     var message: ZMAssetClientMessage!
@@ -1973,8 +1975,8 @@ extension ZMAssetClientMessageTests {
         
         let dataPayload = [
             "info" : genericMessage.data().base64String(),
-            "id" : thumbnailId.transportString()
-        ]
+            "id" : thumbnailId.transportString()!
+        ] as [String : Any]
         
         let payload = self.payloadForMessage(in: conversation, type: EventConversationAddOTRAsset, data: dataPayload)!
         let updateEvent = ZMUpdateEvent(fromEventStreamPayload: payload, uuid: nil)

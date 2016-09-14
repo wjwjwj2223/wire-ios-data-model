@@ -51,18 +51,15 @@ extension ClientMessageTests_OTR {
             XCTAssertTrue(self.syncMOC.saveOrRollback())
             
             // when
-            guard let dataAndStrategy = textMessage.encryptedMessagePayloadData(conversation, externalData: nil) else {
-                XCTFail()
-                return
-            }
+            guard let dataAndStrategy = textMessage.encryptedMessagePayloadData(conversation, externalData: nil)
+            else { return XCTFail() }
             
             // then
-            guard let createdMessage = ZMNewOtrMessage.builder()!.merge(from: dataAndStrategy.data).build()! as? ZMNewOtrMessage else {
-                XCTFail()
-                return
-            }
+            guard let createdMessage = ZMNewOtrMessage.builder()!.merge(from: dataAndStrategy.data).build()! as? ZMNewOtrMessage
+            else { return XCTFail() }
+            
             XCTAssertEqual(createdMessage.hasBlob(), true)
-                        let clientIds = (createdMessage.recipients as! [ZMUserEntry]).flatMap { userEntry -> [ZMClientId] in
+            let clientIds = (createdMessage.recipients as! [ZMUserEntry]).flatMap { userEntry -> [ZMClientId] in
                 return (userEntry.clients as! [ZMClientEntry]).map { clientEntry -> ZMClientId in
                     return clientEntry.client
                 }
@@ -192,10 +189,8 @@ extension ClientMessageTests_OTR {
             let confirmationMessage = textMessage.confirmReception()
             
             //when
-            guard let payloadAndStrategy = confirmationMessage?.encryptedMessagePayloadData() else {
-                XCTFail()
-                return
-            }
+            guard let payloadAndStrategy = confirmationMessage?.encryptedMessagePayloadData()
+            else { return XCTFail()}
             
             //then
             switch payloadAndStrategy.strategy {

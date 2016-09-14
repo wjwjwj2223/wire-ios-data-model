@@ -109,8 +109,10 @@ extension ZMMessageTests_Confirmation {
         performPretendingUiMocIsSyncMoc {
             ZMOTRMessage.messageUpdateResult(from: confirmationUpdate, in: self.uiMOC, prefetchResult: nil)
         }
+        XCTAssertTrue(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
         XCTAssertTrue(uiMOC.saveOrRollback())
-        guard let confirmation = message.confirmations.first else {
+        
+        guard let confirmation = message.confirmations?.first else {
             XCTFail()
             return
         }

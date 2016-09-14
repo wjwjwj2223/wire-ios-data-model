@@ -13,7 +13,7 @@ import ZMTesting
 public extension UUID {
 
     public static func create() -> UUID {
-            return UUID.create() as UUID
+            return NSUUID.create() as UUID
     }
 }
 
@@ -21,7 +21,7 @@ public extension UUID {
 public extension Date {
 
     public func transportString() -> String {
-        return (self as NSDate).transportString()!
+        return (self as NSDate).transportString()
     }
     
 }

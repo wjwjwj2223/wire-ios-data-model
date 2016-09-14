@@ -123,11 +123,8 @@ private struct FileCache : Cache {
     
     func assetURL(_ key: String) -> URL? {
         let url = URLForKey(key)
-        let ptr : NSErrorPointer? = nil
-        if (url as NSURL).checkResourceIsReachableAndReturnError(ptr!) {
-            return url
-        }
-        return nil
+        let isReachable = (try? url.checkResourceIsReachable()) ?? false
+        return isReachable ? url : nil
     }
     
     func hasDataForKey(_ key: String) -> Bool {

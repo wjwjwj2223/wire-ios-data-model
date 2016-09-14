@@ -830,7 +830,7 @@
     ZMConversation *sut = [ZMConversation insertGroupConversationIntoManagedObjectContext:self.uiMOC withParticipants:@[user1, user2]];
     
     // when
-    ZMMessage *message = [sut appendMessageWithText:@"Quux"];
+    ZMMessage *message = (id)[sut appendMessageWithText:@"Quux"];
 
     // then
     XCTAssertNotNil(message.expirationDate);

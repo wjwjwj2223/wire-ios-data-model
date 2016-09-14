@@ -366,7 +366,7 @@ static NSString *const ValidEmail = @"foo77@example.com";
     user.mediumRemoteIdentifier = [NSUUID createUUID];
     NSData *imageData = [self verySmallJPEGData];
     user.imageMediumData = imageData;
-    XCTAssertEqual(user.imageMediumData, imageData);
+    XCTAssertEqualObjects(user.imageMediumData, imageData);
     
     [self.syncMOC saveOrRollback];
     
@@ -385,7 +385,7 @@ static NSString *const ValidEmail = @"foo77@example.com";
     user.smallProfileRemoteIdentifier = [NSUUID createUUID];
     NSData *imageData = [self verySmallJPEGData];
     user.imageSmallProfileData = imageData;
-    XCTAssertEqual(user.imageSmallProfileData, imageData);
+    XCTAssertEqualObjects(user.imageSmallProfileData, imageData);
     
     [self.syncMOC saveOrRollback];
     

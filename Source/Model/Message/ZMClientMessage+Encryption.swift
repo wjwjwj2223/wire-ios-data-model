@@ -57,14 +57,10 @@ extension ZMGenericMessage {
                                              externalData: Data?)
         -> (data: Data, strategy: MissingClientsStrategy)?
     {
-        guard let context = conversation.managedObjectContext else {
-            return nil
-        }
-        guard let selfClient = ZMUser.selfUser(in: context).selfClient()
-            , selfClient.remoteIdentifier != nil
-        else {
-            return nil
-        }
+        guard let context = conversation.managedObjectContext
+        else { return nil }
+        guard let selfClient = ZMUser.selfUser(in: context).selfClient(), selfClient.remoteIdentifier != nil
+        else { return nil }
         
         let encryptionContext = selfClient.keysStore.encryptionContext
         var messageDataAndStrategy : (data: Data, strategy: MissingClientsStrategy)?

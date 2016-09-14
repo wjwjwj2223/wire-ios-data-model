@@ -272,11 +272,14 @@ class UserClientTests: ZMBaseManagedObjectTest {
             fetchRequest.predicate = NSPredicate(format: "%K == %@", "remoteIdentifier", otherClientId!)
             fetchRequest.fetchLimit = 1
             // when
-            let fetchedClient = self.syncMOC.executeFetchOrAssert(request: fetchRequest).first
-            
-            // then
-            XCTAssertNotNil(fetchedClient)
-            XCTAssertNotNil(fetchedClient!.fingerprint)
+            var fetchedClient: UserClient?
+            do {
+                fetchedClient = try self.syncMOC.fetch(fetchRequest).first
+                XCTAssertNotNil(fetchedClient)
+                XCTAssertNotNil(fetchedClient!.fingerprint)
+            } catch let error{
+                XCTFail(error.localizedDescription)
+            }
         }
     }
     
