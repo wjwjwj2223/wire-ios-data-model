@@ -51,6 +51,7 @@
 		F93265211D8950F10076AAD6 /* NSManagedObjectContext+FetchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F93265201D8950F10076AAD6 /* NSManagedObjectContext+FetchRequest.swift */; };
 		F93265271D895A910076AAD6 /* ZMTransport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A6B71CAD80BC0039E10C /* ZMTransport.framework */; };
 		F93265281D895C1C0076AAD6 /* ZMUtilities.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A6731CAD78160039E10C /* ZMUtilities.framework */; };
+		F93265291D89648B0076AAD6 /* ZMAssetClientMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9B71F5D1CB2BC85001DB03F /* ZMAssetClientMessageTests.swift */; };
 		F9331C521CB3BC6800139ECC /* CryptoBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C501CB3BC6800139ECC /* CryptoBoxTests.swift */; };
 		F9331C561CB3BCF300139ECC /* OtrBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C541CB3BCDA00139ECC /* OtrBaseTest.swift */; };
 		F9331C581CB3BE5300139ECC /* ZMConversationTests+OTR.m in Sources */ = {isa = PBXBuildFile; fileRef = F9331C571CB3BE5300139ECC /* ZMConversationTests+OTR.m */; };
@@ -1900,6 +1901,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F93265291D89648B0076AAD6 /* ZMAssetClientMessageTests.swift in Sources */,
 				F9B71F9C1CB2BF18001DB03F /* ZMCallStateTests.swift in Sources */,
 				F9B71F951CB2BF08001DB03F /* ZMDisplayNameGeneratorTests.m in Sources */,
 				F9B71FEE1CB2C4C6001DB03F /* ManagedObjectChangesTests.swift in Sources */,

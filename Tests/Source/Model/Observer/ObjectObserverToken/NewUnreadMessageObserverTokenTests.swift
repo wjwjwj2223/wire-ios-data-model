@@ -67,8 +67,10 @@ class NewUnreadMessageObserverTokenTests : ZMBaseManagedObjectTest {
         self.newKnocksToken = ZMMessageNotification.addNewKnocksObserver(self.testObserver, managedObjectContext: self.uiMOC)
         
         self.syncTestObserver = UnreadMessageTestObserver()
-        self.syncNewMessageToken = ZMMessageNotification.addNewMessagesObserver(syncTestObserver, managedObjectContext: self.syncMOC)
-        self.syncNewKnocksToken = ZMMessageNotification.addNewKnocksObserver(syncTestObserver, managedObjectContext: self.syncMOC)
+        self.syncMOC.performGroupedBlockAndWait {
+            self.syncNewMessageToken = ZMMessageNotification.addNewMessagesObserver(self.syncTestObserver, managedObjectContext: self.syncMOC)
+            self.syncNewKnocksToken = ZMMessageNotification.addNewKnocksObserver(self.syncTestObserver, managedObjectContext: self.syncMOC)
+        }
         
         NotificationCenter.default.post(name: Notification.Name(rawValue: "ZMApplicationDidEnterEventProcessingStateNotification"), object: nil)
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
@@ -77,9 +79,10 @@ class NewUnreadMessageObserverTokenTests : ZMBaseManagedObjectTest {
     override func tearDown() {
         ZMMessageNotification.removeNewKnocksObserver(for: self.newKnocksToken!, managedObjectContext: self.uiMOC)
         ZMMessageNotification.removeNewMessagesObserver(for: self.newMessageToken!, managedObjectContext: self.uiMOC)
-        ZMMessageNotification.removeNewKnocksObserver(for: self.syncNewKnocksToken!, managedObjectContext: self.syncMOC)
-        ZMMessageNotification.removeNewMessagesObserver(for: self.syncNewMessageToken!, managedObjectContext: self.syncMOC)
-        
+        self.syncMOC.performGroupedBlockAndWait {
+            ZMMessageNotification.removeNewKnocksObserver(for: self.syncNewKnocksToken!, managedObjectContext: self.syncMOC)
+            ZMMessageNotification.removeNewMessagesObserver(for: self.syncNewMessageToken!, managedObjectContext: self.syncMOC)
+        }
         self.newMessageToken = nil
         self.newKnocksToken = nil
         self.syncNewKnocksToken = nil

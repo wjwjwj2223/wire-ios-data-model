@@ -710,7 +710,9 @@ extension ZMCallStateTests {
         let conversationA = ZMConversation.insertNewObject(in: uiMOC)
         let conversationB = ZMConversation.insertNewObject(in: uiMOC)
         uiMOC.saveOrRollback()
-        syncMOC.saveOrRollback()
+        syncMOC.performGroupedBlockAndWait {
+            self.syncMOC.saveOrRollback()
+        }
         
         XCTAssertFalse(mainSut.stateForConversation(conversationA).isCallDeviceActive)
         XCTAssertFalse(mainSut.stateForConversation(conversationB).isCallDeviceActive)
@@ -745,7 +747,10 @@ extension ZMCallStateTests {
         XCTAssertTrue(uiMOC.zm_callState.hasChanges)
 
         // when
-        let changedConversations = syncMOC.mergeCallStateChanges(uiMOC.zm_callState.createCopyAndResetHasChanges())
+        var changedConversations: Set<ZMConversation>!
+        self.syncMOC.performGroupedBlockAndWait {
+            changedConversations = self.syncMOC.mergeCallStateChanges(self.uiMOC.zm_callState.createCopyAndResetHasChanges())
+        }
         
         // then
         XCTAssertEqual(changedConversations.count, 2)
@@ -762,33 +767,41 @@ extension ZMCallStateTests {
 
         // when
         conversation.isIgnoringCall = true
-        let callState1 = uiMOC.zm_callState.createCopyAndResetHasChanges()
-        _ =  syncMOC.mergeCallStateChanges(callState1)
+        let callState1 = self.uiMOC.zm_callState.createCopyAndResetHasChanges()
+        self.syncMOC.performGroupedBlockAndWait {
+            _ = self.syncMOC.mergeCallStateChanges(callState1)
+        }
         XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
 
         // then
-        let syncConversation = syncMOC.object(with: conversation.objectID) as? ZMConversation
-        XCTAssertNotNil(syncConversation)
-        if let syncConversation = syncConversation {
-            XCTAssertTrue(syncConversation.isIgnoringCall)
-            XCTAssertTrue(syncConversation.hasLocalModificationsForIsIgnoringCall)
-        } else {
-            XCTFail()
+        var syncConversation: ZMConversation!
+        self.syncMOC.performGroupedBlockAndWait {
+            syncConversation = self.syncMOC.object(with: conversation.objectID) as? ZMConversation
+            XCTAssertNotNil(syncConversation)
+            if let syncConversation = syncConversation {
+                XCTAssertTrue(syncConversation.isIgnoringCall)
+                XCTAssertTrue(syncConversation.hasLocalModificationsForIsIgnoringCall)
+            } else {
+                XCTFail()
+            }
         }
         
         // when
         conversation.isIgnoringCall = false
-        let callState2 = uiMOC.zm_callState.createCopyAndResetHasChanges()
-        _ = syncMOC.mergeCallStateChanges(callState2)
+        let callState2 = self.uiMOC.zm_callState.createCopyAndResetHasChanges()
+        self.syncMOC.performGroupedBlockAndWait {
+            _ = self.syncMOC.mergeCallStateChanges(callState2)
+        }
         XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
 
         // then
-        XCTAssertNotNil(syncConversation)
-        if let syncConversation = syncConversation {
-            XCTAssertFalse(syncConversation.isIgnoringCall)
-            XCTAssertFalse(syncConversation.hasLocalModificationsForIsIgnoringCall)
-        } else {
-            XCTFail()
+        self.syncMOC.performGroupedBlockAndWait {             
+            if let syncConversation = syncConversation {
+                XCTAssertFalse(syncConversation.isIgnoringCall)
+                XCTAssertFalse(syncConversation.hasLocalModificationsForIsIgnoringCall)
+            } else {
+                XCTFail()
+            }
         }
     }
     
@@ -803,12 +816,18 @@ extension ZMCallStateTests {
             // when
             conversation.isIgnoringCall = true
         }
-        let callState1 = syncMOC.zm_callState.createCopyAndResetHasChanges()
-        _ = uiMOC.mergeCallStateChanges(callState1)
+        
+        var callState1: ZMCallState!
+        self.syncMOC.performGroupedBlockAndWait { 
+            callState1 = self.syncMOC.zm_callState.createCopyAndResetHasChanges()
+        }
+        _ = self.uiMOC.mergeCallStateChanges(callState1)
         
         // then
-        XCTAssertTrue(conversation.isIgnoringCall)
-        XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
+        self.syncMOC.performGroupedBlockAndWait {
+            XCTAssertTrue(conversation.isIgnoringCall)
+            XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
+        }
         
         let uiConversation = uiMOC.object(with: conversation.objectID) as? ZMConversation
         XCTAssertNotNil(uiConversation)
@@ -821,15 +840,18 @@ extension ZMCallStateTests {
         }
         
         // when
-        syncMOC.performGroupedBlockAndWait{
+        var callState2: ZMCallState!
+        self.syncMOC.performGroupedBlockAndWait{
             conversation.isIgnoringCall = false
+            callState2 = self.syncMOC.zm_callState.createCopyAndResetHasChanges()
         }
-        let callState2 = syncMOC.zm_callState.createCopyAndResetHasChanges()
-        _ = uiMOC.mergeCallStateChanges(callState2)
+        _ = self.uiMOC.mergeCallStateChanges(callState2)
         
         // then
-        XCTAssertFalse(conversation.isIgnoringCall)
-        XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
+        self.syncMOC.performGroupedBlockAndWait{
+            XCTAssertFalse(conversation.isIgnoringCall)
+            XCTAssertFalse(conversation.hasLocalModificationsForIsIgnoringCall)
+        }
         
         XCTAssertNotNil(uiConversation)
         if let uiConversation = uiConversation {

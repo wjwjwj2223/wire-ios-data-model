@@ -30,7 +30,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
     
     func clientWithTrustedClientCount(_ trustedCount: UInt, ignoredClientCount: UInt, missedClientCount: UInt) -> UserClient
     {
-        let client = UserClient.insertNewObject(in: self.syncMOC)
+        let client = UserClient.insertNewObject(in: self.uiMOC)
         
         func userClientSetWithClientCount(_ count :UInt) -> Set<UserClient>?
         {
@@ -38,7 +38,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
             
             var clients = Set<UserClient>()
             for _ in 0..<count {
-                clients.insert(UserClient.insertNewObject(in: self.syncMOC))
+                clients.insert(UserClient.insertNewObject(in: uiMOC))
             }
             return clients
         }
@@ -55,20 +55,20 @@ class UserClientTests: ZMBaseManagedObjectTest {
     }
 
     func testThatItCanInitializeClient() {
-        let client = UserClient.insertNewObject(in: self.syncMOC)
+        let client = UserClient.insertNewObject(in: self.uiMOC)
         XCTAssertEqual(client.type, ZMUserClientTypePermanent, "Client type should be 'permanent'")
     }
     
     func testThatItReturnsTrackedKeys() {
-        let client = UserClient.insertNewObject(in: self.syncMOC)
+        let client = UserClient.insertNewObject(in: self.uiMOC)
         let trackedKeys = client.keysTrackedForLocalModifications()
         XCTAssertTrue(trackedKeys.contains(ZMUserClientMarkedToDeleteKey), "")
         XCTAssertTrue(trackedKeys.contains(ZMUserClientNumberOfKeysRemainingKey), "")
     }
     
     func testThatItSyncClientsWithNoRemoteIdentifier() {
-        let unsyncedClient = UserClient.insertNewObject(in: self.syncMOC)
-        let syncedClient = UserClient.insertNewObject(in: self.syncMOC);
+        let unsyncedClient = UserClient.insertNewObject(in: self.uiMOC)
+        let syncedClient = UserClient.insertNewObject(in: self.uiMOC);
         syncedClient.remoteIdentifier = "synced"
         
         XCTAssertTrue(UserClient.predicateForObjectsThatNeedToBeInsertedUpstream().evaluate(with: unsyncedClient))
@@ -76,8 +76,8 @@ class UserClientTests: ZMBaseManagedObjectTest {
     }
     
     func testThatClientCanBeMarkedForDeletion() {
-        let client = UserClient.insertNewObject(in: self.syncMOC)
-        client.user = ZMUser.selfUser(in: self.syncMOC)
+        let client = UserClient.insertNewObject(in: self.uiMOC)
+        client.user = ZMUser.selfUser(in: self.uiMOC)
         
         XCTAssertFalse(client.markedToDelete)
         client.markForDeletion()
@@ -88,7 +88,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
     
     func testThatItTracksCorrectKeys() {
         let expectedKeys = [ZMUserClientMarkedToDeleteKey, ZMUserClientNumberOfKeysRemainingKey, ZMUserClientMissingKey, ZMUserClientNeedsToUpdateSignalingKeysKey]
-        let client = UserClient.insertNewObject(in: self.syncMOC)
+        let client = UserClient.insertNewObject(in: self.uiMOC)
 
         XCTAssertEqual(client.keysTrackedForLocalModifications() , expectedKeys)
     }
@@ -133,7 +133,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
     func testThatItDeletesASession() {
         self.syncMOC.performGroupedBlockAndWait{
             // given
-            let selfClient = self.createSelfClient()
+            let selfClient = self.createSelfClient(onMOC: self.syncMOC)
             
             var preKeys : [(id: UInt16, prekey: String)] = []
             selfClient.keysStore.encryptionContext.perform({ (sessionsDirectory) in
@@ -165,7 +165,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
     func testThatItDeletesASessionWhenDeletingAClient() {
         self.syncMOC.performGroupedBlockAndWait{
             // given
-            let selfClient = self.createSelfClient()
+            let selfClient = self.createSelfClient(onMOC: self.syncMOC)
             var preKeys : [(id: UInt16, prekey: String)] = []
             selfClient.keysStore.encryptionContext.perform({ (sessionsDirectory) in
                 preKeys = try! sessionsDirectory.generatePrekeys(CountableRange<UInt16>(0..<2))            })
@@ -196,7 +196,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
         
         self.syncMOC.performGroupedBlockAndWait{
             // given
-            let selfClient = self.createSelfClient()
+            let selfClient = self.createSelfClient(onMOC: self.syncMOC)
             
             let otherClient1 = UserClient.insertNewObject(in: self.syncMOC)
             otherClient1.remoteIdentifier = UUID.create().transportString()
@@ -243,7 +243,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
         let otherClientId = UUID.create().transportString()
         
         self.syncMOC.performGroupedBlockAndWait {
-            let selfClient = self.createSelfClient()
+            let selfClient = self.createSelfClient(onMOC: self.syncMOC)
             
             var preKeys : [(id: UInt16, prekey: String)] = []
             selfClient.keysStore.encryptionContext.perform({ (sessionsDirectory) in
@@ -286,7 +286,7 @@ class UserClientTests: ZMBaseManagedObjectTest {
     func testThatItSendsMessageWhenResettingSession() {
         self.syncMOC.performGroupedBlockAndWait{
             // given
-            let selfClient = self.createSelfClient()
+            let selfClient = self.createSelfClient(onMOC: self.syncMOC)
             
             let otherClient = UserClient.insertNewObject(in: self.syncMOC)
             otherClient.remoteIdentifier = UUID.create().transportString()
@@ -318,23 +318,25 @@ class UserClientTests: ZMBaseManagedObjectTest {
 
 extension UserClientTests {
     func testThatItStoresFailedToEstablishSessionInformation() {
-        // given
-        let client = UserClient.insertNewObject(in: syncMOC)
-        
-        // when & then
-        XCTAssertFalse(client.failedToEstablishSession)
-        
-        // when
-        client.failedToEstablishSession = true
-        
-        // then
-        XCTAssertTrue(client.failedToEstablishSession)
-        
-        // when
-        client.failedToEstablishSession = false
-        
-        // then
-        XCTAssertFalse(client.failedToEstablishSession)
+        self.syncMOC.performGroupedBlockAndWait {
+            // given
+            let client = UserClient.insertNewObject(in: self.syncMOC)
+            
+            // when & then
+            XCTAssertFalse(client.failedToEstablishSession)
+            
+            // when
+            client.failedToEstablishSession = true
+            
+            // then
+            XCTAssertTrue(client.failedToEstablishSession)
+            
+            // when
+            client.failedToEstablishSession = false
+            
+            // then
+            XCTAssertFalse(client.failedToEstablishSession)
+        }
     }
 }
 
@@ -362,7 +364,7 @@ extension UserClientTests {
         // given & when
         self.createSelfClient()
         
-        let otherClient = UserClient.insertNewObject(in: self.syncMOC);
+        let otherClient = UserClient.insertNewObject(in: self.uiMOC);
         otherClient.remoteIdentifier = String.createAlphanumerical()
         
         // then
@@ -373,7 +375,7 @@ extension UserClientTests {
         // given
         let selfClient = self.createSelfClient()
 
-        let otherClient = UserClient.insertNewObject(in: self.syncMOC);
+        let otherClient = UserClient.insertNewObject(in: self.uiMOC);
         otherClient.remoteIdentifier = String.createAlphanumerical()
         
         // when
@@ -387,7 +389,7 @@ extension UserClientTests {
         // given
         let selfClient = createSelfClient()
         
-        let otherClient = UserClient.insertNewObject(in: self.syncMOC);
+        let otherClient = UserClient.insertNewObject(in: self.uiMOC);
         otherClient.remoteIdentifier = String.createAlphanumerical()
         
         // when
@@ -414,7 +416,7 @@ extension UserClientTests {
         XCTAssertNotNil(selfClient.apsDecryptionKey)
         
         // when
-        UserClient.resetSignalingKeysInContext(self.syncMOC)
+        UserClient.resetSignalingKeysInContext(self.uiMOC)
         
         // then
         XCTAssertNil(selfClient.apsVerificationKey)
@@ -427,7 +429,7 @@ extension UserClientTests {
         let selfClient = createSelfClient()
         
         // when
-        UserClient.resetSignalingKeysInContext(self.syncMOC)
+        UserClient.resetSignalingKeysInContext(self.uiMOC)
         
         // then
         XCTAssertTrue(selfClient.needsToUploadSignalingKeys)
