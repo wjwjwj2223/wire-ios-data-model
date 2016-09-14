@@ -28,7 +28,6 @@ extension ZMVoiceChannel : ObjectInSnapshot {
     }
 }
 
-
 public extension NSOrderedSet {
 
     public func subtracting(orderedSet: NSOrderedSet) -> NSOrderedSet {
