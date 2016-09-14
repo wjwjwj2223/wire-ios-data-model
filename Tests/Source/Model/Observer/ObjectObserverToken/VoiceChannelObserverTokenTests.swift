@@ -443,12 +443,12 @@ extension VoiceChannelObserverTokenTests {
         let otherParticipant2 = self.addConversationParticipant(conversation)
         conversation.conversationType = .group
         conversation.isFlowActive = true
-        self.uiMOC.saveOrRollback()
         
         conversation.mutableCallParticipants.add(otherParticipant1)
         conversation.mutableCallParticipants.add(selfParticipant)
         conversation.mutableCallParticipants.add(otherParticipant2)
-    
+        self.uiMOC.saveOrRollback()
+
         let token = conversation.voiceChannel.addCall(observer)
         
         // when
@@ -487,6 +487,7 @@ extension VoiceChannelObserverTokenTests {
         
         conversation.mutableCallParticipants.addObjects(from: [otherParticipant1, selfParticipant, otherParticipant2])
         conversation.activeFlowParticipants = NSOrderedSet(array: [otherParticipant1, selfParticipant, otherParticipant2])
+        self.uiMOC.saveOrRollback()
 
         let token = conversation.voiceChannel.addCall(observer)
         
@@ -564,15 +565,16 @@ extension VoiceChannelObserverTokenTests {
         conversation.conversationType = .group
         conversation.isFlowActive = true
         self.uiMOC.saveOrRollback()
-        
+
         conversation.mutableCallParticipants.add(otherParticipant1)
         conversation.mutableCallParticipants.add(otherParticipant2)
         conversation.activeFlowParticipants = NSOrderedSet(objects: otherParticipant1)
-        
+        self.uiMOC.saveOrRollback()
+
         let token = conversation.voiceChannel.addCall(observer)
         
         // when
-        conversation.activeFlowParticipants = NSOrderedSet(array: [otherParticipant1, otherParticipant2])
+        conversation.activeFlowParticipants = NSOrderedSet(array: [otherParticipant2, otherParticipant1])
         self.uiMOC.globalManagedObjectContextObserver.notifyUpdatedCallState(Set(arrayLiteral: conversation), notifyDirectly: true)
         
         // then
@@ -659,12 +661,13 @@ extension VoiceChannelObserverTokenTests {
         
         let otherParticipant1 = self.addConversationParticipant(conversation)
         let otherParticipant2 = self.addConversationParticipant(conversation)
-        
         conversation.conversationType = .group
         conversation.isFlowActive = true
         self.uiMOC.saveOrRollback()
-        conversation.addActiveVideoCallParticipant(otherParticipant1)
         
+        conversation.addActiveVideoCallParticipant(otherParticipant1)
+        self.uiMOC.saveOrRollback()
+
         let token = conversation.voiceChannel.addCall(observer)
         
         // when
@@ -692,6 +695,8 @@ extension VoiceChannelObserverTokenTests {
         let otherParticipant1 = self.addConversationParticipant(conversation)
         conversation.conversationType = .group
         conversation.isFlowActive = false
+        self.uiMOC.saveOrRollback()
+
         conversation.addActiveVideoCallParticipant(otherParticipant1)
         self.uiMOC.saveOrRollback()
         

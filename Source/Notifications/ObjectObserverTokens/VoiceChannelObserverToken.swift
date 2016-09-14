@@ -29,17 +29,17 @@ extension ZMVoiceChannel : ObjectInSnapshot {
 }
 
 
-extension NSOrderedSet {
+public extension NSOrderedSet {
 
-    func subtracted(orderedSet: NSOrderedSet) -> NSOrderedSet {
+    public func subtracting(orderedSet: NSOrderedSet) -> NSOrderedSet {
         let mutableSelf = mutableCopy() as! NSMutableOrderedSet
-        mutableSelf.remove(orderedSet)
+        mutableSelf.minus(orderedSet)
         return NSOrderedSet(orderedSet: mutableSelf)
     }
     
-    func added(orderedSet: NSOrderedSet) -> NSOrderedSet {
+    public func adding(orderedSet: NSOrderedSet) -> NSOrderedSet {
         let mutableSelf = mutableCopy() as! NSMutableOrderedSet
-        mutableSelf.add(orderedSet)
+        mutableSelf.union(orderedSet)
         return NSOrderedSet(orderedSet: mutableSelf)
     }
 }
@@ -72,7 +72,7 @@ extension NSOrderedSet {
         }
         return .invalid
     }
-    public var voiceChannel : ZMVoiceChannel? { return (self.object as? ZMConversation)?.voiceChannel }
+    public var voiceChannel : ZMVoiceChannel? { return (object as? ZMConversation)?.voiceChannel }
     
     public override var description: String {
         return "Call state changed from \(previousState) to \(currentState)"
@@ -131,7 +131,7 @@ public final class GlobalVoiceChannelStateObserverToken : NSObject {
     
     public func notifyObserver(_ changeInfo: VoiceChannelStateChangeInfo?) {
         if let changeInfo = changeInfo {
-            self.observer?.voiceChannelStateDidChange(changeInfo)
+            observer?.voiceChannelStateDidChange(changeInfo)
         }
     }
     
@@ -152,12 +152,12 @@ public final class GlobalVoiceChannelStateObserverToken : NSObject {
 @objc public final class VoiceChannelParticipantsChangeInfo: SetChangeInfo {
     
     init(setChangeInfo: SetChangeInfo) {
-        self.conversation = setChangeInfo.observedObject as! ZMConversation
+        conversation = setChangeInfo.observedObject as! ZMConversation
         super.init(observedObject: conversation, changeSet: setChangeInfo.changeSet)
     }
     
     let conversation : ZMConversation
-    public var voiceChannel : ZMVoiceChannel { return self.conversation.voiceChannel }
+    public var voiceChannel : ZMVoiceChannel { return conversation.voiceChannel }
     public var otherActiveVideoCallParticipantsChanged : Bool = false
 }
 
@@ -202,62 +202,51 @@ class InternalVoiceChannelParticipantsObserverToken: NSObject, ObjectsDidChangeD
         self.globalObserver = observer
         self.conversation = conversation
         
-        self.state = SetSnapshot(set: self.conversation.voiceChannel.participants(), moveType: .uiCollectionView)
-        self.activeFlowParticipantsState = self.conversation.activeFlowParticipants
+        state = SetSnapshot(set: conversation.voiceChannel.participants(), moveType: .uiCollectionView)
+        activeFlowParticipantsState = conversation.activeFlowParticipants.copy() as! NSOrderedSet
         
         super.init()
     }
     
     deinit {
-        self.tearDown()
+        tearDown()
     }
     
     func conversationDidChange(_ note: GeneralConversationChangeInfo) {
         if note.callParticipantsChanged { // || note.activeFlowParticipantsChanged {
-            self.videoParticipantsChanged = note.videoParticipantsChanged
-            self.shouldRecalculate = true
+            videoParticipantsChanged = note.videoParticipantsChanged
+            shouldRecalculate = true
         }
     }
     
     func objectsDidChange(_ changes: ManagedObjectChanges) {
-        if self.shouldRecalculate {
-            self.recalculateSet()
+        if shouldRecalculate {
+            recalculateSet()
         }
     }
     
     func recalculateSet() {
         
-        self.shouldRecalculate = false
-        let participants = self.conversation.voiceChannel.participants() ?? NSOrderedSet()
-        let activeFlowParticipants = self.conversation.activeFlowParticipants
-        print("participants: \(state.set.count), activeFlowParticipants: \(activeFlowParticipantsState.count)")
-        print("newParticipants: \(participants.count), newActiveFlowParticipants: \(activeFlowParticipants.count)")
+        shouldRecalculate = false
+        let newParticipants = conversation.voiceChannel.participants() ?? NSOrderedSet()
+        let newFlowParticipants = conversation.activeFlowParticipants
 
         // participants who have an updated flow, but are still in the voiceChannel
-//        let newConnected = activeFlowParticipants.subtracted(orderedSet: self.activeFlowParticipantsState)
-//        let newDisconnected = self.activeFlowParticipantsState.subtracted(orderedSet: activeFlowParticipants)
-        let newConnected = NSOrderedSet(array: activeFlowParticipants.filter{ !self.activeFlowParticipantsState.contains($0)})
-        let newDisconnected = NSOrderedSet(array: self.activeFlowParticipantsState.filter{ !activeFlowParticipants.contains($0)})
-        print("newConnected: \(newConnected.count), newDisconnected: \(newDisconnected.count)")
+        let newConnected = newFlowParticipants.subtracting(orderedSet: activeFlowParticipantsState)
+        let newDisconnected = activeFlowParticipantsState.subtracting(orderedSet: newFlowParticipants)
 
         // participants who left the voiceChannel / call
-        let addedUsers = participants.subtracted(orderedSet: self.state.set)
-        let removedUsers = self.state.set.subtracted(orderedSet: participants)
-//        let addedUsers = NSOrderedSet(array: participants.filter{ !self.state.set.contains($0)})
-//        let removedUsers = NSOrderedSet(array: self.state.set.filter{ !participants.contains($0)})
+        let addedUsers = newParticipants.subtracting(orderedSet: state.set)
+        let removedUsers = state.set.subtracting(orderedSet: newParticipants)
 
-        print("newAdded: \(addedUsers.count), newLeft: \(removedUsers.count)")
-//        print("currentPart: \(self.state.set), newParticipants: \(participants)")
-
-//        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)
-        let updated = newConnected.added(orderedSet: newDisconnected).subtracted(orderedSet: removedUsers).subtracted(orderedSet: addedUsers)
-
-        print("updated: \(updated.count)")
+        let updated = newConnected.adding(orderedSet: newDisconnected)
+                                  .subtracting(orderedSet: removedUsers)
+                                  .subtracting(orderedSet: addedUsers)
 
         // calculate inserts / deletes / moves
-        if let newStateUpdate = self.state.updatedState(updated, observedObject: self.conversation, newSet: participants) {
-            self.state = newStateUpdate.newSnapshot
-            self.activeFlowParticipantsState = (self.conversation.activeFlowParticipants.copy() as? NSOrderedSet) ?? NSOrderedSet()
+        if let newStateUpdate = state.updatedState(updated, observedObject: conversation, newSet: newParticipants) {
+            state = newStateUpdate.newSnapshot
+            activeFlowParticipantsState = (conversation.activeFlowParticipants.copy() as? NSOrderedSet) ?? NSOrderedSet()
             
             let changeInfo = VoiceChannelParticipantsChangeInfo(setChangeInfo: newStateUpdate.changeInfo)
             changeInfo.otherActiveVideoCallParticipantsChanged = videoParticipantsChanged

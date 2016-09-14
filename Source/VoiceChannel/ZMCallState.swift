@@ -167,7 +167,7 @@ extension ZMConversation {
     
     public var activeFlowParticipants : NSOrderedSet {
         get {
-            let participants = callState.activeFlowParticipants.map{self.managedObjectContext?.object(with: $0 as! NSManagedObjectID)}
+            let participants = callState.activeFlowParticipants.flatMap{self.managedObjectContext?.object(with: $0 as! NSManagedObjectID)}
             return NSOrderedSet(array: participants) 
         }
         set {

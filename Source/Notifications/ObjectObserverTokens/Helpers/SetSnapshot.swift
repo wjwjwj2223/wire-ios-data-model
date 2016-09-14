@@ -73,7 +73,7 @@ struct SetStateUpdate {
     let moveType : ZMSetChangeMoveType
     
     init(set: NSOrderedSet,  moveType : ZMSetChangeMoveType) {
-        self.set = set
+        self.set = set.copy() as! NSOrderedSet
         self.moveType = moveType
     }
     
@@ -81,7 +81,6 @@ struct SetStateUpdate {
         let startState = ZMOrderedSetState(orderedSet:self.set)
         let endState = ZMOrderedSetState(orderedSet:newSet)
         let updatedState = ZMOrderedSetState(orderedSet:updatedObjects)
-        print("updatedState:", updatedState)
         
         return ZMChangedIndexes(start:startState, end:endState, updatedState:updatedState, moveType:self.moveType)
     }
@@ -94,17 +93,14 @@ struct SetStateUpdate {
         }
         
         let changeSet = self.calculateChangeSet(newSet.copy() as! NSOrderedSet, updatedObjects: updatedObjects)
-        print("changeSet: ", changeSet.updatedIndexes, "\n updated: ", updatedObjects.count, "\n newSet: ", newSet.count)
         let changeInfo = SetChangeInfo(observedObject: observedObject, changeSet: changeSet)
-        print("changeInfo: ", changeInfo)
 
-        let insertedObjects = NSOrderedSet(array: newSet.filter{!self.set.contains($0)})
-        let removedObjects = NSOrderedSet(array: self.set.filter{!newSet.contains($0)})
-        print("insertedObjects: \(insertedObjects.count), removedObjects: \(removedObjects.count)")
+        let insertedObjects = newSet.subtracting(orderedSet: set)
+        let removedObjects = set.subtracting(orderedSet: newSet)
         
         if changeInfo.insertedIndexes.count == 0 && changeInfo.deletedIndexes.count == 0 && changeInfo.updatedIndexes.count == 0 && changeInfo.movedIndexPairs.count == 0 {
             return nil
         }
-        return SetStateUpdate(newSnapshot: SetSnapshot(set: newSet.copy() as! NSOrderedSet, moveType: self.moveType), changeInfo: changeInfo, removedObjects: removedObjects, insertedObjects: insertedObjects)
+        return SetStateUpdate(newSnapshot: SetSnapshot(set: newSet, moveType: self.moveType), changeInfo: changeInfo, removedObjects: removedObjects, insertedObjects: insertedObjects)
     }
 }
