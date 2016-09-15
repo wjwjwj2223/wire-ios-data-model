@@ -277,7 +277,7 @@ class ManagedObjectContextObserverTests : ZMBaseManagedObjectTest {
         self.uiMOC.globalManagedObjectContextObserver.isTesting = true
         
         let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
-        let imageMessage = conversation.appendOTRMessage(withImageData: self.verySmallJPEGData()!, nonce: UUID.create())
+        let imageMessage = conversation.appendOTRMessage(withImageData: self.verySmallJPEGData(), nonce: UUID.create())
         self.uiMOC.zm_imageAssetCache.deleteAssetData(imageMessage.nonce, format: .original, encrypted: false)
         XCTAssertFalse(imageMessage.hasDownloadedImage)
         self.uiMOC.saveOrRollback()
@@ -286,7 +286,7 @@ class ManagedObjectContextObserverTests : ZMBaseManagedObjectTest {
         let messageObserver = ZMMessageNotification.add(observer, for: imageMessage)
         
         // when
-        self.uiMOC.zm_imageAssetCache.storeAssetData(imageMessage.nonce, format: .medium, encrypted: false, data: self.verySmallJPEGData()!)
+        self.uiMOC.zm_imageAssetCache.storeAssetData(imageMessage.nonce, format: .medium, encrypted: false, data: self.verySmallJPEGData())
         XCTAssertTrue(imageMessage.hasDownloadedImage)
         self.uiMOC.globalManagedObjectContextObserver.notifyNonCoreDataChangeInManagedObject(imageMessage)
         
@@ -310,7 +310,7 @@ class ManagedObjectContextObserverTests : ZMBaseManagedObjectTest {
         let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
         let documentsURL = URL(fileURLWithPath: documents)
         let fileURL =  documentsURL.appendingPathComponent(filename)
-        try? verySmallJPEGData()!.write(to: fileURL, options: Data.WritingOptions.atomic)
+        try? verySmallJPEGData().write(to: fileURL, options: Data.WritingOptions.atomic)
         defer { try! FileManager.default.removeItem(at: fileURL) }
         
         let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
@@ -327,7 +327,7 @@ class ManagedObjectContextObserverTests : ZMBaseManagedObjectTest {
         let messageObserver = ZMMessageNotification.add(observer, for: fileMessage)
         
         // when
-        self.uiMOC.zm_fileAssetCache.storeAssetData(fileMessage.nonce, fileName: filename, encrypted: false, data: self.verySmallJPEGData()!)
+        self.uiMOC.zm_fileAssetCache.storeAssetData(fileMessage.nonce, fileName: filename, encrypted: false, data: self.verySmallJPEGData())
         XCTAssertTrue(fileMessage.hasDownloadedFile)
         self.uiMOC.globalManagedObjectContextObserver.notifyNonCoreDataChangeInManagedObject(fileMessage)
         

@@ -177,7 +177,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(message,
-            modifier: { $0.sender!.imageMediumData = self.verySmallJPEGData()!},
+            modifier: { $0.sender!.imageMediumData = self.verySmallJPEGData()},
             expectedChangedField: "senderChanged"
         )
     }
@@ -192,7 +192,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
         
         // when
         self.checkThatItNotifiesTheObserverOfAChange(message,
-            modifier: { $0.sender!.imageSmallProfileData = self.verySmallJPEGData()!},
+            modifier: { $0.sender!.imageSmallProfileData = self.verySmallJPEGData()},
             expectedChangedField: "senderChanged"
         )
     }
@@ -205,7 +205,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
         self.checkThatItNotifiesTheObserverOfAChange(message,
             modifier: { message in
                 if let imageMessage = message as? ZMImageMessage {
-                    imageMessage.mediumData = self.verySmallJPEGData()!}
+                    imageMessage.mediumData = self.verySmallJPEGData()}
             },
             expectedChangedField: "imageChanged"
         )
@@ -225,7 +225,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
         
         let clientMessage = ZMClientMessage.insertNewObject(in: uiMOC)
         let nonce = UUID.create()
-        clientMessage.add(ZMGenericMessage(text: name!, nonce: nonce.transportString()).data())
+        clientMessage.add(ZMGenericMessage(text: name!, nonce: nonce.transportString()!).data())
         let preview = ZMLinkPreview.linkPreview(
             withOriginalURL: "www.example.com",
             permanentURL: "www.example.com/permanent",
@@ -234,7 +234,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
             summary: "summary",
             imageAsset: nil
         )
-        let updateGenericMessage = ZMGenericMessage(text: name!, linkPreview: preview, nonce: nonce.transportString())!
+        let updateGenericMessage = ZMGenericMessage(text: name!, linkPreview: preview, nonce: nonce.transportString()!)
         
         // when
         checkThatItNotifiesTheObserverOfAChange(
@@ -252,7 +252,7 @@ class MessageObserverTokenTests : ZMBaseManagedObjectTest {
         self.checkThatItNotifiesTheObserverOfAChange(message,
             modifier: { message in
                 if let imageMessage = message as? ZMImageMessage {
-                    imageMessage.previewData = self.verySmallJPEGData()!}
+                    imageMessage.previewData = self.verySmallJPEGData()}
             },
             expectedChangedField: nil
         )

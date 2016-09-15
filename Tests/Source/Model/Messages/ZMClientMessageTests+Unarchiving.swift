@@ -28,8 +28,8 @@ class ZMClientMessageTests_Unarchiving : BaseZMClientMessageTests {
         conversation.remoteIdentifier = UUID.create()
         conversation.isArchived = true
         
-        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString())
-        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage!)
+        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString()!)
+        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage)
 
         // when
         performPretendingUiMocIsSyncMoc {
@@ -48,8 +48,8 @@ class ZMClientMessageTests_Unarchiving : BaseZMClientMessageTests {
         conversation.isArchived = true
         conversation.isSilenced = true
 
-        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString())
-        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage!)
+        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString()!)
+        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage)
         
         // when
         performPretendingUiMocIsSyncMoc {
@@ -73,8 +73,8 @@ class ZMClientMessageTests_Unarchiving : BaseZMClientMessageTests {
         conversation.lastServerTimeStamp = lastMessage.serverTimestamp!
         conversation.clearMessageHistory()
         
-        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString())
-        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage!)
+        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString()!)
+        let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage)
         XCTAssertNotNil(event)
         
         XCTAssertGreaterThan(conversation.clearedTimeStamp!.timeIntervalSince1970, event.timeStamp()!.timeIntervalSince1970)
@@ -101,7 +101,7 @@ class ZMClientMessageTests_Unarchiving : BaseZMClientMessageTests {
         conversation.lastServerTimeStamp = lastMessage.serverTimestamp!
         conversation.clearMessageHistory()
 
-        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString())!
+        let genericMessage = ZMGenericMessage(text: "bar", nonce: UUID.create().transportString()!)
         let event = createUpdateEvent(UUID(), conversationID: conversation.remoteIdentifier, genericMessage: genericMessage)
         
         XCTAssertLessThan(conversation.clearedTimeStamp!.timeIntervalSince1970, event.timeStamp()!.timeIntervalSince1970)

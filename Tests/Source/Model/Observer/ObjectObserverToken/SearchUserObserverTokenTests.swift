@@ -47,7 +47,7 @@ class SearchUserObserverTokenTests : ZMBaseManagedObjectTest {
         let token = ZMUser.add(testObserver, forUsers:[searchUser], managedObjectContext: self.uiMOC)
         
         // when
-        searchUser.notifyNewSmallImageData(self.verySmallJPEGData()!, managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
+        searchUser.notifyNewSmallImageData(self.verySmallJPEGData(), managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
         
         // then
         XCTAssertEqual(testObserver.receivedChangeInfo.count, 1)
@@ -70,7 +70,7 @@ class SearchUserObserverTokenTests : ZMBaseManagedObjectTest {
         
         // when
         user.smallProfileRemoteIdentifier = UUID.create()
-        user.imageSmallProfileData = self.verySmallJPEGData()!
+        user.imageSmallProfileData = self.verySmallJPEGData()
         self.uiMOC.processPendingChanges()
         
         // then
@@ -92,7 +92,7 @@ class SearchUserObserverTokenTests : ZMBaseManagedObjectTest {
         ZMUser.removeObserver(for: token)
         
         // when
-        searchUser.notifyNewSmallImageData(self.verySmallJPEGData()!, managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
+        searchUser.notifyNewSmallImageData(self.verySmallJPEGData(), managedObjectContextObserver: self.uiMOC.globalManagedObjectContextObserver)
         
         // then
         XCTAssertEqual(testObserver.receivedChangeInfo.count, 0)

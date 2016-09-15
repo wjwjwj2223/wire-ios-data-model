@@ -142,7 +142,7 @@ class MessageWindowChangeTokenTests : ZMBaseManagedObjectTest
         let token = window.addConversationWindowObserver(observer)
         
         // when
-        message2.mediumData = self.verySmallJPEGData()!
+        message2.mediumData = self.verySmallJPEGData()
         self.uiMOC.processPendingChanges()
         
         // then

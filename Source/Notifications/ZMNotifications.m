@@ -168,7 +168,7 @@ static NSString *const ZMInvitationStatusChangedNotificationName = @"ZMInvitatio
 + (id<ZMMessageObserverOpaqueToken>)addMessageObserver:(id<ZMMessageObserver>)observer forMessage:(id<ZMConversationMessage>)conversationMessage;
 {
     if ([conversationMessage isKindOfClass:[ZMMessage class]]) {
-    return (id) [[MessageObserverToken alloc] initWithObserver: observer object:(ZMMessage *)conversationMessage];
+        return (id) [[MessageObserverToken alloc] initWithObserver: observer object:(ZMMessage *)conversationMessage];
     }
     return nil;
 }

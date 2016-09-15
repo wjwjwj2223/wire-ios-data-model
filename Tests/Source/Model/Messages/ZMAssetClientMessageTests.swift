@@ -36,7 +36,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
     }
     
     func appendImageMessage(toConversation conversation: ZMConversation) {
-        let imageData = verySmallJPEGData()!
+        let imageData = verySmallJPEGData()
         let messageNonce = UUID.create()
         message = conversation.appendOTRMessage(withImageData: imageData, nonce: messageNonce)
         
@@ -45,16 +45,16 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         
         let keys = ZMImageAssetEncryptionKeys(otrKey: Data.randomEncryptionKey(), macKey: Data.zmRandomSHA256Key(), mac: Data.zmRandomSHA256Key())
         
-        let mediumMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString(), format: .medium)
-        message.add(mediumMessage!)
+        let mediumMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString()!, format: .medium)
+        message.add(mediumMessage)
         
-        let previewMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString(), format: .preview)
-        message.add(previewMessage!)
+        let previewMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString()!, format: .preview)
+        message.add(previewMessage)
     }
     
     func appendImageMessage(_ format: ZMImageFormat, to conversation: ZMConversation) -> ZMAssetClientMessage {
         let otherFormat = format == ZMImageFormat.medium ? ZMImageFormat.preview : ZMImageFormat.medium
-        let imageData = verySmallJPEGData()!
+        let imageData = verySmallJPEGData()
         let messageNonce = UUID.create()
         let message = conversation.appendOTRMessage(withImageData: imageData, nonce: messageNonce)
         
@@ -63,10 +63,10 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         
         let keys = ZMImageAssetEncryptionKeys(otrKey: Data.randomEncryptionKey(), macKey: Data.zmRandomSHA256Key(), mac: Data.zmRandomSHA256Key())
         
-        let imageMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString(), format: format)
-        let emptyImageMessage = ZMGenericMessage(mediumImageProperties: nil, processedImageProperties: nil, encryptionKeys: nil, nonce: messageNonce.transportString(), format: otherFormat)
-        message.add(imageMessage!)
-        message.add(emptyImageMessage!)
+        let imageMessage = ZMGenericMessage(mediumImageProperties: properties, processedImageProperties: properties, encryptionKeys: keys, nonce: messageNonce.transportString()!, format: format)
+        let emptyImageMessage = ZMGenericMessage(mediumImageProperties: nil, processedImageProperties: nil, encryptionKeys: nil, nonce: messageNonce.transportString()!, format: otherFormat)
+        message.add(imageMessage)
+        message.add(emptyImageMessage)
         
         return message
     }
@@ -75,7 +75,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         let message = ZMAssetClientMessage.insertNewObject(in: self.uiMOC);
         message.nonce = UUID.create()
         
-        let imageData = self.verySmallJPEGData()!
+        let imageData = self.verySmallJPEGData()
         XCTAssertNotNil(message.imageAssetStorage!.updateMessage(withImageData: imageData, for: ZMImageFormat.preview))
         
         let storedData = self.uiMOC.zm_imageAssetCache.assetData(message.nonce, format: ZMImageFormat.preview, encrypted: message.isEncrypted)
@@ -88,7 +88,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         let message = ZMAssetClientMessage.insertNewObject(in: self.uiMOC);
         message.nonce = UUID.create()
         
-        let imageData = self.verySmallJPEGData()!
+        let imageData = self.verySmallJPEGData()
         XCTAssertNotNil(message.imageAssetStorage!.updateMessage(withImageData: imageData, for: ZMImageFormat.medium))
         
         let storedData = self.uiMOC.zm_imageAssetCache.assetData(message.nonce, format: ZMImageFormat.medium, encrypted: message.isEncrypted)
@@ -102,7 +102,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         let message = ZMAssetClientMessage.insertNewObject(in: self.uiMOC);
         message.nonce = UUID.create()
         message.isEncrypted = true
-        let imageData = self.verySmallJPEGData()!
+        let imageData = self.verySmallJPEGData()
         
         self.uiMOC.zm_imageAssetCache.storeAssetData(message.nonce, format: ZMImageFormat.medium, encrypted: false, data: imageData)
         
@@ -111,7 +111,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         self.uiMOC.zm_imageAssetCache.deleteAssetData(message.nonce, format: ZMImageFormat.medium, encrypted: false)
         
         let imageProperties = ZMIImageProperties(size: ZMImagePreprocessor.sizeOfPrerotatedImage(with: imageData), length: UInt(imageData.count), mimeType: "image/jpeg")
-        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString(), format: ZMImageFormat.medium))
+        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString()!, format: ZMImageFormat.medium))
         
         // when
         XCTAssertNotNil(message.imageAssetStorage!.updateMessage(withImageData: encryptedImageData, for: ZMImageFormat.medium))
@@ -127,7 +127,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         let message = ZMAssetClientMessage.insertNewObject(in: self.uiMOC);
         message.nonce = UUID.create()
         message.isEncrypted = true
-        let imageData = self.verySmallJPEGData()!
+        let imageData = self.verySmallJPEGData()
         
         //store original image
         self.uiMOC.zm_imageAssetCache.storeAssetData(message.nonce, format: ZMImageFormat.medium, encrypted: false, data: imageData)
@@ -139,7 +139,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
 
         
         let imageProperties = ZMIImageProperties(size: ZMImagePreprocessor.sizeOfPrerotatedImage(with: imageData), length: UInt(imageData.count), mimeType: "image/jpeg")
-        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString(), format: ZMImageFormat.medium))
+        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString()!, format: ZMImageFormat.medium))
         
         // when
         //pass in some wrong data (i.e. plain data instead of encrypted)
@@ -156,7 +156,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         let message = ZMAssetClientMessage.insertNewObject(in: self.uiMOC);
         message.nonce = UUID.create()
         message.isEncrypted = true
-        let imageData = self.verySmallJPEGData()!
+        let imageData = self.verySmallJPEGData()
         
         self.uiMOC.zm_imageAssetCache.storeAssetData(message.nonce, format: ZMImageFormat.medium, encrypted: false, data: imageData)
         
@@ -165,7 +165,7 @@ class ZMAssetClientMessageTests : BaseZMClientMessageTests {
         self.uiMOC.zm_imageAssetCache.deleteAssetData(message.nonce, format: ZMImageFormat.medium, encrypted: false)
         
         let imageProperties = ZMIImageProperties(size: ZMImagePreprocessor.sizeOfPrerotatedImage(with: imageData), length: UInt(imageData.count), mimeType: "image/jpeg")
-        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString(), format: ZMImageFormat.medium))
+        message.add(ZMGenericMessage(mediumImageProperties: imageProperties, processedImageProperties: imageProperties, encryptionKeys: keys, nonce: message.nonce.transportString()!, format: ZMImageFormat.medium))
         
         // when
         XCTAssertNotNil(message.imageAssetStorage!.updateMessage(withImageData: encryptedImageData, for: ZMImageFormat.medium))
@@ -335,7 +335,7 @@ extension ZMAssetClientMessageTests {
         // then
         let assetMessage = sut.genericAssetMessage
         XCTAssertNotNil(assetMessage)
-        XCTAssertEqual(assetMessage?.messageId, nonce.transportString())
+        XCTAssertEqual(assetMessage?.messageId, nonce.transportString()!)
         XCTAssertTrue(assetMessage!.hasAsset())
         XCTAssertNotNil(assetMessage?.asset)
         XCTAssertTrue(assetMessage!.asset.hasOriginal())
@@ -383,7 +383,7 @@ extension ZMAssetClientMessageTests {
         sut.add(previewMessage)
         
         // then
-        XCTAssertEqual(sut.genericAssetMessage?.messageId, nonce.transportString())
+        XCTAssertEqual(sut.genericAssetMessage?.messageId, nonce.transportString()!)
         
         guard let asset = sut.genericAssetMessage?.asset else { return XCTFail() }
         XCTAssertNotNil(asset)
@@ -1229,7 +1229,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let thumbnail = self.verySmallJPEGData()!
+            let thumbnail = self.verySmallJPEGData()
             let nonce = UUID()
             _ = self.createTestFile(self.testURL)
             defer { self.removeTestFile(self.testURL) }
@@ -1359,7 +1359,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let image = self.verySmallJPEGData()!
+        let image = self.verySmallJPEGData()
         
         // when
         let sut = ZMAssetClientMessage(originalImageData: image, nonce: nonce, managedObjectContext: self.uiMOC)
@@ -1375,7 +1375,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let image = self.verySmallJPEGData()!
+        let image = self.verySmallJPEGData()
         
         // when
         _ = ZMAssetClientMessage(originalImageData: image, nonce: nonce, managedObjectContext: self.uiMOC)
@@ -1389,7 +1389,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let image = self.verySmallJPEGData()!
+        let image = self.verySmallJPEGData()
         let expectedSize = ZMImagePreprocessor.sizeOfPrerotatedImage(with: image)
         
         // when
@@ -1489,7 +1489,7 @@ extension ZMAssetClientMessageTests {
 extension ZMAssetClientMessageTests {
     
     func sampleImageData() -> Data {
-        return self.verySmallJPEGData()!
+        return self.verySmallJPEGData()
     }
     
     func sampleProcessedImageData(_ format: ZMImageFormat) -> Data {
@@ -1517,7 +1517,7 @@ extension ZMAssetClientMessageTests {
                 mediumImageProperties: storeProcessed ? self.sampleImageProperties(.medium) : nil,
                 processedImageProperties: storeProcessed ? self.sampleImageProperties(format) : nil,
                 encryptionKeys: storeEncrypted ? encryptionKeys : nil,
-                nonce: nonce.transportString(),
+                nonce: nonce.transportString()!,
                 format: format)
             
             if(storeProcessed) {
@@ -1866,7 +1866,7 @@ extension ZMAssetClientMessageTests {
         let properties = ZMIImageProperties(size: CGSize(width: 300, height: 300), length: 234, mimeType: "image/jpg")
         
         // when
-        message.imageAssetStorage!.setImageData(self.verySmallJPEGData()!, for: .medium, properties: properties)
+        message.imageAssetStorage!.setImageData(self.verySmallJPEGData(), for: .medium, properties: properties)
         
         // then
         let id = message.imageMessageData?.imageDataIdentifier
@@ -1934,9 +1934,9 @@ extension ZMAssetClientMessageTests {
             let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
             conversation.remoteIdentifier = UUID.create()
             let nonce = UUID.create()
-            let imageData = self.verySmallJPEGData()!
+            let imageData = self.verySmallJPEGData()
             let assetId = format == .medium ? mediumAssetId : previewAssetId
-            let genericMessage = ZMGenericMessage(imageData: imageData, format: format, nonce: nonce.transportString())!
+            let genericMessage = ZMGenericMessage(imageData: imageData, format: format, nonce: nonce.transportString()!)
             let dataPayload = [
                 "info" : genericMessage.data().base64String(),
                 "id" : assetId.transportString()
@@ -2199,8 +2199,8 @@ extension ZMAssetClientMessageTests {
             message.expire()
         }
         if state == .delivered {
-            let genericMessage = ZMGenericMessage(confirmation: message.nonce.transportString(), type: .DELIVERED, nonce: UUID.create().transportString())
-            _ = ZMMessageConfirmation.createOrUpdateMessageConfirmation(genericMessage!, conversation: message.conversation!, sender: message.sender!)
+            let genericMessage = ZMGenericMessage(confirmation: message.nonce.transportString()!, type: .DELIVERED, nonce: UUID.create().transportString()!)
+            _ = ZMMessageConfirmation.createOrUpdateMessageConfirmation(genericMessage, conversation: message.conversation!, sender: message.sender!)
             message.managedObjectContext?.saveOrRollback()
         }
     }

@@ -128,7 +128,7 @@ class UserClientKeysStoreTests: OtrBaseTest {
         
         // given
         type(of: self).createFakeOTRFolder()
-        try? "foo".data(using: String.Encoding.utf8)!.write(to: UserClientKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
+        try! "foo".data(using: String.Encoding.utf8)!.write(to: UserClientKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
         
         // then
         XCTAssertTrue(UserClientKeysStore.needToMigrateIdentity)
@@ -171,7 +171,7 @@ class UserClientKeysStoreTests: OtrBaseTest {
         type(of: self).cleanOTRFolder()
 
         type(of: self).createFakeOTRFolder()
-        try? "foo".data(using: String.Encoding.utf8)!.write(to: UserClientKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
+        try! "foo".data(using: String.Encoding.utf8)!.write(to: UserClientKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
 
         // when
         let _ = UserClientKeysStore()

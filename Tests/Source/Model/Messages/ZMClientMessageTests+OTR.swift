@@ -41,7 +41,7 @@ extension ClientMessageTests_OTR {
             let textBuilder = ZMText.builder()!
             textBuilder.setContent(self.textMessageRequiringExternalMessage(2))
             builder.setText(textBuilder.build()!)
-            builder.setMessageId(nonce.transportString())
+            builder.setMessageId(nonce.transportString()!)
             let textMessage = builder.build()!
             
             let conversation = ZMConversation.insertNewObject(in:self.syncMOC)

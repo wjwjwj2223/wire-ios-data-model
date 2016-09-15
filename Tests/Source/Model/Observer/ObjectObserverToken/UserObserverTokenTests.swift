@@ -156,7 +156,7 @@ class UserObserverTokenTests : ZMBaseManagedObjectTest {
         let user = ZMUser.insertNewObject(in:self.uiMOC)
         user.remoteIdentifier = UUID.create()
         user.mediumRemoteIdentifier = UUID.create()
-        user.imageMediumData = self.verySmallJPEGData()!
+        user.imageMediumData = self.verySmallJPEGData()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(user,
@@ -170,7 +170,7 @@ class UserObserverTokenTests : ZMBaseManagedObjectTest {
         let user = ZMUser.insertNewObject(in:self.uiMOC)
         user.remoteIdentifier = UUID.create()
         user.smallProfileRemoteIdentifier = UUID.create()
-        user.imageSmallProfileData = self.verySmallJPEGData()!
+        user.imageSmallProfileData = self.verySmallJPEGData()
 
         // when
         self.checkThatItNotifiesTheObserverOfAChange(user,

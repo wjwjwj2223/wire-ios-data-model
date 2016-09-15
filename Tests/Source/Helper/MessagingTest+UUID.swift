@@ -19,22 +19,6 @@
 import Foundation
 import ZMTesting
 
-
-public extension UUID {
-    public static func create() -> UUID {
-            return NSUUID.create() as UUID
-    }
-}
-
-
-public extension Date {
-
-    public func transportString() -> String {
-        return (self as NSDate).transportString()
-    }
-}
-
-
 public extension Data {
 
     static func secureRandomData(ofLength length: UInt) -> Data {

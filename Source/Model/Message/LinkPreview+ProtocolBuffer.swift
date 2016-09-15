@@ -26,7 +26,7 @@ extension LinkPreview {
         self.init(originalURLString: protocolBuffer.url, permamentURLString: protocolBuffer.permanentURLString, offset: Int(protocolBuffer.urlOffset))
     }
     
-    public var protocolBuffer: ZMLinkPreview? {
+    public var protocolBuffer: ZMLinkPreview {
         let linkPreviewBuilder = ZMLinkPreview.builder()!
         linkPreviewBuilder.setUrl(originalURLString)
         linkPreviewBuilder.setPermanentUrl(permanentURL?.absoluteString ?? originalURLString)

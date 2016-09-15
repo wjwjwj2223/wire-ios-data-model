@@ -19,13 +19,6 @@
 import Foundation
 
 
-public extension UUID {
-    
-    func transportString() -> String? {
-        return (self as NSUUID).transportString()
-    }
-}
-
 extension ZMMessage {
     
     static func appendReaction(_ unicodeValue: String?, toMessage message: ZMConversationMessage)
@@ -37,9 +30,9 @@ extension ZMMessage {
         
         let genericMessage = ZMGenericMessage(
             emojiString: emoji,
-            messageID: message.nonce.transportString(),
+            messageID: message.nonce.transportString()!,
             nonce: NSUUID().transportString()
-        )!
+        )
     
         _ = message.conversation?.append(genericMessage, expires:false, hidden: true)
         message.addReaction(unicodeValue, forUser: .selfUser(in: context))

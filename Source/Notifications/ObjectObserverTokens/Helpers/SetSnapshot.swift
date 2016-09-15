@@ -72,7 +72,7 @@ struct SetStateUpdate {
     let set : NSOrderedSet
     let moveType : ZMSetChangeMoveType
     
-    init(set: NSOrderedSet,  moveType : ZMSetChangeMoveType) {
+    init(set: NSOrderedSet, moveType : ZMSetChangeMoveType) {
         self.set = set.copy() as! NSOrderedSet
         self.moveType = moveType
     }

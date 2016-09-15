@@ -220,7 +220,7 @@ class NewUnreadMessageObserverTokenTests : ZMBaseManagedObjectTest {
         self.processPendingChangesAndClearNotifications()
         
         // when
-        let genMsg = ZMGenericMessage.knock(withNonce: "nonce")!
+        let genMsg = ZMGenericMessage.knock(withNonce: "nonce")
         let msg1 = conversation.appendClientMessage(with: genMsg.data())
         msg1.serverTimestamp = Date()
         conversation.resortMessages(withUpdatedMessage: msg1)

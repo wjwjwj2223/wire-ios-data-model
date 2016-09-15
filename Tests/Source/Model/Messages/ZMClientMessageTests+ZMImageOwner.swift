@@ -47,9 +47,9 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
         var genericMessage : ZMGenericMessage!
         switch contentType{
         case .textMessage:
-            genericMessage = ZMGenericMessage(text: text, linkPreview: article.protocolBuffer, nonce: nonce.transportString())
+            genericMessage = ZMGenericMessage(text: text, linkPreview: article.protocolBuffer, nonce: nonce.transportString()!)
         case .editMessage:
-            genericMessage = ZMGenericMessage(editMessage: UUID.create().transportString(), newText: text, linkPreview: article.protocolBuffer, nonce: nonce.transportString())
+            genericMessage = ZMGenericMessage(editMessage: UUID.create().transportString()!, newText: text, linkPreview: article.protocolBuffer, nonce: nonce.transportString()!)
         }
         clientMessage.add(genericMessage.data())
         clientMessage.nonce = nonce
@@ -59,7 +59,7 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
     func testThatItCachesAndEncryptsTheMediumImage_TextMessage() {
         // given
         let clientMessage = insertMessageWithLinkPreview(contentType: .textMessage)
-        let imageData = mediumJPEGData()!
+        let imageData = mediumJPEGData()
         
         // when
         let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
@@ -84,7 +84,7 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
     func testThatItCachesAndEncryptsTheMediumImage_EditMessage() {
         // given
         let clientMessage = insertMessageWithLinkPreview(contentType: .editMessage)
-        let imageData = mediumJPEGData()!
+        let imageData = mediumJPEGData()
         
         // when
         let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
@@ -111,7 +111,7 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
         let nonce = UUID()
         let clientMessage = ZMClientMessage.insertNewObject(in: uiMOC)
         clientMessage.nonce = nonce
-        self.uiMOC.zm_imageAssetCache.storeAssetData(nonce, format: .original, encrypted: false, data: mediumJPEGData()!)
+        self.uiMOC.zm_imageAssetCache.storeAssetData(nonce, format: .original, encrypted: false, data: mediumJPEGData())
         
         // when
         clientMessage.processingDidFinish()
@@ -126,7 +126,7 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
         let nonce = UUID()
         let clientMessage = ZMClientMessage.insertNewObject(in: uiMOC)
         clientMessage.nonce = nonce
-        self.uiMOC.zm_imageAssetCache.storeAssetData(nonce, format: .original, encrypted: false, data: mediumJPEGData()!)
+        self.uiMOC.zm_imageAssetCache.storeAssetData(nonce, format: .original, encrypted: false, data: mediumJPEGData())
         
         // when
         let imageSize = clientMessage.originalImageSize()

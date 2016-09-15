@@ -74,7 +74,7 @@ open class GeneralConversationChangeInfo : ObjectChangeInfo {
         var dict : Dictionary<String, NSObject?> = [:]
         
         for key in keys {
-            dict[key] = "" as NSObject??
+            dict[key] = "" as NSObject?
         }
         
         changedKeysAndOldValues = dict
