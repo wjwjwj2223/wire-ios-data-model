@@ -147,7 +147,7 @@ extension ZMFileMetadata {
     
     public var filename : String {
         get {
-            return  fileURL.lastPathComponent
+            return  fileURL.lastPathComponent.isEmpty ? "unnamed" :  fileURL.lastPathComponent
         }
     }
     

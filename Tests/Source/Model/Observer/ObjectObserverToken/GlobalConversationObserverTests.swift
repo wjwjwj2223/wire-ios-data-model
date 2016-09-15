@@ -401,8 +401,7 @@ class GlobalConversationObserverTests : ZMBaseManagedObjectTest {
         XCTAssertEqual(normalList.count, 0)
 
         // when
-        conversation.connection!
-            .status = .accepted
+        conversation.connection!.status = .accepted
         conversation.conversationType = .oneOnOne
         self.uiMOC.saveOrRollback()
         
