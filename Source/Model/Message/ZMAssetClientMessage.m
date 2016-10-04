@@ -1113,7 +1113,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
 - (BOOL)isEphemeral
 {
-    return self.genericAssetMessage.hasEphemeral;
+    return self.destructionDate != nil || self.genericAssetMessage.hasEphemeral;
 }
 
 - (NSTimeInterval)deletionTimeout

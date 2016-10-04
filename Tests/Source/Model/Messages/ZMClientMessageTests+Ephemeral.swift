@@ -128,7 +128,7 @@ extension ZMClientMessageTests_Ephemeral {
             // given
             let timeout : TimeInterval = 10
             self.syncConversation.messageDestructionTimeout = timeout
-            let message = self.syncConversation.appendMessage(withText: "foo") as! ZMMessage
+            let message = self.syncConversation.appendMessage(withText: "foo") as! ZMClientMessage
             XCTAssertEqual(self.obfuscationTimer.runningTimersCount, 0)
 
             // when
@@ -199,6 +199,7 @@ extension ZMClientMessageTests_Ephemeral {
         
         self.syncMOC.performGroupedBlock {
             // then
+            XCTAssertTrue(message.isEphemeral)
             XCTAssertNotNil(message.destructionDate)
             XCTAssertTrue(message.isObfuscated)
             XCTAssertNotNil(message.sender)
@@ -321,6 +322,7 @@ extension ZMClientMessageTests_Ephemeral {
         guard let genericMessage = deleteMessage.genericMessage, genericMessage.hasDeleted()
         else {return XCTFail()}
 
+        XCTAssertTrue(message.isEphemeral)
         XCTAssertNotEqual(deleteMessage, message)
         XCTAssertNil(message.sender)
         XCTAssertNil(message.genericMessage)

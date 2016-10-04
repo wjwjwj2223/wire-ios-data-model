@@ -25,6 +25,7 @@
 #import "ZMAssetClientMessage.h"
 #import "NSString+RandomString.h"
 #import "ZMCDataModelTests-Swift.h"
+#import <ZMCDataModel/ZMCDataModel-Swift.h>
 
 @import CoreGraphics;
 @import ZMCLinkPreview;
@@ -617,7 +618,7 @@
     existingMessage.nonce = nonce;
     existingMessage.visibleInConversation = conversation;
     
-    ZMGenericMessage *message = [ZMGenericMessage messageWithText:self.name nonce:nonce.transportString];
+    ZMGenericMessage *message = [ZMGenericMessage messageWithText:self.name nonce:nonce.transportString expiresAfter:nil];
     NSData *contentData = message.data;
     
     NSString *data = [contentData base64EncodedStringWithOptions:0];
