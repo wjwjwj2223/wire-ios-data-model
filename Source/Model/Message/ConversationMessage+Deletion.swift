@@ -18,6 +18,7 @@
 
 
 import Foundation
+import Cryptobox
 
 extension ZMConversation {
     static func appendHideMessageToSelfConversation(_ message: ZMMessage) {
@@ -55,12 +56,12 @@ extension ZMMessage {
     }
     
     func deleteForEveryone() {
-        guard !isZombieObject, let sender = sender , sender.isSelfUser else { return }
+        guard !isZombieObject, let sender = sender , (sender.isSelfUser || isEphemeral) else { return }
         guard let conversation = conversation else { return }
         
         // We insert a message of type `ZMMessageDelete` containing the nonce of the message that should be deleted
         let deletedMessage = ZMGenericMessage(deleteMessage: nonce.transportString(), nonce: NSUUID().transportString())
-        
+        print(deletedMessage)
         conversation.append(deletedMessage, expires:false, hidden: true)
         removeClearingSender(true)
     }

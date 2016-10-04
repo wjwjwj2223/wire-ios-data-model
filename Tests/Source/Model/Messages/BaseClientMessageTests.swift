@@ -20,6 +20,40 @@
 import Foundation
 @testable import ZMCDataModel
 
+/*
+public extension BaseZMMessageTests {
+    
+    public func textMessageRequiringExternalMessage(numberOfClients count: UInt) -> String {
+        var text = "Long Text"
+        while text.data(using: .utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold / count) {
+            text += text
+        }
+        return text
+    }
+    
+    public func encryptedExternalMessageFixtureWithBlob(from client: UserClient) -> ZMUpdateEvent {
+        let encryptedMessageURL = fileURL(forResource: "EncryptedBase64EncondedExternalMessageTestFixture", extension: "txt")
+        let encryptedMessageFixtureString = try! String(contentsOf: encryptedMessageURL!)
+        let payload = [
+            "conversation": UUID.create().transportString,
+            "data": "CiQzMzRmN2Y3Yi1hNDk5LTQ1MTMtOTJhOC1hZTg4MDI0OTQ0ZTlCRAog4H1nD6bG2sCxC/tZBnIG7avLYhkCsSfv0ATNqnfug7wSIJCkkpWzMVxHXfu33pMQfEK+u/5qY426AbK9sC3Fu8Mx",
+            "external": encryptedMessageFixtureString,
+            "from": client.remoteIdentifier,
+            "time": Date().transportString,
+            "type": "conversation.otr-message-add"] as [String : Any]
+        return ZMUpdateEvent(fromEventStreamPayload: payload as ZMTransportData, uuid: UUID.create())!
+    }
+    
+    var expectedExternalMessageText : String {
+        let messageFixtureURL =  fileURL(forResource:"ExternalMessageTextFixture", extension:"txt")
+        let messageFixtureString = try! String(contentsOf:messageFixtureURL!)
+        return messageFixtureString
+    }
+    
+}
+
+ */
+
 class BaseZMClientMessageTests : BaseZMMessageTests {
     
     var syncSelfUser: ZMUser!
@@ -78,6 +112,8 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
             self.syncUser3Client1 = self.createClient(for: self.syncUser3, createSessionWithSelfUser: false, onMOC: self.syncMOC)
             
             self.syncConversation = ZMConversation.insertGroupConversation(into: self.syncMOC, withParticipants: [self.syncUser1, self.syncUser2, self.syncUser3])
+            self.syncConversation.remoteIdentifier = UUID.create()
+            
             self.expectedRecipients = [
                 self.syncSelfUser.remoteIdentifier!.transportString(): [
                     self.syncSelfClient2.remoteIdentifier!
@@ -146,9 +182,9 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
                 XCTFail("Unexpected otr client in recipients", file: file, line: line)
                 return
             }
-            let clientIds = (recipientEntry.clients as! [ZMClientEntry]).map { String(format: "%llx", $0.client.client) }.sorted()
+            let clientIds = (recipientEntry.clients).map { String(format: "%llx", $0.client.client) }.sorted()
             XCTAssertEqual(clientIds, expectedClientsIds, file: file, line: line)
-            let hasTexts = (recipientEntry.clients as! [ZMClientEntry]).map { $0.hasText() }
+            let hasTexts = (recipientEntry.clients).map { $0.hasText() }
             XCTAssertFalse(hasTexts.contains(false), file: file, line: line)
             
         }
@@ -177,5 +213,8 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
             return event
         }
     }
-
+    
 }
+
+
+

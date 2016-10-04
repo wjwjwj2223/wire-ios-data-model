@@ -59,6 +59,15 @@ typedef NS_ENUM(int16_t, ZMConversationListIndicator) {
 };
 
 
+typedef NS_ENUM(int16_t, ZMConversationMessageDestructionTimeout) {
+    ZMConversationMessageDestructionTimeoutNone = 0,
+    ZMConversationMessageDestructionTimeoutFiveSeconds = 5,
+    ZMConversationMessageDestructionTimeoutFifteenSeconds = 15,
+    ZMConversationMessageDestructionTimeoutFiveMinutes = 300,
+    ZMConversationMessageDestructionTimeoutFifteenMinutes = 900,
+};
+
+
 extern NSString * _Null_unspecified const ZMConversationFailedToDecryptMessageNotificationName;
 extern NSString * _Null_unspecified const ZMIsDimmedKey; ///< Specifies that a range in an attributed string should be displayed dimmed.
 extern NSString * _Null_unspecified const ZMConversationIsVerifiedNotificationName;
@@ -104,6 +113,15 @@ extern NSString * _Null_unspecified const ZMConversationIsVerifiedNotificationNa
 
 /// For group conversation this will be nil, for one to one or connection conversation this will be the other user
 @property (nonatomic, readonly, nullable) ZMUser *connectedUser;
+
+/// Defines the time interval until an inserted messages is deleted / "self-destructs" on all clients
+/// Use [updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout] for setting it
+/// Or import the internal header for testing
+@property (nonatomic, readonly) NSTimeInterval messageDestructionTimeout;
+
+/// Sets messageDestructionTimeout
+/// @param timeout The timeout after which an appended message should "self-destruct"
+- (void)updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout;
 
 - (void)addParticipant:(nonnull ZMUser *)participant;
 - (void)removeParticipant:(nonnull ZMUser *)participant;
@@ -161,6 +179,5 @@ extern NSString * _Null_unspecified const ZMConversationIsVerifiedNotificationNa
 @property (nonatomic, copy, readonly, nonnull) NSString *connectionMessage;
 
 @end
-
 
 

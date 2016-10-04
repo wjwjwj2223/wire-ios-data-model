@@ -119,6 +119,7 @@ static NSString *const CallDeviceIsActiveKey = @"callDeviceIsActive";
 static NSString *const IsFlowActiveKey = @"isFlowActive";
 
 static NSString *const SecurityLevelKey = @"securityLevel";
+static NSString *const MessageDestructionTimeoutKey = @"messageDestructionTimeout";
 
 
 NSTimeInterval ZMConversationDefaultLastReadEventIDSaveDelay = 3.0;
@@ -161,7 +162,6 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 @property (nonatomic) ZMVoiceChannel *primitiveVoiceChannel;
 
 @property (nonatomic) ZMConversationSecurityLevel securityLevel;
-
 @end
 
 
@@ -186,6 +186,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 @dynamic internalIsArchived;
 @dynamic archivedChangedTimestamp;
 @dynamic silencedChangedTimestamp;
+@dynamic messageDestructionTimeout;
 
 @synthesize tempMaximumLastReadEventID;
 @synthesize tempMaxLastReadServerTimeStamp;
@@ -429,7 +430,8 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
             ZMConversationLastReadLocalTimestampKey,
             ZMConversationInternalEstimatedUnreadCountKey,
             ZMConversationIsArchivedKey,
-            ZMConversationIsSilencedKey
+            ZMConversationIsSilencedKey,
+            MessageDestructionTimeoutKey,
         };
         
         NSSet *additionalKeys = [NSSet setWithObjects:KeysIgnoredForTrackingModifications count:(sizeof(KeysIgnoredForTrackingModifications) / sizeof(*KeysIgnoredForTrackingModifications))];
@@ -725,6 +727,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
         NOT_USED(oldestMessage);
         newestMessage = tempMsg;
     }
+
     [self updateLastReadServerTimeStampWithMessage:newestMessage];
     
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
@@ -1089,6 +1092,11 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
     }];
 }
 
+- (void)updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout;
+{
+    self.messageDestructionTimeout = (long)timeout;
+}
+
 @end
 
 
@@ -1102,6 +1110,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 @dynamic normalizedUserDefinedName;
 @dynamic callStateNeedsToBeUpdatedFromBackend;
 @dynamic hiddenMessages;
+@dynamic messageDestructionTimeout;
 
 
 + (NSPredicate *)callConversationPredicate;
@@ -1480,9 +1489,6 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
     return [ZMConversation conversationWithRemoteID:selfUserID createIfNeeded:NO inContext:managedObjectContext];
 }
 
-
-
-
 - (void)startFetchingMessages
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:ZMConversationRequestToLoadConversationEventsNotification object:self userInfo:nil];
@@ -1523,7 +1529,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 
 - (ZMAssetClientMessage *)appendAssetClientMessageWithNonce:(NSUUID *)nonce hidden:(BOOL)hidden imageData:(NSData *)imageData
 {
-    ZMAssetClientMessage *message = [ZMAssetClientMessage assetClientMessageWithOriginalImageData:imageData nonce:nonce managedObjectContext:self.managedObjectContext];
+    ZMAssetClientMessage *message = [ZMAssetClientMessage assetClientMessageWithOriginalImageData:imageData nonce:nonce managedObjectContext:self.managedObjectContext expiresAfter:self.messageDestructionTimeout];
     message.sender = [ZMUser selfUserInContext:self.managedObjectContext];
     if(hidden) {
         message.hiddenInConversation = self;
@@ -1536,7 +1542,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 
 - (ZMAssetClientMessage *)appendOTRMessageWithFileMetadata:(ZMFileMetadata *)fileMetadata nonce:(NSUUID *)nonce
 {
-    ZMAssetClientMessage *message = [ZMAssetClientMessage assetClientMessageWithFileMetadata:fileMetadata nonce:nonce managedObjectContext:self.managedObjectContext];
+    ZMAssetClientMessage *message = [ZMAssetClientMessage assetClientMessageWithFileMetadata:fileMetadata nonce:nonce managedObjectContext:self.managedObjectContext expiresAfter:self.messageDestructionTimeout];
     message.sender = [ZMUser selfUserInContext:self.managedObjectContext];
     message.isEncrypted = YES;
     [self sortedAppendMessage:message];
@@ -1545,7 +1551,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 
 - (ZMClientMessage *)appendOTRMessageWithLocationData:(ZMLocationData *)locationData nonce:(NSUUID *)nonce
 {
-    ZMGenericMessage *genericMessage = [ZMGenericMessage genericMessageWithLocation:locationData.zmLocation messageID:nonce.transportString];
+    ZMGenericMessage *genericMessage = [ZMGenericMessage genericMessageWithLocation:locationData.zmLocation messageID:nonce.transportString expiresAfter:@(self.messageDestructionTimeout)];
     ZMClientMessage *message = [self appendClientMessageWithData:genericMessage.data];
     message.isEncrypted = YES;
     return message;
@@ -1553,7 +1559,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 
 - (ZMClientMessage *)appendOTRKnockMessageWithNonce:(NSUUID *)nonce
 {
-    ZMGenericMessage *genericMessage = [ZMGenericMessage knockWithNonce:nonce.transportString];
+    ZMGenericMessage *genericMessage = [ZMGenericMessage knockWithNonce:nonce.transportString expiresAfter:@(self.messageDestructionTimeout)];
     ZMClientMessage *message = [self appendClientMessageWithData:genericMessage.data];
     message.isEncrypted = YES;
     return message;
@@ -1561,7 +1567,7 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
 
 - (ZMClientMessage *)appendOTRMessageWithText:(NSString *)text nonce:(NSUUID *)nonce
 {
-    ZMGenericMessage *genericMessage = [ZMGenericMessage messageWithText:text nonce:nonce.transportString];
+    ZMGenericMessage *genericMessage = [ZMGenericMessage messageWithText:text nonce:nonce.transportString expiresAfter:@(self.messageDestructionTimeout)];
     ZMClientMessage *message = [self appendClientMessageWithData:genericMessage.data];
     message.linkPreviewState = ZMLinkPreviewStateWaitingToBeProcessed;
     message.isEncrypted = YES;

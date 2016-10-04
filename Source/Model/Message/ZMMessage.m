@@ -74,6 +74,9 @@ NSString * const ZMMessageHiddenInConversationKey = @"hiddenInConversation";
 NSString * const ZMMessageSenderClientIDKey = @"senderClientID";
 NSString * const ZMMessageReactionKey = @"reactions";
 NSString * const ZMMessageConfirmationKey = @"confirmations";
+NSString * const ZMMessageDestructionDateKey = @"destructionDate";
+NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
+
 
 @interface ZMMessage ()
 
@@ -97,6 +100,8 @@ NSString * const ZMMessageConfirmationKey = @"confirmations";
 
 @property (nonatomic) BOOL isExpired;
 @property (nonatomic) NSDate *expirationDate;
+@property (nonatomic) NSDate *destructionDate;
+@property (nonatomic) BOOL isObfuscated;
 
 @end
 
@@ -114,9 +119,11 @@ NSString * const ZMMessageConfirmationKey = @"confirmations";
 @dynamic missingRecipients;
 @dynamic isExpired;
 @dynamic expirationDate;
+@dynamic destructionDate;
 @dynamic senderClientID;
 @dynamic reactions;
 @dynamic confirmations;
+@dynamic isObfuscated;
 
 + (instancetype)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent *)updateEvent
                               inManagedObjectContext:(NSManagedObjectContext *)moc
@@ -383,14 +390,14 @@ NSString * const ZMMessageConfirmationKey = @"confirmations";
     [message removePendingDeliveryReceipts];
     
     // Only the sender of the original message can delete it
-    if (![senderID isEqual:message.sender.remoteIdentifier]) {
+    if (![senderID isEqual:message.sender.remoteIdentifier] && message.destructionDate == nil) {
         return;
     }
 
     ZMUser *selfUser = [ZMUser selfUserInContext:moc];
 
     // Only clients other than self should see the system message
-    if (nil != message && ![senderID isEqual:selfUser.remoteIdentifier]) {
+    if (nil != message && ![senderID isEqual:selfUser.remoteIdentifier] && message.destructionDate == nil) {
         [conversation appendDeletedForEveryoneSystemMessageWithTimestamp:message.serverTimestamp sender:message.sender];
     }
 
@@ -689,7 +696,9 @@ NSString * const ZMMessageConfirmationKey = @"confirmations";
                              ZMMessageNeedsUpdatingUsersKey,
                              ZMMessageSenderClientIDKey,
                              ZMMessageConfirmationKey,
-                             ZMMessageReactionKey
+                             ZMMessageReactionKey,
+                             ZMMessageDestructionDateKey,
+                             ZMMessageIsObfuscatedKey
                              ];
         ignoredKeys = [keys setByAddingObjectsFromArray:newKeys];
     });
@@ -1060,6 +1069,42 @@ NSString * const ZMMessageConfirmationKey = @"confirmations";
     return self.systemMessageType == ZMSystemMessageTypeMissedCall;
 }
 
+
+@end
+
+
+
+
+@implementation ZMMessage (Ephemeral)
+
+
+- (BOOL)startDestructionIfNeeded
+{
+    // TODO Sabine: Tests
+    if (self.destructionDate != nil || !self.isEphemeral) {
+        return NO;
+    }
+    BOOL isSelfUser = self.sender.isSelfUser;
+    if (isSelfUser && self.managedObjectContext.zm_isSyncContext) {
+        self.destructionDate = [NSDate dateWithTimeIntervalSinceNow:self.deletionTimeout];
+        ZMMessageDestructionTimer *timer = self.managedObjectContext.zm_messageObfuscationTimer;
+        [timer startObfuscationTimerWithMessage:self timeout:self.deletionTimeout];
+        return YES;
+    }
+    else if (!isSelfUser && self.managedObjectContext.zm_isUserInterfaceContext){
+        self.destructionDate = [NSDate dateWithTimeIntervalSinceNow:self.deletionTimeout];
+        ZMMessageDestructionTimer *timer = self.managedObjectContext.zm_messageDeletionTimer;
+        [timer startDeletionTimerWithMessage:self timeout:self.deletionTimeout];
+        return YES;
+    }
+    return NO;
+}
+
+- (void)obfuscate;
+{
+    // TODO Sabine: Tests
+    self.isObfuscated = true;
+}
 
 @end
 
