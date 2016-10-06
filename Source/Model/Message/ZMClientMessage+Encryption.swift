@@ -94,13 +94,10 @@ extension ZMGenericMessage {
                             sessionDirectory: EncryptionSessionsDirectory) -> (message: ZMNewOtrMessage, strategy: MissingClientsStrategy) {
         
         var recipientUsers : [ZMUser] = []
-        let replyOnlyToSender = self.hasConfirmation()
-        if replyOnlyToSender {
-            // Reply is only supported on 1-to-1 conversations
+        let sendOnlyToOtherUser = ( self.hasConfirmation() || self.hasEphemeral() )
+        if sendOnlyToOtherUser {
+            // Sending only to the other user is only supported on 1-to-1 conversations
             assert(conversation.conversationType == .oneOnOne)
-            
-            // In case of confirmation messages, we want to send the confirmation only to the clients of the sender of the original message, 
-            // not to the other clients of the selfUser
             recipientUsers = [conversation.connectedUser!]
         } else {
             recipientUsers = conversation.activeParticipants.array as! [ZMUser]
@@ -110,7 +107,7 @@ extension ZMGenericMessage {
         let message = ZMNewOtrMessage.message(withSender: selfClient, nativePush: true, recipients: recipients, blob: externalData)
         
         let strategy : MissingClientsStrategy =
-            replyOnlyToSender ?
+            sendOnlyToOtherUser ?
                 .ignoreAllMissingClientsNotFromUser(user: recipientUsers.first!)
                 : .doNotIgnoreAnyMissingClient
         return (message: message, strategy: strategy)

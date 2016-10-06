@@ -66,14 +66,15 @@ enum MessageDestructionType : String {
 
 public class ZMMessageDestructionTimer : ZMMessageTimer {
 
-    init(managedObjectContext: NSManagedObjectContext!) {
-        super.init(managedObjectContext: managedObjectContext) { (message, userInfo) in
-            guard let message = message, !message.isZombieObject else { return }
-            ZMMessageDestructionTimer.messageTimerDidFire(message: message, userInfo:userInfo)
+    override init(managedObjectContext: NSManagedObjectContext!) {
+        super.init(managedObjectContext: managedObjectContext)
+        timerCompletionBlock = { [weak self] (message, userInfo) in
+            guard let strongSelf = self, let message = message, !message.isZombieObject else { return }
+            strongSelf.messageTimerDidFire(message: message, userInfo:userInfo)
         }
     }
     
-    class func messageTimerDidFire(message: ZMMessage, userInfo: [AnyHashable: Any]?) {
+    func messageTimerDidFire(message: ZMMessage, userInfo: [AnyHashable: Any]?) {
         guard let userInfo = userInfo as? [String : Any],
               let type = userInfo[MessageDestructionType.UserInfoKey] as? String
         else { return }
@@ -86,6 +87,7 @@ public class ZMMessageDestructionTimer : ZMMessageTimer {
         default:
             return
         }
+        moc.saveOrRollback()
     }
     
     public func startObfuscationTimer(message: ZMMessage, timeout: TimeInterval) {

@@ -1102,8 +1102,32 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
 
 - (void)obfuscate;
 {
-    // TODO Sabine: Tests
     self.isObfuscated = true;
+}
+
++ (NSFetchRequest *)fetchRequestForEphemeralMessagesThatNeedToBeDeleted
+{
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:self.entityName];
+    fetchRequest.predicate = [NSPredicate predicateWithFormat:@"%K != nil AND %K != nil AND %K == FALSE",
+                              ZMMessageDestructionDateKey,          // If it has a destructionDate, the timer did not fire in time
+                              ZMMessageSenderKey,                   // As soon as the message is deleted, we would delete the sender
+                              ZMMessageIsObfuscatedKey];            // If the message is obfuscated, we don't need to obfuscate it again
+    return fetchRequest;
+}
+
++ (void)deleteOldEphemeralMessages:(NSManagedObjectContext *)context
+{
+    NSFetchRequest *request = [self fetchRequestForEphemeralMessagesThatNeedToBeDeleted];
+    NSArray *messages = [context executeFetchRequestOrAssert:request];
+    for (ZMMessage *message in messages) {
+        if (message.sender.isSelfUser) {
+            // message needs to be obfuscated
+            [message obfuscate];
+        } else {
+            // message needs to be deleted for everyone
+            [ZMMessage deleteForEveryone:message];
+        }
+    }
 }
 
 @end

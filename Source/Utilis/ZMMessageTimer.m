@@ -29,7 +29,6 @@
 @property (nonatomic) NSMapTable *objectToTimerMap;
 @property (nonatomic) BOOL tearDownCalled;
 @property (nonatomic, weak) NSManagedObjectContext *moc;
-@property (nonatomic, copy) void(^timerCompletionBlock)(ZMMessage *, NSDictionary*);
 
 @end
 
@@ -40,14 +39,12 @@
 ZM_EMPTY_ASSERTING_INIT()
 
 
-- (instancetype)initWithManagedObjectContext:(NSManagedObjectContext *)moc
-                        timerCompletionBlock:(void(^)(ZMMessage *, NSDictionary*))completionBlock
+- (instancetype)initWithManagedObjectContext:(NSManagedObjectContext *)moc;
 {
     self = [super init];
     if (self) {
         self.objectToTimerMap = [NSMapTable strongToStrongObjectsMapTable];
         self.moc = moc;
-        self.timerCompletionBlock = completionBlock;
     }
     return self;
 }
@@ -73,7 +70,7 @@ ZM_EMPTY_ASSERTING_INIT()
         ZMTimer *timer = [ZMTimer timerWithTarget:self];
         NSMutableDictionary *info = [NSMutableDictionary dictionaryWithDictionary:userInfo ?: @{}];
         info[@"message"] = message;
-        timer.userInfo =  [NSDictionary dictionaryWithDictionary:info];
+        timer.userInfo = [NSDictionary dictionaryWithDictionary:info];
         [self.objectToTimerMap setObject:timer forKey:message];
         
         [timer fireAtDate:fireDate];
@@ -83,6 +80,7 @@ ZM_EMPTY_ASSERTING_INIT()
 
 - (BOOL)isTimerRunningForMessage:(ZMMessage *)message
 {
+    NSLog(@"%@", self.objectToTimerMap);
     return [self.objectToTimerMap objectForKey:message] != nil;
 }
 
@@ -92,13 +90,16 @@ ZM_EMPTY_ASSERTING_INIT()
     
     NSManagedObjectContext *strongMoc = self.moc;
     RequireString(strongMoc != nil, "MOC is nil");
+    
     [strongMoc performGroupedBlock:^{
         [self removeTimerForMessage:message];
         
         if (message == nil || message.isZombieObject) {
             return;
         }
-        self.timerCompletionBlock(message, timer.userInfo);
+        if (self.timerCompletionBlock != nil) {
+            self.timerCompletionBlock(message, timer.userInfo);
+        }
     }];
 }
 

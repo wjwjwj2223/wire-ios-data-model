@@ -233,7 +233,8 @@ public extension ZMEphemeral {
         default:
             return nil
         }
-        ephBuilder.setExpireAfterMillis(timeout.int64Value*1000)
+        let doubleTimeout = timeout.doubleValue
+        ephBuilder.setExpireAfterMillis(Int64(doubleTimeout*1000))
         return ephBuilder.build()
     }
 }

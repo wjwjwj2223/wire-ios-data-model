@@ -283,7 +283,8 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 - (void)updateWithPostPayload:(NSDictionary *)payload updatedKeys:(__unused NSSet *)updatedKeys
 {
     // we don't want to update the conversation if the message is a confirmation message
-    if (self.genericMessage.hasConfirmation || self.genericMessage.hasReaction) {
+    if (self.genericMessage.hasConfirmation || self.genericMessage.hasReaction || self.genericMessage.hasDeleted)
+    {
         return;
     }
     if (self.genericMessage.hasEdited) {
