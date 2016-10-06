@@ -18,11 +18,11 @@ public extension NSManagedObjectContext {
         if !zm_isUserInterfaceContext {
             preconditionFailure("MessageDeletionTimerKey should be started only on the uiContext")
         }
-        if let timer = persistentStoreMetadata(forKey: MessageDeletionTimerKey) as? ZMMessageDestructionTimer {
+        if let timer = userInfo[MessageDeletionTimerKey] as? ZMMessageDestructionTimer {
             return timer
         }
         let timer = ZMMessageDestructionTimer(managedObjectContext: self)
-        setPersistentStoreMetadata(timer, forKey: MessageDeletionTimerKey)
+        userInfo[MessageDeletionTimerKey] = timer
         return timer
     }
     
@@ -30,29 +30,29 @@ public extension NSManagedObjectContext {
         if !zm_isSyncContext {
             preconditionFailure("MessageObfuscationTimer should be started only on the syncContext")
         }
-        if let timer = persistentStoreMetadata(forKey: MessageObfuscationTimerKey) as? ZMMessageDestructionTimer {
+        if let timer = userInfo[MessageObfuscationTimerKey] as? ZMMessageDestructionTimer {
             return timer
         }
         let timer = ZMMessageDestructionTimer(managedObjectContext: self)
-        setPersistentStoreMetadata(timer, forKey: MessageObfuscationTimerKey)
+        userInfo[MessageObfuscationTimerKey] = timer
         return timer
     }
     
     /// Tears down zm_messageObfuscationTimer and zm_messageDeletionTimer
     /// Call inside a performGroupedBlock(AndWait) when calling it from another context
     public func zm_teardownMessageObfuscationTimer() {
-        if let timer = persistentStoreMetadata(forKey: MessageObfuscationTimerKey) as? ZMMessageDestructionTimer {
+        if let timer = userInfo[MessageObfuscationTimerKey] as? ZMMessageDestructionTimer {
             timer.tearDown()
-            setPersistentStoreMetadata(nil, forKey: MessageObfuscationTimerKey)
+            userInfo.removeObject(forKey: MessageObfuscationTimerKey)
         }
     }
     
     /// Tears down zm_messageDeletionTimer
     /// Call inside a performGroupedBlock(AndWait) when calling it from another context
     public func zm_teardownMessageDeletionTimer() {
-        if let timer = persistentStoreMetadata(forKey: MessageDeletionTimerKey) as? ZMMessageDestructionTimer {
+        if let timer = userInfo[MessageDeletionTimerKey] as? ZMMessageDestructionTimer {
             timer.tearDown()
-            setPersistentStoreMetadata(nil, forKey: MessageDeletionTimerKey)
+            userInfo.removeObject(forKey: MessageDeletionTimerKey)
         }
     }
 }
