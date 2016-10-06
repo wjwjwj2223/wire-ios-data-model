@@ -61,7 +61,6 @@ extension ZMMessage {
         
         // We insert a message of type `ZMMessageDelete` containing the nonce of the message that should be deleted
         let deletedMessage = ZMGenericMessage(deleteMessage: nonce.transportString(), nonce: NSUUID().transportString())
-        print(deletedMessage)
         conversation.append(deletedMessage, expires:false, hidden: true)
         removeClearingSender(true)
     }

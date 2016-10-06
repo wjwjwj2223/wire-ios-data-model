@@ -320,6 +320,7 @@
 		F9C9A8101CAED9A00039E10C /* ZMTesting.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A79D1CAEAAF20039E10C /* ZMTesting.framework */; };
 		F9C9A8111CAED9A00039E10C /* ZMTesting.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F9C9A79D1CAEAAF20039E10C /* ZMTesting.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F9C9A82C1CAEDA330039E10C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F9C9A8231CAEDA330039E10C /* Info.plist */; };
+		F9EC8DE11DA69982003C0022 /* ZMGenericMessage+Obfuscation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9EC8DE01DA69982003C0022 /* ZMGenericMessage+Obfuscation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -752,6 +753,7 @@
 		F9C9A8371CAEDABF0039E10C /* Cryptobox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cryptobox.framework; path = Carthage/Build/iOS/Cryptobox.framework; sourceTree = "<group>"; };
 		F9C9A8381CAEDABF0039E10C /* ocmock.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ocmock.framework; path = Carthage/Build/iOS/ocmock.framework; sourceTree = "<group>"; };
 		F9C9A8391CAEDABF0039E10C /* ZMCSystem.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ZMCSystem.framework; path = Carthage/Build/iOS/ZMCSystem.framework; sourceTree = "<group>"; };
+		F9EC8DE01DA69982003C0022 /* ZMGenericMessage+Obfuscation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ZMGenericMessage+Obfuscation.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -842,6 +844,7 @@
 			isa = PBXGroup;
 			children = (
 				F963E9681D9ADD5A00098AD3 /* ZMGenericMessage+Helper.swift */,
+				F9EC8DE01DA69982003C0022 /* ZMGenericMessage+Obfuscation.swift */,
 				F963E9751D9C002000098AD3 /* ZMGenericMessage+Assets.swift */,
 				F963E9691D9ADD5A00098AD3 /* ZMGenericMessage+PropertyUtils.h */,
 				F963E96A1D9ADD5A00098AD3 /* ZMGenericMessage+PropertyUtils.m */,
@@ -1954,6 +1957,7 @@
 				F9A706C31CAEE01D00C2F5FE /* UserImageLocalCache.swift in Sources */,
 				F9A706B21CAEE01D00C2F5FE /* NewUnreadMessageObserverToken.swift in Sources */,
 				F963E96D1D9ADD5A00098AD3 /* ZMGenericMessage+Helper.swift in Sources */,
+				F9EC8DE11DA69982003C0022 /* ZMGenericMessage+Obfuscation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
