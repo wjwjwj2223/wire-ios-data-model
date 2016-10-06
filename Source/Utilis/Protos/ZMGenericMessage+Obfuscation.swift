@@ -24,7 +24,7 @@ extension String {
     static func randomChar() -> UnicodeScalar {
         let string = "abcdefghijklmnopqrstuvxyz"
         let chars = Array(string.unicodeScalars)
-        let random = Int(arc4random()*24)
+        let random = Int(arc4random_uniform(UInt32(chars.count)))
         return chars[random]
     }
     

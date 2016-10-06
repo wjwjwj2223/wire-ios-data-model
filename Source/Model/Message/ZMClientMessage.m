@@ -386,10 +386,7 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 
 - (NSString *)messageText
 {
-    if (self.genericMessage.hasEdited) {
-        return self.genericMessage.edited.text.content;
-    }
-    return self.genericMessage.text.content;
+    return self.genericMessage.textData.content;
 }
 
 - (BOOL)isEdited
