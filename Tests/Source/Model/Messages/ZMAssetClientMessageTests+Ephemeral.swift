@@ -59,7 +59,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
             self.syncConversation.messageDestructionTimeout = 10
             let fileMetadata = self.addFile().0
             let message = self.syncConversation.appendMessage(with: fileMetadata) as! ZMAssetClientMessage
-            message.uploadState = .done
+            message.uploadState = .uploadingFullAsset
             
             // when
             message.update(withPostPayload: [:], updatedKeys: Set(arrayLiteral: ZMAssetClientMessageUploadedStateKey))

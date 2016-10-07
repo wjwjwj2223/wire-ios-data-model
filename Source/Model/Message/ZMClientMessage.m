@@ -505,7 +505,7 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
         [self addData:[ZMGenericMessage messageWithText:self.textMessageData.messageText
                                                    linkPreview:updatedPreview
                                                          nonce:self.nonce.transportString
-                                                   expiresAfter:@(self.conversation.messageDestructionTimeout)].data];
+                                                   expiresAfter:@(self.deletionTimeout)].data];
     } else if (self.genericMessage.hasEdited) {
         [self addData:[ZMGenericMessage messageWithEditMessage:self.genericMessage.edited.replacingMessageId
                                                        newText:self.textMessageData.messageText

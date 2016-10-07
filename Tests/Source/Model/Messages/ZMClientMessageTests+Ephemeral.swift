@@ -205,7 +205,8 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNotNil(message.sender)
             XCTAssertNotEqual(message.hiddenInConversation, self.syncConversation)
             XCTAssertEqual(message.visibleInConversation, self.syncConversation)
-            XCTAssertNil(message.genericMessage)
+            XCTAssertNotNil(message.genericMessage)
+            XCTAssertNotEqual(message.genericMessage?.textData?.content, "foo")
             XCTAssertEqual(self.obfuscationTimer.runningTimersCount, 0)
         }
     }
@@ -243,7 +244,6 @@ extension ZMClientMessageTests_Ephemeral {
         self.syncMOC.performGroupedBlockAndWait {
             XCTAssertTrue(message.isObfuscated)
             XCTAssertNotNil(message.destructionDate)
-            XCTAssertNil(message.genericMessage)
 
             // when
             let delete = ZMGenericMessage(deleteMessage: message.nonce.transportString(), nonce: UUID.create().transportString())

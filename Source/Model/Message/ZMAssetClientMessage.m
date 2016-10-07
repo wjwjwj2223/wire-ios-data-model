@@ -469,7 +469,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
     ZMGenericMessage *notUploadedMessage = [ZMGenericMessage genericMessageWithNotUploaded:notUploaded
                                                                                  messageID:self.nonce.transportString
-                                                                               expiresAfter:@(self.conversation.messageDestructionTimeout)];
+                                                                               expiresAfter:@(self.deletionTimeout)];
     [self addGenericMessage:notUploadedMessage];
     self.uploadState = ZMAssetUploadStateUploadingFailed;
 }
@@ -665,7 +665,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     ZMImageAssetEncryptionKeys *keys = [self.managedObjectContext.zm_imageAssetCache encryptFileAndComputeSHA256Digest:self.nonce format:format];
     
     if (nil != self.imageMessageData) {
-        [self processAddedImageWithFormat:format properties:properties encryptionKeys:keys expiresAfter:self.conversation.messageDestructionTimeout];
+        [self processAddedImageWithFormat:format properties:properties encryptionKeys:keys];
     } else if (nil != self.fileMessageData) {
         [self processAddedFilePreviewWithFormat:format properties:properties encryptionKeys:keys imageData:imageData];
     } else {
@@ -675,7 +675,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     [self.managedObjectContext enqueueDelayedSave];
 }
 
-- (void)processAddedImageWithFormat:(ZMImageFormat)format properties:(ZMIImageProperties *)properties encryptionKeys:(ZMImageAssetEncryptionKeys *)keys expiresAfter:(NSTimeInterval)timeout
+- (void)processAddedImageWithFormat:(ZMImageFormat)format properties:(ZMIImageProperties *)properties encryptionKeys:(ZMImageAssetEncryptionKeys *)keys
 {
     // We need to set the medium size on the preview message
     if(format == ZMImageFormatMedium) {
@@ -684,7 +684,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
                                                                                       encryptionKeys:keys
                                                                                                nonce:self.nonce.transportString
                                                                                               format:ZMImageFormatMedium
-                                                                                         expiresAfter:@(timeout)];
+                                                                                         expiresAfter:@(self.deletionTimeout)];
         [self addGenericMessage:genericMessage];
         ZMGenericMessage *previewGenericMessage = [self genericMessageForFormat:ZMImageFormatPreview];
         if(previewGenericMessage.imageAssetData.size > 0) { // if the preview is there, update it with the medium size
@@ -693,7 +693,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
                                                                                encryptionKeys:[self keysFromGenericMessage:previewGenericMessage]
                                                                                         nonce:self.nonce.transportString
                                                                                        format:ZMImageFormatPreview
-                                                                                  expiresAfter:@(timeout)];
+                                                                                  expiresAfter:@(self.deletionTimeout)];
             [self addGenericMessage:previewGenericMessage];
             
         }
@@ -706,7 +706,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
                                                                                       encryptionKeys:keys
                                                                                                nonce:self.nonce.transportString
                                                                                               format:ZMImageFormatPreview
-                                                                                         expiresAfter:@(timeout)];
+                                                                                         expiresAfter:@(self.deletionTimeout)];
         [self addGenericMessage:genericMessage];
     }
     else {
@@ -724,7 +724,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     ZMAssetBuilder *builder = ZMAsset.builder;
     [builder setPreview:preview];
     ZMAsset *asset = builder.build;
-    ZMGenericMessage *filePreviewMessage = [ZMGenericMessage genericMessageWithAsset:asset messageID:self.nonce.transportString expiresAfter:@(self.conversation.messageDestructionTimeout)];
+    ZMGenericMessage *filePreviewMessage = [ZMGenericMessage genericMessageWithAsset:asset messageID:self.nonce.transportString expiresAfter:@(self.deletionTimeout)];
     
     [self addGenericMessage:filePreviewMessage];
 }
