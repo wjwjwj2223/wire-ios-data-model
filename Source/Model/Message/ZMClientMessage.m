@@ -594,9 +594,10 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     [super obfuscate];
     ZMGenericMessage *obfuscatedMessage = [self.genericMessage obfuscatedMessage];
     [self deleteContent];
-    
-    [self mergeWithExistingData:obfuscatedMessage.data];
-    [self setGenericMessage:self.genericMessageFromDataSet];
+    if (nil != obfuscatedMessage) {
+        [self mergeWithExistingData:obfuscatedMessage.data];
+        [self setGenericMessage:self.genericMessageFromDataSet];
+    }
 }
 
 @end
