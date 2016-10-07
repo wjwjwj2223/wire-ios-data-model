@@ -45,12 +45,98 @@ extension String {
 public extension ZMGenericMessage {
 
     public func obfuscatedMessage() -> ZMGenericMessage? {
+        guard hasEphemeral() else { return nil }
+        
         if let someText = textData {
             if let content = someText.content {
                 let obfuscatedContent = content.obfuscated()
-                return ZMGenericMessage.message(text: obfuscatedContent, nonce: messageId)
+                var obfuscatedLinkPreviews : [ZMLinkPreview] = []
+                if linkPreviews.count > 0 {
+                    obfuscatedLinkPreviews = linkPreviews.map{$0.obfuscated()}
+                }
+                return ZMGenericMessage.message(text: obfuscatedContent, linkPreview:obfuscatedLinkPreviews.first, nonce: messageId)
             }
+        }
+        if let someAsset = assetData {
+            let obfuscatedAsset = someAsset.obfuscated()
+            return ZMGenericMessage.genericMessage(asset: obfuscatedAsset, messageID: messageId)
+        }
+        if locationData != nil {
+            let obfuscatedLocation = ZMLocation.location(withLatitude: 0.0, longitude: 0.0)
+            return ZMGenericMessage.genericMessage(location: obfuscatedLocation, messageID: messageId)
+        }
+        if let imageAsset = imageAssetData {
+            let obfuscatedImage = imageAsset.obfuscated()
+            return ZMGenericMessage.genericMessage(pbMessage: obfuscatedImage, messageID: messageId)
         }
         return nil
     }
 }
+
+extension ZMLinkPreview {
+
+    func obfuscated() -> ZMLinkPreview {
+        let obfTitle = hasTitle() ? title?.obfuscated() : nil
+        let obfSummary = hasSummary() ? summary?.obfuscated() : nil
+        let obfImage = hasImage() ? image?.obfuscated() : nil
+        let obfTweet = hasTweet() ? tweet?.obfuscated() : nil
+        return ZMLinkPreview.linkPreview(withOriginalURL: url.obfuscated(), permanentURL: permanentUrl.obfuscated(), offset: 0, title: obfTitle, summary: obfSummary, imageAsset: obfImage, tweet: obfTweet)
+    }
+}
+
+extension ZMTweet {
+    func obfuscated() -> ZMTweet {
+        let obfAuthorName = hasAuthor() ? author?.obfuscated() : nil
+        let obfUserName = hasUsername() ? username?.obfuscated() : nil
+        return ZMTweet.tweet(withAuthor: obfAuthorName, username: obfUserName)
+    }
+}
+
+
+extension ZMAsset {
+
+    func obfuscated() -> ZMAsset {
+        let originalBuilder = ZMAssetOriginal.builder()!
+        if hasOriginal(), let original = original {
+            if original.hasImage(), let image = original.image {
+                let imageBuilder = ZMAssetImageMetaData.builder()!
+                imageBuilder.setTag(image.tag)
+                imageBuilder.setWidth(image.width)
+                imageBuilder.setHeight(image.height)
+                originalBuilder.setImage(imageBuilder.build())
+            }
+            if original.hasName(), let name = original.name {
+                let obfName = name.obfuscated()
+                originalBuilder.setName(obfName)
+            }
+            if original.hasAudio() {
+                let audioBuilder = ZMAssetAudioMetaData.builder()!
+                originalBuilder.setAudio(audioBuilder.build())
+            }
+            if original.hasVideo() {
+                let videoBuilder = ZMAssetVideoMetaData.builder()!
+                originalBuilder.setVideo(videoBuilder.build())
+            }
+            originalBuilder.setSize(10)
+            originalBuilder.setMimeType(original.mimeType)
+        }
+        return ZMAsset.asset(withOriginal: originalBuilder.build(), preview: nil)
+    }
+}
+
+extension ZMImageAsset {
+
+    func obfuscated() -> ZMImageAsset {
+        let imageAssetBuilder = ZMImageAsset.builder()!
+        imageAssetBuilder.setTag(tag)
+        imageAssetBuilder.setWidth(width)
+        imageAssetBuilder.setHeight(height)
+        imageAssetBuilder.setOriginalWidth(originalWidth)
+        imageAssetBuilder.setOriginalHeight(originalHeight)
+        imageAssetBuilder.setMimeType(mimeType)
+        imageAssetBuilder.setSize(1)
+        return imageAssetBuilder.build()
+    }
+}
+
+

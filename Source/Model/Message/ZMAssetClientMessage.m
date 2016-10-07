@@ -1127,7 +1127,19 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 - (void)obfuscate;
 {
     [super obfuscate];
+    
+    ZMGenericMessage *obfuscatedMessage;
+    if (self.mediumGenericMessage != nil) {
+        obfuscatedMessage = [self.mediumGenericMessage obfuscatedMessage];
+    }
+    else if (self.fileMessageData != nil) {
+        obfuscatedMessage = [self.genericAssetMessage obfuscatedMessage];
+    }
     [self deleteContent];
+    
+    if (obfuscatedMessage != nil) {
+        [self createNewGenericMessageData:obfuscatedMessage.data];
+    }
 }
 
 - (BOOL)startDestructionIfNeeded
