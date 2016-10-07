@@ -950,7 +950,13 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     ZMAssetPreview *assetPreview = [previewBuilder build];
     [assetBuilder setPreview:assetPreview];
     ZMAsset *asset = [assetBuilder build];
-    [messageBuilder setAsset:asset];
+    
+    if (self.isEphemeral) {
+        ZMEphemeral *ephemeral = [ZMEphemeral ephemeralWithPbMessage:asset expiresAfter:@(self.deletionTimeout)];
+        [messageBuilder setEphemeral:ephemeral];
+    } else {
+        [messageBuilder setAsset:asset];
+    }
     
     [self replaceGenericMessageForThumbnailWithGenericMessage:[messageBuilder build]];
 }

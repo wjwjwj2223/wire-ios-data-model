@@ -48,7 +48,6 @@ extension ZMAssetClientMessageTests_Ephemeral {
         
         // then
         XCTAssertTrue(message.genericAssetMessage!.hasEphemeral())
-        XCTAssertTrue(message.genericAssetMessage!.hasEphemeral())
         XCTAssertTrue(message.genericAssetMessage!.ephemeral.hasAsset())
         XCTAssertEqual(message.genericAssetMessage!.ephemeral.expireAfterMillis, Int64(10*1000))
     }
@@ -65,7 +64,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
             message.update(withPostPayload: [:], updatedKeys: Set(arrayLiteral: ZMAssetClientMessageUploadedStateKey))
             
             // then
-            XCTAssertEqual(message.uploadState, ZMAssetUploadState.done)
+            XCTAssertEqual(message.uploadState, ZMAssetUploadState.uploadingFullAsset)
             XCTAssertEqual(self.obfuscationTimer.runningTimersCount, 1)
             XCTAssertTrue(self.obfuscationTimer.isTimerRunning(for: message))
         }
