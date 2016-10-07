@@ -1113,7 +1113,9 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
 - (BOOL)isEphemeral
 {
-    return self.destructionDate != nil || self.genericAssetMessage.hasEphemeral;
+    BOOL ephemeralImage = self.mediumGenericMessage.hasEphemeral || self.previewGenericMessage.hasEphemeral;
+    BOOL ephemeralFile = self.genericAssetMessage.hasEphemeral;
+    return self.destructionDate != nil || ephemeralFile || ephemeralImage;
 }
 
 - (NSTimeInterval)deletionTimeout
@@ -1148,7 +1150,9 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     if (!isSelfUser && self.transferState == ZMFileTransferStateUploading) {
         return NO;
     }
-    if (isSelfUser && self.uploadState != ZMAssetUploadStateDone) {
+    // This method is called after receiving the response but before updating the
+    // uploadState, which means a state of fullAsset corresponds to the asset upload being done.
+    if (isSelfUser && self.uploadState != ZMAssetUploadStateUploadingFullAsset) {
         return NO;
     }
     return [super startDestructionIfNeeded];
