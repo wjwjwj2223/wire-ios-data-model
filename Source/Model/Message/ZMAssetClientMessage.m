@@ -1090,6 +1090,8 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
         // Delete thumbnail data
         [self.managedObjectContext.zm_imageAssetCache deleteAssetData:self.nonce format:ZMImageFormatOriginal encrypted:NO];
         [self.managedObjectContext.zm_imageAssetCache deleteAssetData:self.nonce format:ZMImageFormatOriginal encrypted:YES];
+        [self.managedObjectContext.zm_imageAssetCache deleteAssetData:self.nonce format:ZMImageFormatMedium encrypted:NO];
+        [self.managedObjectContext.zm_imageAssetCache deleteAssetData:self.nonce format:ZMImageFormatMedium encrypted:YES];
     }
     
     self.dataSet = [NSOrderedSet orderedSet];
