@@ -96,31 +96,45 @@ extension ZMTweet {
 extension ZMAsset {
 
     func obfuscated() -> ZMAsset {
-        let originalBuilder = ZMAssetOriginal.builder()!
+        var originalBuilder : ZMAssetOriginalBuilder? = nil
+        var previewBuilder : ZMAssetPreviewBuilder? = nil
         if hasOriginal(), let original = original {
+            originalBuilder = ZMAssetOriginal.builder()
             if original.hasImage(), let image = original.image {
                 let imageBuilder = ZMAssetImageMetaData.builder()!
                 imageBuilder.setTag(image.tag)
                 imageBuilder.setWidth(image.width)
                 imageBuilder.setHeight(image.height)
-                originalBuilder.setImage(imageBuilder.build())
+                originalBuilder!.setImage(imageBuilder.build())
             }
             if original.hasName(), let name = original.name {
                 let obfName = name.obfuscated()
-                originalBuilder.setName(obfName)
+                originalBuilder!.setName(obfName)
             }
             if original.hasAudio() {
                 let audioBuilder = ZMAssetAudioMetaData.builder()!
-                originalBuilder.setAudio(audioBuilder.build())
+                originalBuilder!.setAudio(audioBuilder.build())
             }
             if original.hasVideo() {
                 let videoBuilder = ZMAssetVideoMetaData.builder()!
-                originalBuilder.setVideo(videoBuilder.build())
+                originalBuilder!.setVideo(videoBuilder.build())
             }
-            originalBuilder.setSize(10)
-            originalBuilder.setMimeType(original.mimeType)
+            originalBuilder!.setSize(10)
+            originalBuilder!.setMimeType(original.mimeType)
         }
-        return ZMAsset.asset(withOriginal: originalBuilder.build(), preview: nil)
+        if hasPreview(), let preview = preview {
+            previewBuilder = ZMAssetPreview.builder()
+            if preview.hasImage(), let image = preview.image {
+                let imageBuilder = ZMAssetImageMetaData.builder()!
+                imageBuilder.setTag(image.tag)
+                imageBuilder.setWidth(image.width)
+                imageBuilder.setHeight(image.height)
+                previewBuilder!.setImage(imageBuilder.build())
+            }
+            previewBuilder!.setSize(10)
+            previewBuilder!.setMimeType(original.mimeType)
+        }
+        return ZMAsset.asset(withOriginal: originalBuilder?.build(), preview: previewBuilder?.build())
     }
 }
 
