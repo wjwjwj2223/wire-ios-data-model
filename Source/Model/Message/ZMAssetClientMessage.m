@@ -1121,15 +1121,30 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
 - (BOOL)isEphemeral
 {
-    BOOL ephemeralImage = self.mediumGenericMessage.hasEphemeral || self.previewGenericMessage.hasEphemeral;
-    BOOL ephemeralFile = self.genericAssetMessage.hasEphemeral;
-    return self.destructionDate != nil || ephemeralFile || ephemeralImage;
+    return self.destructionDate != nil || self.ephemeral != nil;
+}
+
+- (ZMEphemeral *)ephemeral
+{
+    if (self.mediumGenericMessage.hasEphemeral) {
+        return self.mediumGenericMessage.ephemeral;
+    }
+
+    if (self.previewGenericMessage.hasEphemeral) {
+        return self.previewGenericMessage.ephemeral;
+    }
+
+    if (self.genericAssetMessage.hasEphemeral) {
+        return self.genericAssetMessage.ephemeral;
+    }
+
+    return nil;
 }
 
 - (NSTimeInterval)deletionTimeout
 {
     if (self.isEphemeral) {
-        return self.genericAssetMessage.ephemeral.expireAfterMillis/1000;
+        return self.ephemeral.expireAfterMillis/1000;
     }
     return -1;
 }
