@@ -63,6 +63,7 @@ typedef NS_ENUM(int16_t, ZMConversationMessageDestructionTimeout) {
     ZMConversationMessageDestructionTimeoutNone = 0,
     ZMConversationMessageDestructionTimeoutFiveSeconds = 5,
     ZMConversationMessageDestructionTimeoutFifteenSeconds = 15,
+    ZMConversationMessageDestructionTimeoutOneMinute = 60,
     ZMConversationMessageDestructionTimeoutFiveMinutes = 300,
     ZMConversationMessageDestructionTimeoutFifteenMinutes = 900,
 };
