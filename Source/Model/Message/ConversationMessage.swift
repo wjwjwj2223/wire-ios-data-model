@@ -110,6 +110,9 @@ public protocol ZMConversationMessage : NSObjectProtocol {
     /// Returns true if the message is an ephemeral message that was sent by the selfUser and the obfuscation timer already fired
     /// At this point the genericMessage content is already cleared. You should receive a notification that the content was cleared
     var isObfuscated : Bool { get }
+
+    /// Returns the date when a ephemeral message will be destructed or `nil` if th message is not ephemeral
+    var destructionDate: Date? { get }
 }
 
 
