@@ -53,7 +53,7 @@ public extension ZMGenericMessage {
                 var obfuscatedLinkPreviews : [ZMLinkPreview] = []
                 if linkPreviews.count > 0 {
                     let offset = linkPreviews.first!.urlOffset
-                    let offsetIndex = obfuscatedContent.index(obfuscatedContent.startIndex, offsetBy: String.IndexDistance(offset))
+                    let offsetIndex = obfuscatedContent.index(obfuscatedContent.startIndex, offsetBy: String.IndexDistance(offset), limitedBy: obfuscatedContent.endIndex) ?? obfuscatedContent.startIndex
                     let originalURL = obfuscatedContent.substring(from: offsetIndex)
                     obfuscatedLinkPreviews = linkPreviews.map{$0.obfuscated(originalURL: originalURL)}
                 }
@@ -127,15 +127,15 @@ extension ZMAsset {
         }
         if hasPreview(), let preview = preview {
             previewBuilder = ZMAssetPreview.builder()
-            if preview.hasImage(), let image = preview.image {
+            if preview.hasImage(), let previewImage = preview.image {
                 let imageBuilder = ZMAssetImageMetaData.builder()!
-                imageBuilder.setTag(image.tag)
-                imageBuilder.setWidth(image.width)
-                imageBuilder.setHeight(image.height)
+                imageBuilder.setTag(previewImage.tag)
+                imageBuilder.setWidth(previewImage.width)
+                imageBuilder.setHeight(previewImage.height)
                 previewBuilder!.setImage(imageBuilder.build())
             }
             previewBuilder!.setSize(10)
-            previewBuilder!.setMimeType(original.mimeType)
+            previewBuilder!.setMimeType(preview.mimeType)
         }
         return ZMAsset.asset(withOriginal: originalBuilder?.build(), preview: previewBuilder?.build())
     }
