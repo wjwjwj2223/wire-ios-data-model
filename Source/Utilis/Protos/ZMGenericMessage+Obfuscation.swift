@@ -52,7 +52,10 @@ public extension ZMGenericMessage {
                 let obfuscatedContent = content.obfuscated()
                 var obfuscatedLinkPreviews : [ZMLinkPreview] = []
                 if linkPreviews.count > 0 {
-                    obfuscatedLinkPreviews = linkPreviews.map{$0.obfuscated()}
+                    let offset = linkPreviews.first!.urlOffset
+                    let offsetIndex = obfuscatedContent.index(obfuscatedContent.startIndex, offsetBy: String.IndexDistance(offset))
+                    let originalURL = obfuscatedContent.substring(from: offsetIndex)
+                    obfuscatedLinkPreviews = linkPreviews.map{$0.obfuscated(originalURL: originalURL)}
                 }
                 return ZMGenericMessage.message(text: obfuscatedContent, linkPreview:obfuscatedLinkPreviews.first, nonce: messageId)
             }
@@ -75,12 +78,12 @@ public extension ZMGenericMessage {
 
 extension ZMLinkPreview {
 
-    func obfuscated() -> ZMLinkPreview {
+    func obfuscated(originalURL: String) -> ZMLinkPreview {
         let obfTitle = hasTitle() ? title?.obfuscated() : nil
         let obfSummary = hasSummary() ? summary?.obfuscated() : nil
         let obfImage = hasImage() ? image?.obfuscated() : nil
         let obfTweet = hasTweet() ? tweet?.obfuscated() : nil
-        return ZMLinkPreview.linkPreview(withOriginalURL: url.obfuscated(), permanentURL: permanentUrl.obfuscated(), offset: 0, title: obfTitle, summary: obfSummary, imageAsset: obfImage, tweet: obfTweet)
+        return ZMLinkPreview.linkPreview(withOriginalURL: originalURL, permanentURL: permanentUrl.obfuscated(), offset: urlOffset, title: obfTitle, summary: obfSummary, imageAsset: obfImage, tweet: obfTweet)
     }
 }
 
