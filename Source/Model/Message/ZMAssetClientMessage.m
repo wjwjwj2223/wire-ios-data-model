@@ -1170,8 +1170,13 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 - (BOOL)startDestructionIfNeeded
 {
     BOOL isSelfUser = self.sender.isSelfUser;
-    if (!isSelfUser && self.transferState == ZMFileTransferStateUploading) {
-        return NO;
+
+    if (!isSelfUser) {
+        if (nil != self.imageMessageData && !self.hasDownloadedImage) {
+            return NO;
+        } else if (nil != self.fileMessageData && !self.genericAssetMessage.assetData.hasUploaded) {
+            return NO;
+        }
     }
     // This method is called after receiving the response but before updating the
     // uploadState, which means a state of fullAsset corresponds to the asset upload being done.
