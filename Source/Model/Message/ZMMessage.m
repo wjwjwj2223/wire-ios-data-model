@@ -1124,11 +1124,33 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
             // message needs to be obfuscated
             [message obfuscate];
         } else {
-            // message needs to be deleted for everyone
-            [ZMMessage deleteForEveryone:message];
+            NSTimeInterval timeToDeletion = [message.destructionDate timeIntervalSinceNow];
+            if (timeToDeletion > 0) {
+                // The timer has not run out yet, we want to start a timer with the remaining time
+                [message restartDeletionTimer:timeToDeletion];
+            } else {
+                // The timer has run out, we want to delete the message
+                [ZMMessage deleteForEveryone:message];
+            }
         }
     }
 }
+
+- (void)restartDeletionTimer:(NSTimeInterval)remainingTime
+{
+    NSManagedObjectContext *uiContext = self.managedObjectContext;
+    if (!uiContext.zm_isUserInterfaceContext) {
+        uiContext = self.managedObjectContext.zm_userInterfaceContext;
+    }
+    [uiContext performGroupedBlock:^{
+        NSError *error;
+        ZMMessage *message = [uiContext existingObjectWithID:self.objectID error:&error];
+        if (error == nil && message != nil) {
+            [uiContext.zm_messageDeletionTimer startDeletionTimerWithMessage:message timeout:remainingTime];
+        }
+    }];
+}
+
 
 @end
 

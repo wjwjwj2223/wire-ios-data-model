@@ -41,7 +41,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
     func testThatItInsertsAnEphemeralMessageForAssets(){
         // given
         conversation.messageDestructionTimeout = 10
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
         
         // when
         let message = conversation.appendMessage(with: fileMetadata) as! ZMAssetClientMessage
@@ -56,7 +56,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
         self.syncMOC.performGroupedBlockAndWait {
             // given
             self.syncConversation.messageDestructionTimeout = 10
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             let message = self.syncConversation.appendMessage(with: fileMetadata) as! ZMAssetClientMessage
             message.uploadState = .uploadingFullAsset
             
@@ -74,7 +74,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
         self.syncMOC.performGroupedBlockAndWait {
             // given
             self.syncConversation.messageDestructionTimeout = 10
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             let message = self.syncConversation.appendMessage(with: fileMetadata) as! ZMAssetClientMessage
             
             // when
@@ -92,14 +92,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
 
 extension ZMAssetClientMessageTests_Ephemeral {
     
-    func testThatItStartsTheTimerWhenFileTransferStateIsUploaded() {
     
-    }
-    
-    func testThatDoesNotItStartsTheTimerWhenFileTransferStateIsUploading() {
-        
-    }
-
 }
 
 

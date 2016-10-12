@@ -79,16 +79,15 @@ class BaseZMAssetClientMessageTests : BaseZMClientMessageTests {
     }
     
     
-    func addFile(filename: String? = nil) -> (ZMFileMetadata, Int) {
+    func addFile(filename: String? = nil) -> ZMFileMetadata {
         if let fileName = filename {
             currentTestURL = testURLWithFilename(fileName)
         } else {
             currentTestURL = testURLWithFilename("file.dat")
         }
-        let data = createTestFile(currentTestURL!)
-        let size = data.count
+        _ = createTestFile(currentTestURL!)
         let fileMetadata = ZMFileMetadata(fileURL: currentTestURL!)
-        return (fileMetadata, size)
+        return fileMetadata
     }
     
     func testURLWithFilename(_ filename: String) -> URL {
@@ -238,7 +237,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
         
         // when
         let sut = ZMAssetClientMessage(
@@ -259,7 +258,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
         
         // when
         let sut = ZMAssetClientMessage(
@@ -277,7 +276,7 @@ extension ZMAssetClientMessageTests {
     {
         // given
         let nonce = UUID.create()
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
         
         // when
         let sut = ZMAssetClientMessage(
@@ -298,7 +297,7 @@ extension ZMAssetClientMessageTests {
         // given
         let nonce = UUID.create()
         let mimeType = "video/mp4"
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
 
         
         // when
@@ -320,7 +319,7 @@ extension ZMAssetClientMessageTests {
         // given
         let nonce = UUID.create()
         let mimeType = "video/mp4"
-        let fileMetadata = addFile().0
+        let fileMetadata = addFile()
         
         // when
         let sut = ZMAssetClientMessage(
@@ -567,7 +566,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             // given
             let nonce = UUID.create()
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             // when
             let sut = ZMAssetClientMessage(
@@ -587,7 +586,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait { 
             // given
             let nonce = UUID.create()
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -616,7 +615,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             // given
             let nonce = UUID.create()
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let selfClient = UserClient.insertNewObject(in: self.syncMOC)
             selfClient.remoteIdentifier = self.name
@@ -816,7 +815,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -842,7 +841,7 @@ extension ZMAssetClientMessageTests {
         // given
         self.syncMOC.performAndWait {
             
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -877,7 +876,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -904,7 +903,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
 
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -939,7 +938,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -965,7 +964,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -996,7 +995,7 @@ extension ZMAssetClientMessageTests {
     func testThatItItReturnsTheEncryptedGenericMessageDataIncludingThe_NotUploaded_WhenItIsPresent() {
         self.syncMOC.performAndWait {
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1053,7 +1052,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1083,7 +1082,7 @@ extension ZMAssetClientMessageTests {
         self.syncMOC.performAndWait {
             
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1107,7 +1106,7 @@ extension ZMAssetClientMessageTests {
             let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
             
             let uuid = UUID.create().transportString()
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1144,7 +1143,7 @@ extension ZMAssetClientMessageTests {
             let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
             
             let uuid = UUID.create().transportString()
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1185,7 +1184,7 @@ extension ZMAssetClientMessageTests {
             let previewMimeType = "image/jpg"
             let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data.zmRandomSHA256Key(), sha256: Data.zmRandomSHA256Key())
             let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
@@ -1233,7 +1232,7 @@ extension ZMAssetClientMessageTests {
         let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
         
         let uuid = UUID.create().transportString()
-        let fileMetadata = self.addFile().0
+        let fileMetadata = self.addFile()
         
         let sut = ZMAssetClientMessage(fileMetadata: fileMetadata,
                                        nonce: UUID.create(),
@@ -2171,7 +2170,7 @@ extension ZMAssetClientMessageTests {
     func checkThatFileMessageCanBeDeleted(_ canBeDeleted: Bool, _ state: ZMDeliveryState, line: UInt = #line) {
         syncMOC.performAndWait {
             // given
-            let fileMetadata = self.addFile().0
+            let fileMetadata = self.addFile()
             
             let sut = ZMAssetClientMessage(
                 fileMetadata: fileMetadata,
