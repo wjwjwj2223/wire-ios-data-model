@@ -64,13 +64,13 @@ class TokenCollection<T : NSObject> where T : ChangeNotifierToken {
 
 final class GlobalConversationObserver : NSObject, ObjectsDidChangeDelegate, ZMGeneralConversationObserver, ZMConversationListObserver {
     
-    fileprivate var internalConversationListObserverTokens : [String :InternalConversationListObserverToken] = [:]
+    fileprivate var internalConversationListObserverTokens : [String: InternalConversationListObserverToken] = [:]
     fileprivate var globalVoiceChannelObserverTokens : Set<GlobalVoiceChannelStateObserverToken> = Set()
 
     fileprivate var conversationTokens : [NSManagedObjectID : GeneralConversationObserverToken<GlobalConversationObserver>] = [:]
-    fileprivate var voiceChannelParticipantsTokens : [NSManagedObjectID : InternalVoiceChannelParticipantsObserverToken] = [:]
+    fileprivate var voiceChannelParticipantsTokens : [NSManagedObjectID: InternalVoiceChannelParticipantsObserverToken] = [:]
 
-    fileprivate weak var managedObjectContext : NSManagedObjectContext?
+    fileprivate weak var managedObjectContextObserver : ManagedObjectContextObserver?
     
     fileprivate var conversationLists : [UnownedObject<ZMConversationList>] = Array()
     
@@ -82,9 +82,15 @@ final class GlobalConversationObserver : NSObject, ObjectsDidChangeDelegate, ZMG
     var isTornDown : Bool = false
     fileprivate (set) var isReady : Bool  = false
     
-    init(managedObjectContext: NSManagedObjectContext) {
-        self.managedObjectContext = managedObjectContext
+    init(managedObjectContextObserver: ManagedObjectContextObserver) {
+        self.managedObjectContextObserver = managedObjectContextObserver
         super.init()
+    }
+    
+    fileprivate var managedObjectContext: NSManagedObjectContext? {
+        get {
+            return self.managedObjectContextObserver?.managedObjectContext
+        }
     }
     
     func prepareObservers() {
@@ -129,7 +135,7 @@ final class GlobalConversationObserver : NSObject, ObjectsDidChangeDelegate, ZMG
                 _ = try? conv.managedObjectContext?.obtainPermanentIDs(for: [conv])
             }
             if self.conversationTokens[conv.objectID] == nil {
-                self.conversationTokens[conv.objectID] = GeneralConversationObserverToken<GlobalConversationObserver>(observer: self, conversation: conv)
+                self.conversationTokens[conv.objectID] = GeneralConversationObserverToken<GlobalConversationObserver>(observer: self, conversation: conv, managedObjectContextObserver: self.managedObjectContextObserver!)
             }
         }
     }
@@ -275,7 +281,7 @@ final class GlobalConversationObserver : NSObject, ObjectsDidChangeDelegate, ZMG
         internalConversationListObserverTokens = [:]
         
         globalVoiceChannelObserverTokens.forEach{$0.tearDown()}
-        globalVoiceChannelObserverTokens =  Set()
+        globalVoiceChannelObserverTokens = Set()
         
         conversationObserverTokens = TokenCollection()
         conversationListObserverTokens = TokenCollection()
@@ -292,8 +298,7 @@ final class GlobalConversationObserver : NSObject, ObjectsDidChangeDelegate, ZMG
 extension GlobalConversationObserver {
     
     // adding and removing list observers
-    func addObserver(_ observer: ZMConversationListObserver, conversationList: ZMConversationList) -> ConversationListObserverToken
-    {
+    func addObserver(_ observer: ZMConversationListObserver, conversationList: ZMConversationList) -> ConversationListObserverToken {
         registerTokensForConversationList([conversationList])
         let token = conversationListObserverTokens.addObserver(observer, object: conversationList.identifier, globalObserver: self)
         return token
@@ -308,8 +313,7 @@ extension GlobalConversationObserver {
     }
     
     // adding and removing voiceChannel observers
-    func addGlobalVoiceChannelStateObserver(_ observer: ZMVoiceChannelStateObserver) -> GlobalVoiceChannelStateObserverToken
-    {
+    func addGlobalVoiceChannelStateObserver(_ observer: ZMVoiceChannelStateObserver) -> GlobalVoiceChannelStateObserverToken {
         let token = GlobalVoiceChannelStateObserverToken(observer: observer)
         self.globalVoiceChannelObserverTokens.insert(token)
         return token
@@ -318,7 +322,6 @@ extension GlobalConversationObserver {
     func removeGlobalVoiceChannelStateObserver(_ token: GlobalVoiceChannelStateObserverToken) {
         self.globalVoiceChannelObserverTokens.remove(token)
     }
-    
     
     func addConversationObserver(_ observer: ZMConversationObserver, conversation: ZMConversation) -> ConversationObserverToken {
         registerTokensForConversations([conversation])

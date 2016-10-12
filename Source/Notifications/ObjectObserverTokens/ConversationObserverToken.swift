@@ -115,21 +115,24 @@ class GeneralConversationObserverToken<T: NSObject> : ObjectObserverTokenContain
     
     typealias InnerTokenType = ObjectObserverToken<GeneralConversationChangeInfo, GeneralConversationObserverToken>
     
+    let managedObjectContextObserver: ManagedObjectContextObserver
     var isTornDown : Bool = false
     fileprivate weak var observer : T?
     var conversation : ZMConversation? {
         return self.object as? ZMConversation
     }    
     
-    init(observer: T, conversation: ZMConversation) {
+    init(observer: T, conversation: ZMConversation, managedObjectContextObserver: ManagedObjectContextObserver) {
         self.observer = observer
 
         var changeHandler : (NSObject, GeneralConversationChangeInfo) -> () = { _ in return }
         let innerToken = InnerTokenType.token(
             conversation,
             observableKeys: conversation.observableKeys,
-            managedObjectContextObserver : conversation.managedObjectContext!.globalManagedObjectContextObserver,
+            managedObjectContextObserver: managedObjectContextObserver,
             changeHandler: { changeHandler($0, $1) })
+        
+        self.managedObjectContextObserver = managedObjectContextObserver
         
         super.init(object:conversation, token:innerToken)
         
@@ -138,7 +141,7 @@ class GeneralConversationObserverToken<T: NSObject> : ObjectObserverTokenContain
             self?.observer?.conversationDidChange(changeInfo)
         }
         innerToken.addContainer(self)
-        conversation.managedObjectContext?.globalManagedObjectContextObserver.addDisplayNameObserver(self)
+        managedObjectContextObserver.addDisplayNameObserver(self)
     }
     
      override func tearDown() {
@@ -152,7 +155,7 @@ class GeneralConversationObserverToken<T: NSObject> : ObjectObserverTokenContain
                 t.tearDown()
             }
         }
-        conversation?.managedObjectContext?.globalManagedObjectContextObserver.removeDisplayNameObserver(self)
+        managedObjectContextObserver.removeDisplayNameObserver(self)
     }
     
     func displayNameMightChange(_ users: Set<NSObject>) {

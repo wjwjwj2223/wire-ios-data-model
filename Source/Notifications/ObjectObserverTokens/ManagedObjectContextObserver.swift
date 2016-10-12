@@ -245,6 +245,7 @@ public protocol DisplayNameDidChangeDelegate {
 // MARK: - ManagedObjectContextObserver
 
 let ManagedObjectContextObserverKey = "ManagedObjectContextObserverKey"
+let ManagedObjectContextBackgroundObserverKey = "ManagedObjectContextBackgroundObserverKey"
 
 extension NSManagedObjectContext {
     
@@ -258,6 +259,18 @@ extension NSManagedObjectContext {
         newObserver.setup()
         return newObserver
     }
+    
+    public var globalManagedObjectContextBackgroundObserver : ManagedObjectContextObserver {
+        if let observer = self.userInfo[ManagedObjectContextBackgroundObserverKey] as? ManagedObjectContextObserver {
+            return observer
+        }
+        
+        let newObserver = ManagedObjectContextObserver(managedObjectContext: self)
+        self.userInfo[ManagedObjectContextBackgroundObserverKey] = newObserver
+        newObserver.setup()
+        newObserver.propagateChanges = true
+        return newObserver
+    }
 }
 
 public final class ManagedObjectContextObserver: NSObject {
@@ -265,8 +278,8 @@ public final class ManagedObjectContextObserver: NSObject {
     typealias ObserversCollection = [ObjectObserverType : NSHashTable<AnyObject>]
     
     fileprivate var observers : ObserversCollection = [:]
-    
-    fileprivate weak var managedObjectContext : NSManagedObjectContext?
+
+    public weak var managedObjectContext : NSManagedObjectContext?
     
     fileprivate var globalConversationObserver : GlobalConversationObserver!
     fileprivate var globalUserObserver : GlobalUserObserver!
@@ -284,7 +297,6 @@ public final class ManagedObjectContextObserver: NSObject {
                 propagateAccumulatedChanges()
             }
         }
-        
     }
     
     public var isReady : Bool {
@@ -311,7 +323,7 @@ public final class ManagedObjectContextObserver: NSObject {
     
     func setup() {
         self.globalUserObserver = GlobalUserObserver(managedObjectContext: managedObjectContext!)
-        self.globalConversationObserver = GlobalConversationObserver(managedObjectContext: managedObjectContext!)
+        self.globalConversationObserver = GlobalConversationObserver(managedObjectContextObserver: self)
     }
     
     public func tearDown() {
@@ -325,6 +337,7 @@ public final class ManagedObjectContextObserver: NSObject {
             }
         }
         self.observers = [:]
+
         NotificationCenter.default.removeObserver(self)
     }
     

@@ -75,8 +75,17 @@ static NSString * const ZMVoiceChannelParticipantVoiceGainChangedNotificationNam
 
 + (id<ZMVoiceChannelStateObserverOpaqueToken>)addGlobalVoiceChannelStateObserver:(id<ZMVoiceChannelStateObserver>)observer managedObjectContext:(NSManagedObjectContext *)managedObjectContext;
 {
-    
-    return (id) [managedObjectContext.globalManagedObjectContextObserver addGlobalVoiceChannelObserver:observer];
+    return [self addGlobalVoiceChannelStateObserver:observer managedObjectContext:managedObjectContext runsInBackground:NO];
+}
+
++ (id<ZMVoiceChannelStateObserverOpaqueToken>)addGlobalVoiceChannelStateObserver:(id<ZMVoiceChannelStateObserver>)observer managedObjectContext:(NSManagedObjectContext *)managedObjectContext runsInBackground:(BOOL)runsInBackground;
+{
+    if (runsInBackground) {
+        return (id) [managedObjectContext.globalManagedObjectContextBackgroundObserver addGlobalVoiceChannelObserver:observer];
+    }
+    else {
+        return (id) [managedObjectContext.globalManagedObjectContextObserver addGlobalVoiceChannelObserver:observer];
+    }
 }
 
 + (void)removeGlobalVoiceChannelStateObserverForToken:(id<ZMVoiceChannelStateObserverOpaqueToken>)token managedObjectContext:(NSManagedObjectContext *)managedObjectContext;
@@ -84,10 +93,14 @@ static NSString * const ZMVoiceChannelParticipantVoiceGainChangedNotificationNam
     [managedObjectContext.globalManagedObjectContextObserver removeGlobalVoiceChannelStateObserverForToken:token];
 }
 
-
-+ (id<ZMVoiceChannelStateObserverOpaqueToken>)addGlobalVoiceChannelStateObserver:(id<ZMVoiceChannelStateObserver>)observer inUserSession:(id<ZMManagedObjectContextProvider>)userSession;
++ (nonnull id<ZMVoiceChannelStateObserverOpaqueToken>)addGlobalVoiceChannelStateObserver:(nonnull id<ZMVoiceChannelStateObserver>)observer inUserSession:(nonnull id<ZMManagedObjectContextProvider>)userSession;
 {
-    return [self addGlobalVoiceChannelStateObserver:observer managedObjectContext:userSession.managedObjectContext];
+    return [self addGlobalVoiceChannelStateObserver:observer inUserSession:userSession runsInBackground:NO];
+}
+
++ (nonnull id<ZMVoiceChannelStateObserverOpaqueToken>)addGlobalVoiceChannelStateObserver:(nonnull id<ZMVoiceChannelStateObserver>)observer inUserSession:(nonnull id<ZMManagedObjectContextProvider>)userSession runsInBackground:(BOOL)runsInBackground;
+{
+    return [self addGlobalVoiceChannelStateObserver:observer managedObjectContext:userSession.managedObjectContext runsInBackground:runsInBackground];
 }
 
 + (void)removeGlobalVoiceChannelStateObserverForToken:(id<ZMVoiceChannelStateObserverOpaqueToken>)token inUserSession:(id<ZMManagedObjectContextProvider>)userSession;
