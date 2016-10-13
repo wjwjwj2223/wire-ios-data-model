@@ -1,9 +1,19 @@
 //
-//  ZMMessageDestructionTimer.swift
-//  ZMCDataModel
+// Wire
+// Copyright (C) 2016 Wire Swiss GmbH
 //
-//  Created by Sabine Geithner on 28/09/16.
-//  Copyright © 2016 Wire Swiss GmbH. All rights reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
 import Foundation
@@ -63,9 +73,10 @@ enum MessageDestructionType : String {
     case obfuscation, deletion
 }
 
-
 public class ZMMessageDestructionTimer : ZMMessageTimer {
 
+    internal var isTesting : Bool = false
+    
     override init(managedObjectContext: NSManagedObjectContext!) {
         super.init(managedObjectContext: managedObjectContext)
         timerCompletionBlock = { [weak self] (message, userInfo) in
@@ -90,15 +101,18 @@ public class ZMMessageDestructionTimer : ZMMessageTimer {
         moc.saveOrRollback()
     }
     
+    
     public func startObfuscationTimer(message: ZMMessage, timeout: TimeInterval) {
-        let fireDate = Date().addingTimeInterval(timeout)
+        let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.closestTimeout(for: timeout)
+        let fireDate = Date().addingTimeInterval(matchedTimeout)
         start(forMessageIfNeeded: message,
               fire: fireDate,
               userInfo: [MessageDestructionType.UserInfoKey : MessageDestructionType.obfuscation.rawValue])
     }
     
     public func startDeletionTimer(message: ZMMessage, timeout: TimeInterval) {
-        let fireDate = Date().addingTimeInterval(timeout)
+        let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.closestTimeout(for: timeout)
+        let fireDate = Date().addingTimeInterval(matchedTimeout)
         start(forMessageIfNeeded: message,
               fire: fireDate,
               userInfo: [MessageDestructionType.UserInfoKey : MessageDestructionType.deletion.rawValue])

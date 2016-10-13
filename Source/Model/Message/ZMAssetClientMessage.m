@@ -1174,8 +1174,12 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
     if (!isSelfUser) {
         if (nil != self.imageMessageData && !self.hasDownloadedImage) {
             return NO;
-        } else if (nil != self.fileMessageData && !self.genericAssetMessage.assetData.hasUploaded) {
-            return NO;
+        } else if (nil != self.fileMessageData) {
+            if (!self.genericAssetMessage.assetData.hasUploaded &&
+                !self.genericAssetMessage.assetData.hasNotUploaded)
+            {
+                return NO;
+            }
         }
     }
     // This method is called after receiving the response but before updating the

@@ -1,9 +1,19 @@
 //
-//  ZMClientMessageTests+Ephemeral.swift
-//  ZMCDataModel
+// Wire
+// Copyright (C) 2016 Wire Swiss GmbH
 //
-//  Created by Sabine Geithner on 29/09/16.
-//  Copyright © 2016 Wire Swiss GmbH. All rights reserved.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
 import Foundation
@@ -13,8 +23,15 @@ import ZMCLinkPreview
 @testable import ZMCDataModel
 
 class ZMClientMessageTests_Ephemeral : BaseZMClientMessageTests {
-    // TODO Sabine: in the message transcoder make sure that there are no race conditions
-    // e.g. second part completes from server, first part already deleted
+    
+    override func setUp() {
+        super.setUp()
+        deletionTimer.isTesting = true
+        syncMOC.performGroupedBlockAndWait {
+            self.obfuscationTimer.isTesting = true
+        }
+    }
+    
     override func tearDown() {
         syncMOC.performGroupedBlockAndWait {
             self.syncMOC.zm_teardownMessageObfuscationTimer()
@@ -25,7 +42,7 @@ class ZMClientMessageTests_Ephemeral : BaseZMClientMessageTests {
             self.uiMOC.zm_teardownMessageDeletionTimer()
         }
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
-
+    
         super.tearDown()
     }
     
@@ -64,25 +81,6 @@ extension ZMClientMessageTests_Ephemeral {
         
         // then
         XCTAssertFalse(message.isEphemeral)
-    }
-    
-    func testThatWhenCreatingAMultipartMessageItUsesTheTimeoutSetInTheFirstCreatedPartForAllParts(){
-        // given
-        let timeout : TimeInterval = 10
-        conversation.messageDestructionTimeout = timeout
-
-        // when
-        let message = conversation.appendMessage(withImageData: verySmallJPEGData()) as! ZMAssetClientMessage
-        XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
-        
-        // then
-        let previewGenericMessage = message.genericMessage(for: .placeholder)
-        XCTAssertTrue(previewGenericMessage!.hasEphemeral())
-        XCTAssertEqual(previewGenericMessage!.ephemeral.expireAfterMillis, 10*1000)
-        
-        let mediumGenericMessage = message.genericMessage(for: .fullAsset)
-        XCTAssertTrue(mediumGenericMessage!.hasEphemeral())
-        XCTAssertEqual(mediumGenericMessage!.ephemeral.expireAfterMillis, 10*1000)
     }
     
     func checkItCreatesAnEphemeralMessage(messageCreationBlock: ((ZMConversation) -> ZMMessage)) {
@@ -181,7 +179,6 @@ extension ZMClientMessageTests_Ephemeral {
         }
     }
     
-    // TODO test for Asset, External, Image
     func testThatItClearsTheMessageContentWhenTheTimerFiresAndSetsIsObfuscatedToTrue(){
         var message : ZMClientMessage!
         
@@ -255,12 +252,6 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNil(message.genericMessage)
         }
     }
-
-    func testThatTheRequestPayloadForAnEphemeralMessageOnlyContainsTheOtherUsersClients(){
-       // TODO Sabine: Integration Test in Sync Engine, implement after merging mike's changes
-    }
-
-
 }
 
 
@@ -316,8 +307,6 @@ extension ZMClientMessageTests_Ephemeral {
         // then
         guard let deleteMessage = conversation.hiddenMessages.firstObject as? ZMClientMessage
         else { return XCTFail()}
-        print(deleteMessage)
-        print(deleteMessage.genericMessage)
 
         guard let genericMessage = deleteMessage.genericMessage, genericMessage.hasDeleted()
         else {return XCTFail()}
@@ -396,8 +385,9 @@ extension ZMClientMessageTests_Ephemeral {
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
         
         // then
-        XCTAssertEqual(conversation.hiddenMessages.count, 0)
-        XCTAssertTrue(deletionTimer.isTimerRunning(for: message))
+        XCTAssertTrue(hasDeleteMessage(for: message))
+        XCTAssertNil(message.sender)
+        XCTAssertEqual(message.hiddenInConversation, conversation)
     }
     
     func testThatItDoesNotDeleteMessagesFromOtherUserWhenTimerHad_Not_Started(){
@@ -409,9 +399,8 @@ extension ZMClientMessageTests_Ephemeral {
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
         
         // then
-        XCTAssertTrue(hasDeleteMessage(for: message))
-        XCTAssertNil(message.sender)
-        XCTAssertEqual(message.hiddenInConversation, conversation)
+        XCTAssertEqual(conversation.hiddenMessages.count, 0)
+        XCTAssertFalse(deletionTimer.isTimerRunning(for: message))
     }
     
     func obfuscatedMessagesByTheSelfUser(timerHadStarted: Bool) -> Bool {

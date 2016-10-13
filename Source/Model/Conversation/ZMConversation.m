@@ -1092,11 +1092,6 @@ const NSUInteger ZMLeadingEventIDWindowBleed = 50;
     }];
 }
 
-- (void)updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout;
-{
-    self.messageDestructionTimeout = (long)timeout;
-}
-
 @end
 
 

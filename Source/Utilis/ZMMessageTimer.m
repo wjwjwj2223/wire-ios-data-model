@@ -80,7 +80,6 @@ ZM_EMPTY_ASSERTING_INIT()
 
 - (BOOL)isTimerRunningForMessage:(ZMMessage *)message
 {
-    NSLog(@"%@", self.objectToTimerMap);
     return [self.objectToTimerMap objectForKey:message] != nil;
 }
 

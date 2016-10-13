@@ -329,7 +329,6 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     if (!self.isEphemeral) {
         return;
     }
-    // TODO Sabine handle External?
     if (self.genericMessage.textData != nil && self.genericMessage.linkPreviews.count > 0 &&
         self.linkPreviewState != ZMLinkPreviewStateDone)
     {

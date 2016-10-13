@@ -1080,7 +1080,6 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
 
 - (BOOL)startDestructionIfNeeded
 {
-    // TODO Sabine: Tests
     if (self.destructionDate != nil || !self.isEphemeral) {
         return NO;
     }

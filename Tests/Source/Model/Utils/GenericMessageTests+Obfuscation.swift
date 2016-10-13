@@ -19,8 +19,19 @@
 import Foundation
 @testable import ZMCDataModel
 
-class ZMGenericMessageTests_Obfuscation : XCTestCase {
-    // TODO Sabine: ImageAssets & Tweet
+class ZMGenericMessageTests_Obfuscation : ZMBaseManagedObjectTest {
+    
+    func assetWithImage() -> ZMAsset {
+        let original = ZMAssetOriginal.original(withSize: 1000, mimeType: "image", name: "foo")
+        let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data(), sha256: Data(), assetId: "assetID", assetToken: "assetToken")
+        let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 30, height: 40)
+        let imageMetaDataBuilder = imageMetaData.toBuilder()!
+        imageMetaDataBuilder.setTag("bar")
+        
+        let preview = ZMAssetPreview.preview(withSize: 2000, mimeType: "video", remoteData: remoteData, imageMetaData: imageMetaDataBuilder.build())
+        let asset  = ZMAsset.asset(withOriginal: original, preview: preview)
+        return asset
+    }
     
     func testThatItObfuscatesTextMessages(){
         // given
@@ -55,7 +66,7 @@ class ZMGenericMessageTests_Obfuscation : XCTestCase {
         let origURL = "www.example.com/original"
         let text = "foo www.example.com/original"
         let offset : Int32 = 4
-
+        
         let linkPreview = ZMLinkPreview.linkPreview(withOriginalURL: origURL, permanentURL: permURL, offset: offset, title: title, summary: summary, imageAsset: nil)
         let genericMessage = ZMGenericMessage.message(text: text, linkPreview: linkPreview, nonce: "qwerty", expiresAfter: NSNumber(value:20))
         
@@ -79,17 +90,95 @@ class ZMGenericMessageTests_Obfuscation : XCTestCase {
         XCTAssertNotEqual(obfuscatedLinkPreview.article?.summary, summary)
         XCTAssertNotEqual(obfuscatedLinkPreview.article?.summary.characters.count, 0)
     }
+    
+    func testThatItObfuscatesLinkPreviews_Images(){
+        // given
+        let title = "title"
+        let summary = "summary"
+        let permURL = "www.example.com/permanent"
+        let origURL = "www.example.com/original"
+        let text = "foo www.example.com/original"
+        let image = assetWithImage()
+        let offset : Int32 = 4
 
+        let linkPreview = ZMLinkPreview.linkPreview(withOriginalURL: origURL, permanentURL: permURL, offset: offset, title: title, summary: summary, imageAsset: image)
+        let genericMessage = ZMGenericMessage.message(text: text, linkPreview: linkPreview, nonce: "qwerty", expiresAfter: NSNumber(value:20))
+        
+        // when
+        let obfuscated =  genericMessage.obfuscatedMessage()
+        
+        // then
+        guard let obfuscatedLinkPreview = obfuscated?.linkPreviews.first else { return XCTFail()}
+        guard let obfuscatedAsset = obfuscatedLinkPreview.image else {return XCTFail()}
+        XCTAssertTrue(obfuscatedAsset.hasOriginal())
+        XCTAssertEqual(obfuscatedAsset.original.size, 10)
+        XCTAssertEqual(obfuscatedAsset.original.mimeType, "image")
+        XCTAssertEqual(obfuscatedAsset.preview.size, 10)
+        XCTAssertEqual(obfuscatedAsset.preview.mimeType, "video")
+        XCTAssertEqual(obfuscatedAsset.preview.image.width, 30)
+        XCTAssertEqual(obfuscatedAsset.preview.image.height, 40)
+        XCTAssertEqual(obfuscatedAsset.preview.image.tag, "bar")
+        XCTAssertFalse(obfuscatedAsset.preview.hasRemote())
+    }
+    
+    func testThatItObfuscatesLinkPreviews_Tweets(){
+        // given
+        let title = "title"
+        let summary = "summary"
+        let permURL = "www.example.com/permanent"
+        let origURL = "www.example.com/original"
+        let text = "foo www.example.com/original"
+        let tweet = ZMTweet.tweet(withAuthor: "author", username: "username")
+        let offset : Int32 = 4
+        
+        let linkPreview = ZMLinkPreview.linkPreview(withOriginalURL: origURL, permanentURL: permURL, offset: offset, title: title, summary: summary, imageAsset: nil, tweet: tweet)
+        let genericMessage = ZMGenericMessage.message(text: text, linkPreview: linkPreview, nonce: "qwerty", expiresAfter: NSNumber(value:20))
+        
+        // when
+        let obfuscated =  genericMessage.obfuscatedMessage()
+        
+        // then
+        guard let obfuscatedLinkPreview = obfuscated?.linkPreviews.first else { return XCTFail()}
+        
+        // then
+        guard let obfuscatedTweet = obfuscatedLinkPreview.tweet else {return XCTFail()}
+        XCTAssertNotEqual(obfuscatedTweet.author, "author")
+        XCTAssertEqual(obfuscatedTweet.author.characters.count, "author".characters.count)
+
+        XCTAssertNotEqual(obfuscatedTweet.username, "username")
+        XCTAssertEqual(obfuscatedTweet.username.characters.count, "username".characters.count)
+    }
+
+    func testThatItObfuscatesImageAssetContent(){
+        // given
+        let image = ZMImageAsset(data: verySmallJPEGData(), format: .medium)!
+        let genericMessage = ZMGenericMessage.genericMessage(pbMessage: image, messageID: "foo", expiresAfter: NSNumber(value: 3.0))
+        XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
+        XCTAssertTrue(genericMessage.ephemeral.hasImage())
+        XCTAssertEqual(genericMessage.imageAssetData?.mimeType, "image/jpeg")
+        XCTAssertEqual(genericMessage.imageAssetData?.tag, "medium")
+        XCTAssertEqual(genericMessage.imageAssetData?.originalWidth, 64)
+        XCTAssertEqual(genericMessage.imageAssetData?.originalHeight, 64)
+        XCTAssertNotEqual(genericMessage.imageAssetData?.size, 1)
+        
+        // when
+        let obfuscated =  genericMessage.obfuscatedMessage()
+        
+        // then
+        guard let obfuscatedImage = obfuscated?.image else { return XCTFail()}
+        
+        // then
+        XCTAssertEqual(obfuscatedImage.mimeType, "image/jpeg")
+        XCTAssertEqual(obfuscatedImage.tag, "medium")
+        XCTAssertEqual(obfuscatedImage.originalWidth, 64)
+        XCTAssertEqual(obfuscatedImage.originalHeight, 64)
+        XCTAssertEqual(obfuscatedImage.size, 1)
+    }
+    
+    
     func testThatItObfuscatesAssetsImageContent(){
         // given
-        let original = ZMAssetOriginal.original(withSize: 1000, mimeType: "image", name: "foo")
-        let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data(), sha256: Data(), assetId: "assetID", assetToken: "assetToken")
-        let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 30, height: 40)
-        let imageMetaDataBuilder = imageMetaData.toBuilder()!
-        imageMetaDataBuilder.setTag("bar")
-        
-        let preview = ZMAssetPreview.preview(withSize: 2000, mimeType: "video", remoteData: remoteData, imageMetaData: imageMetaDataBuilder.build())
-        let asset  = ZMAsset.asset(withOriginal: original, preview: preview)
+        let asset  = assetWithImage()
         let genericMessage = ZMGenericMessage.genericMessage(asset: asset, messageID: "sdgfhgjkl", expiresAfter: NSNumber(value:20))
         
         // when

@@ -59,16 +59,6 @@ typedef NS_ENUM(int16_t, ZMConversationListIndicator) {
 };
 
 
-typedef NS_ENUM(int16_t, ZMConversationMessageDestructionTimeout) {
-    ZMConversationMessageDestructionTimeoutNone = 0,
-    ZMConversationMessageDestructionTimeoutFiveSeconds = 5,
-    ZMConversationMessageDestructionTimeoutFifteenSeconds = 15,
-    ZMConversationMessageDestructionTimeoutOneMinute = 60,
-    ZMConversationMessageDestructionTimeoutFiveMinutes = 300,
-    ZMConversationMessageDestructionTimeoutFifteenMinutes = 900,
-};
-
-
 extern NSString * _Null_unspecified const ZMConversationFailedToDecryptMessageNotificationName;
 extern NSString * _Null_unspecified const ZMIsDimmedKey; ///< Specifies that a range in an attributed string should be displayed dimmed.
 extern NSString * _Null_unspecified const ZMConversationIsVerifiedNotificationName;
@@ -119,10 +109,6 @@ extern NSString * _Null_unspecified const ZMConversationIsVerifiedNotificationNa
 /// Use [updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout] for setting it
 /// Or import the internal header for testing
 @property (nonatomic, readonly) NSTimeInterval messageDestructionTimeout;
-
-/// Sets messageDestructionTimeout
-/// @param timeout The timeout after which an appended message should "self-destruct"
-- (void)updateMessageDestructionTimeout:(ZMConversationMessageDestructionTimeout)timeout;
 
 - (void)addParticipant:(nonnull ZMUser *)participant;
 - (void)removeParticipant:(nonnull ZMUser *)participant;
