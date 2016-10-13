@@ -95,16 +95,41 @@ extension ZMGenericMessage {
         
         var recipientUsers : [ZMUser] = []
         let sendOnlyToOtherUser = ( self.hasConfirmation() || self.hasEphemeral() )
-        if sendOnlyToOtherUser {
-            // Sending only to the other user is only supported on 1-to-1 conversations
-            assert(conversation.conversationType == .oneOnOne)
-            recipientUsers = [conversation.connectedUser!]
+        if replyOnlyToSender {
+            
+            // In case of confirmation messages, we want to send the confirmation only to the clients of the sender of the original message, 
+            // not to the other clients of the selfUser
+            
+            var sender : ZMUser? = nil
+            if self.confirmation.messageId != nil {
+             
+                if let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.messageId), for:conversation, in:conversation.managedObjectContext){
+                    sender = message.sender
+                }
+            }
+            
+            if conversation.connectedUser != nil || sender != nil || conversation.otherActiveParticipants.firstObject != nil{
+                let recipient = { () -> ZMUser? in 
+                    if sender != nil { return sender }
+                    if conversation.connectedUser != nil { return conversation.connectedUser }
+                    if conversation.otherActiveParticipants.count > 0 { return conversation.otherActiveParticipants.firstObject! as? ZMUser }
+                    return nil
+                }()
+    
+                if let recipient = recipient {
+                    recipientUsers = [recipient]
+                } else {
+                    fatal("confirmation need a recipient\n ConvID: \(conversation.remoteIdentifier) ConvType: \(conversation.conversationType), connection: \(conversation.connection), original message: \(self.confirmation.messageId)")
+                }
+            }
         } else {
             recipientUsers = conversation.activeParticipants.array as! [ZMUser]
         }
         
         let recipients = self.recipientsWithEncryptedData(selfClient, recipients: recipientUsers, sessionDirectory: sessionDirectory)
-        let message = ZMNewOtrMessage.message(withSender: selfClient, nativePush: true, recipients: recipients, blob: externalData)
+
+        let nativePush = !hasConfirmation() // We do not want to send pushes for delivery receipts
+        let message = ZMNewOtrMessage.message(withSender: selfClient, nativePush: nativePush, recipients: recipients, blob: externalData)
         
         let strategy : MissingClientsStrategy =
             sendOnlyToOtherUser ?
