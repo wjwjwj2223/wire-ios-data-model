@@ -252,6 +252,29 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNil(message.genericMessage)
         }
     }
+    
+    func testThatItCreatesPayloadForEphemeralMessage() {
+        syncMOC.performGroupedBlockAndWait {
+            //given
+            let conversation = ZMConversation.insertNewObject(in: self.syncMOC)
+            conversation.conversationType = .oneOnOne
+            conversation.remoteIdentifier = UUID.create()
+            conversation.messageDestructionTimeout = 10
+            
+            let connection = ZMConnection.insertNewObject(in: self.syncMOC)
+            connection.to = self.syncUser1
+            connection.status = .accepted
+            conversation.connection = connection
+            conversation.mutableOtherActiveParticipants.add(self.syncUser1)
+            self.syncMOC.saveOrRollback()
+            
+            let textMessage = conversation.appendOTRMessage(withText: "foo", nonce: UUID.create())
+            
+            //when
+            guard let _ = textMessage.encryptedMessagePayloadData()
+                else { return XCTFail()}
+        }
+    }
 }
 
 
