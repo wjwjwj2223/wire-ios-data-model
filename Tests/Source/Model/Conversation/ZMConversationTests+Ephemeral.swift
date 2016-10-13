@@ -32,8 +32,9 @@ class ZMConversationMessageDestructionTimeoutTests : XCTestCase {
     }
     
     func testThatItReturnsTheClosestTimeOut() {
-        
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: -2), 0)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: -2), 5)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: 0), 5)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: 2), 5)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: 5), 5)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: 10), 5)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.closestTimeout(for: 55), 60)

@@ -103,19 +103,19 @@ public class ZMMessageDestructionTimer : ZMMessageTimer {
     
     
     public func startObfuscationTimer(message: ZMMessage, timeout: TimeInterval) {
-        let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.closestTimeout(for: timeout)
-        let fireDate = Date().addingTimeInterval(matchedTimeout)
+        let fireDate = Date().addingTimeInterval(timeout)
         start(forMessageIfNeeded: message,
               fire: fireDate,
               userInfo: [MessageDestructionType.UserInfoKey : MessageDestructionType.obfuscation.rawValue])
     }
     
-    public func startDeletionTimer(message: ZMMessage, timeout: TimeInterval) {
+    public func startDeletionTimer(message: ZMMessage, timeout: TimeInterval) -> TimeInterval {
         let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.closestTimeout(for: timeout)
         let fireDate = Date().addingTimeInterval(matchedTimeout)
         start(forMessageIfNeeded: message,
               fire: fireDate,
               userInfo: [MessageDestructionType.UserInfoKey : MessageDestructionType.deletion.rawValue])
+        return matchedTimeout
     }
 
 }

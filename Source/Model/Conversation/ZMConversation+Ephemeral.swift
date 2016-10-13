@@ -41,11 +41,11 @@ public extension ZMConversationMessageDestructionTimeout {
     }
     
     public static func closestTimeout(for timeout: TimeInterval) -> TimeInterval {
-        if timeout < 0 {
-            return 0.0
-        }
         var start : Int = 1
-        var lastTimeout : TimeInterval = 0
+        var lastTimeout : TimeInterval = ZMConversationMessageDestructionTimeout(rawValue: 1)!.timeInterval
+        if timeout < lastTimeout {
+            return lastTimeout
+        }
         while let currentTimeout = ZMConversationMessageDestructionTimeout(rawValue: start)?.timeInterval {
             start += 1
             if currentTimeout == timeout {

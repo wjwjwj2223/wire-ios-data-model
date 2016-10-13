@@ -1091,9 +1091,9 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
         return YES;
     }
     else if (!isSelfUser && self.managedObjectContext.zm_isUserInterfaceContext){
-        self.destructionDate = [NSDate dateWithTimeIntervalSinceNow:self.deletionTimeout];
         ZMMessageDestructionTimer *timer = self.managedObjectContext.zm_messageDeletionTimer;
-        [timer startDeletionTimerWithMessage:self timeout:self.deletionTimeout];
+        NSTimeInterval matchedTimeInterval = [timer startDeletionTimerWithMessage:self timeout:self.deletionTimeout];
+        self.destructionDate = [NSDate dateWithTimeIntervalSinceNow:matchedTimeInterval];
         return YES;
     }
     return NO;
