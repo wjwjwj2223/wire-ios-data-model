@@ -17,27 +17,19 @@
 //
 
 
-@objc public enum ZMConversationMessageDestructionTimeout : Int {
+public enum ZMConversationMessageDestructionTimeout : TimeInterval {
     case none = 0
     case fiveSeconds = 5
     case fifteenSeconds = 15
     case oneMinute = 60
 }
 
-extension ZMConversationMessageDestructionTimeout {
-
-    var timeInterval: TimeInterval {
-        return TimeInterval(rawValue)
-    }
-
-}
-
 public extension ZMConversationMessageDestructionTimeout {
 
     public static func validTimeout(for timeout: TimeInterval) -> TimeInterval {
         return timeout.clamp(
-            between: ZMConversationMessageDestructionTimeout.fiveSeconds.timeInterval,
-            and: ZMConversationMessageDestructionTimeout.oneMinute.timeInterval
+            between: ZMConversationMessageDestructionTimeout.fiveSeconds.rawValue,
+            and: ZMConversationMessageDestructionTimeout.oneMinute.rawValue
         )
     }
 }
@@ -54,7 +46,7 @@ public extension ZMConversation {
     /// @param timeout The timeout after which an appended message should "self-destruct"
     public func updateMessageDestructionTimeout(timeout : ZMConversationMessageDestructionTimeout) {
         guard (conversationType == .oneOnOne) else { return }
-        messageDestructionTimeout = timeout.timeInterval
+        messageDestructionTimeout = timeout.rawValue
     }
 
     public var destructionEnabled: Bool {
@@ -62,7 +54,7 @@ public extension ZMConversation {
     }
 
     public var destructionTimeout: ZMConversationMessageDestructionTimeout {
-        return ZMConversationMessageDestructionTimeout(rawValue: Int(messageDestructionTimeout)) ?? .none
+        return ZMConversationMessageDestructionTimeout(rawValue: messageDestructionTimeout) ?? .none
     }
 
 }

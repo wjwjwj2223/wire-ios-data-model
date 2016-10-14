@@ -23,10 +23,10 @@ import Foundation
 class ZMConversationMessageDestructionTimeoutTests : XCTestCase {
 
     func testThatItReturnsTheCorrectTimeouts(){
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.none.timeInterval, 0)
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.fiveSeconds.timeInterval, 5)
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.fifteenSeconds.timeInterval, 15)
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.oneMinute.timeInterval, 60)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.none.rawValue, 0)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.fiveSeconds.rawValue, 5)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.fifteenSeconds.rawValue, 15)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.oneMinute.rawValue, 60)
     }
     
     func testThatItReturnsTheClosestTimeOut() {
