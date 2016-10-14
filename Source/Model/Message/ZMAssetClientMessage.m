@@ -1126,19 +1126,13 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
 - (ZMEphemeral *)ephemeral
 {
-    if (self.mediumGenericMessage.hasEphemeral) {
-        return self.mediumGenericMessage.ephemeral;
-    }
-
-    if (self.previewGenericMessage.hasEphemeral) {
-        return self.previewGenericMessage.ephemeral;
-    }
-
-    if (self.genericAssetMessage.hasEphemeral) {
-        return self.genericAssetMessage.ephemeral;
-    }
-
-    return nil;
+    NSArray <ZMGenericMessage *> *filteredMessages = [[self.dataSet.array mapWithBlock:^ZMGenericMessage *(ZMGenericMessageData *data) {
+        return data.genericMessage;
+    }] filterWithBlock:^BOOL(id genericMessage) {
+        return [genericMessage hasEphemeral];
+    }];
+    
+    return [filteredMessages.firstObject ephemeral];
 }
 
 - (NSTimeInterval)deletionTimeout

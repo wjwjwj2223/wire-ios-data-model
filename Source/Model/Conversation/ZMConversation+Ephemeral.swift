@@ -46,6 +46,8 @@ public extension ZMConversationMessageDestructionTimeout {
         if timeout < lastTimeout {
             return lastTimeout
         }
+        // Interesting fact: looping through an enum only works when the enum is defined in Swift and not in ObjC. 
+        // In ObjC it will continue iterating past the last case and then overflow the iterator.
         while let currentTimeout = ZMConversationMessageDestructionTimeout(rawValue: start)?.timeInterval {
             start += 1
             if currentTimeout == timeout {
