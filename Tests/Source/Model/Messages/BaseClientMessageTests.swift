@@ -20,40 +20,6 @@
 import Foundation
 @testable import ZMCDataModel
 
-/*
-public extension BaseZMMessageTests {
-    
-    public func textMessageRequiringExternalMessage(numberOfClients count: UInt) -> String {
-        var text = "Long Text"
-        while text.data(using: .utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold / count) {
-            text += text
-        }
-        return text
-    }
-    
-    public func encryptedExternalMessageFixtureWithBlob(from client: UserClient) -> ZMUpdateEvent {
-        let encryptedMessageURL = fileURL(forResource: "EncryptedBase64EncondedExternalMessageTestFixture", extension: "txt")
-        let encryptedMessageFixtureString = try! String(contentsOf: encryptedMessageURL!)
-        let payload = [
-            "conversation": UUID.create().transportString,
-            "data": "CiQzMzRmN2Y3Yi1hNDk5LTQ1MTMtOTJhOC1hZTg4MDI0OTQ0ZTlCRAog4H1nD6bG2sCxC/tZBnIG7avLYhkCsSfv0ATNqnfug7wSIJCkkpWzMVxHXfu33pMQfEK+u/5qY426AbK9sC3Fu8Mx",
-            "external": encryptedMessageFixtureString,
-            "from": client.remoteIdentifier,
-            "time": Date().transportString,
-            "type": "conversation.otr-message-add"] as [String : Any]
-        return ZMUpdateEvent(fromEventStreamPayload: payload as ZMTransportData, uuid: UUID.create())!
-    }
-    
-    var expectedExternalMessageText : String {
-        let messageFixtureURL =  fileURL(forResource:"ExternalMessageTextFixture", extension:"txt")
-        let messageFixtureString = try! String(contentsOf:messageFixtureURL!)
-        return messageFixtureString
-    }
-    
-}
-
- */
-
 class BaseZMClientMessageTests : BaseZMMessageTests {
     
     var syncSelfUser: ZMUser!

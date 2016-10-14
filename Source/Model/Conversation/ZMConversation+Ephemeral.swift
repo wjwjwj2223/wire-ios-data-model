@@ -56,6 +56,8 @@ public extension ZMConversationMessageDestructionTimeout {
             } else {
                 if (currentTimeout - timeout) < (timeout - lastTimeout) {
                     return currentTimeout
+                } else {
+                    return lastTimeout
                 }
             }
         }
@@ -68,9 +70,7 @@ public extension ZMConversation {
     /// Sets messageDestructionTimeout
     /// @param timeout The timeout after which an appended message should "self-destruct"
     public func updateMessageDestructionTimeout(timeout : ZMConversationMessageDestructionTimeout) {
-        if (conversationType != .oneOnOne) {
-            return
-        }
+        guard (conversationType == .oneOnOne) else { return }
         messageDestructionTimeout = timeout.timeInterval
     }
 
