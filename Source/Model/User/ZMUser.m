@@ -427,7 +427,7 @@ static NSString *const UserBotEmailRegex = @"^(welcome|anna)(|\\+(.*))@wire\\.co
     }
 }
 
-+ (nullable instancetype)userWithEmailAddress:(NSString *)emailAddress inContext:(NSManagedObjectContext *)context // #TOTEST
++ (nullable instancetype)userWithEmailAddress:(NSString *)emailAddress inContext:(NSManagedObjectContext *)context
 {
     RequireString(0 != emailAddress.length, "emailAddress required");
     
@@ -448,7 +448,7 @@ static NSString *const UserBotEmailRegex = @"^(welcome|anna)(|\\+(.*))@wire\\.co
     }
 }
 
-+ (nullable instancetype)userWithPhoneNumber:(NSString *)phoneNumber inContext:(NSManagedObjectContext *)context // #TOTEST
++ (nullable instancetype)userWithPhoneNumber:(NSString *)phoneNumber inContext:(NSManagedObjectContext *)context
 {
     RequireString(0 != phoneNumber.length, "phoneNumber required");
     
