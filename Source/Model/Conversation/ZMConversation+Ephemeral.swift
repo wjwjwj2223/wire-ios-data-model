@@ -18,52 +18,33 @@
 
 
 @objc public enum ZMConversationMessageDestructionTimeout : Int {
-    case none, fiveSeconds, fifteenSeconds, oneMinute, fiveMinutes, fifteenMinutes
+    case none = 0
+    case fiveSeconds = 5
+    case fifteenSeconds = 15
+    case oneMinute = 60
+}
+
+extension ZMConversationMessageDestructionTimeout {
+
+    var timeInterval: TimeInterval {
+        return TimeInterval(rawValue)
+    }
+
 }
 
 public extension ZMConversationMessageDestructionTimeout {
-    
-    public var timeInterval : TimeInterval {
-        switch self {
-        case .none:
-            return 0
-        case .fiveSeconds:
-            return 5
-        case .fifteenSeconds:
-            return 15
-        case .oneMinute:
-            return 60
-        case .fiveMinutes:
-            return 300
-        case .fifteenMinutes:
-            return 1500
-        }
+
+    public static func validTimeout(for timeout: TimeInterval) -> TimeInterval {
+        return timeout.clamp(
+            between: ZMConversationMessageDestructionTimeout.fiveSeconds.timeInterval,
+            and: ZMConversationMessageDestructionTimeout.oneMinute.timeInterval
+        )
     }
-    
-    public static func closestTimeout(for timeout: TimeInterval) -> TimeInterval {
-        var start : Int = 1
-        var lastTimeout : TimeInterval = ZMConversationMessageDestructionTimeout(rawValue: 1)!.timeInterval
-        if timeout < lastTimeout {
-            return lastTimeout
-        }
-        // Interesting fact: looping through an enum only works when the enum is defined in Swift and not in ObjC. 
-        // In ObjC it will continue iterating past the last case and then overflow the iterator.
-        while let currentTimeout = ZMConversationMessageDestructionTimeout(rawValue: start)?.timeInterval {
-            start += 1
-            if currentTimeout == timeout {
-                return timeout
-            }
-            if currentTimeout < timeout {
-                lastTimeout = currentTimeout
-            } else {
-                if (currentTimeout - timeout) < (timeout - lastTimeout) {
-                    return currentTimeout
-                } else {
-                    return lastTimeout
-                }
-            }
-        }
-        return lastTimeout
+}
+
+fileprivate extension TimeInterval {
+    func clamp(between lower: TimeInterval, and upper: TimeInterval) -> TimeInterval {
+        return fmax(lower, fmin(upper, self))
     }
 }
 
@@ -74,6 +55,14 @@ public extension ZMConversation {
     public func updateMessageDestructionTimeout(timeout : ZMConversationMessageDestructionTimeout) {
         guard (conversationType == .oneOnOne) else { return }
         messageDestructionTimeout = timeout.timeInterval
+    }
+
+    public var destructionEnabled: Bool {
+        return destructionTimeout != .none
+    }
+
+    public var destructionTimeout: ZMConversationMessageDestructionTimeout {
+        return ZMConversationMessageDestructionTimeout(rawValue: Int(messageDestructionTimeout)) ?? .none
     }
 
 }

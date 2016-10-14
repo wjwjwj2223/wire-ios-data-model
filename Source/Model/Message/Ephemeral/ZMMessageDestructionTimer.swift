@@ -110,7 +110,7 @@ public class ZMMessageDestructionTimer : ZMMessageTimer {
     }
     
     public func startDeletionTimer(message: ZMMessage, timeout: TimeInterval) -> TimeInterval {
-        let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.closestTimeout(for: timeout)
+        let matchedTimeout = isTesting ? timeout : ZMConversationMessageDestructionTimeout.validTimeout(for: timeout)
         let fireDate = Date().addingTimeInterval(matchedTimeout)
         start(forMessageIfNeeded: message,
               fire: fireDate,
