@@ -370,12 +370,11 @@ extension ZMAssetClientMessageTests_Ephemeral {
         guard let genericMessage = deleteMessage.genericMessage, genericMessage.hasDeleted()
             else {return XCTFail()}
         
-        XCTAssertTrue(message.isEphemeral)
         XCTAssertNotEqual(deleteMessage, message)
         XCTAssertNil(message.sender)
         XCTAssertNil(message.genericAssetMessage)
         XCTAssertEqual(message.dataSet.count, 0)
-        XCTAssertNotNil(message.destructionDate)
+        XCTAssertNil(message.destructionDate)
     }
 }
 

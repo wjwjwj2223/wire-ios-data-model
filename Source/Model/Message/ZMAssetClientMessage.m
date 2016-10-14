@@ -1121,7 +1121,7 @@ static NSString * const AssociatedTaskIdentifierDataKey = @"associatedTaskIdenti
 
 - (BOOL)isEphemeral
 {
-    return self.destructionDate != nil || self.ephemeral != nil;
+    return self.destructionDate != nil || self.ephemeral != nil || self.isObfuscated;
 }
 
 - (ZMEphemeral *)ephemeral

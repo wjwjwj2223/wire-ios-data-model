@@ -390,14 +390,14 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
     [message removePendingDeliveryReceipts];
     
     // Only the sender of the original message can delete it
-    if (![senderID isEqual:message.sender.remoteIdentifier] && message.destructionDate == nil) {
+    if (![senderID isEqual:message.sender.remoteIdentifier] && !message.isEphemeral) {
         return;
     }
 
     ZMUser *selfUser = [ZMUser selfUserInContext:moc];
 
     // Only clients other than self should see the system message
-    if (nil != message && ![senderID isEqual:selfUser.remoteIdentifier] && message.destructionDate == nil) {
+    if (nil != message && ![senderID isEqual:selfUser.remoteIdentifier] && !message.isEphemeral) {
         [conversation appendDeletedForEveryoneSystemMessageWithTimestamp:message.serverTimestamp sender:message.sender];
     }
 
@@ -1102,6 +1102,14 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
 - (void)obfuscate;
 {
     self.isObfuscated = true;
+    self.destructionDate = nil;
+}
+
+- (void)deleteEphemeral;
+{
+    [ZMMessage deleteForEveryone:self];
+    self.destructionDate = nil;
+    self.isObfuscated = NO;
 }
 
 + (NSFetchRequest *)fetchRequestForEphemeralMessagesThatNeedToBeDeleted
@@ -1129,7 +1137,7 @@ NSString * const ZMMessageIsObfuscatedKey = @"isObfuscated";
                 [message restartDeletionTimer:timeToDeletion];
             } else {
                 // The timer has run out, we want to delete the message
-                [ZMMessage deleteForEveryone:message];
+                [message deleteEphemeral];
             }
         }
     }

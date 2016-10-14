@@ -577,7 +577,7 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 
 - (BOOL)isEphemeral
 {
-    return self.destructionDate != nil || self.genericMessage.hasEphemeral;
+    return self.destructionDate != nil || self.genericMessage.hasEphemeral || self.isObfuscated;
 }
 
 - (NSTimeInterval)deletionTimeout

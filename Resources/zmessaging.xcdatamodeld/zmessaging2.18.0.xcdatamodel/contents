@@ -97,7 +97,7 @@
     </entity>
     <entity name="KnockMessage" representedClassName="ZMKnockMessage" parentEntity="Message" syncable="YES"/>
     <entity name="Message" representedClassName="ZMMessage" isAbstract="YES" syncable="YES">
-        <attribute name="destructionDate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="destructionDate" optional="YES" attributeType="Date" usesScalarValueType="NO" indexed="YES" syncable="YES"/>
         <attribute name="eventID" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="eventID_data" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="expirationDate" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>

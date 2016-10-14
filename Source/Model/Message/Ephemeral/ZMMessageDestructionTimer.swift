@@ -94,7 +94,7 @@ public class ZMMessageDestructionTimer : ZMMessageTimer {
         case .some(.obfuscation):
             message.obfuscate()
         case .some(.deletion):
-            ZMMessage.deleteForEveryone(message)
+            message.deleteEphemeral()
         default:
             return
         }

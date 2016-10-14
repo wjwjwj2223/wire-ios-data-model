@@ -290,6 +290,10 @@ extern NSString * const ZMMessageServerTimestampKey;
 /// Obfuscates the message which means, it deletes the genericMessage content
 - (void)obfuscate;
 
+/// Inserts a delete message for the ephemeral and sets the destruction timeout to nil
+- (void)deleteEphemeral;
+
+
 /// When we restart, we might still have messages that had a timer, but whose timer did not fire before killing the app
 /// To delete those messages immediately use this method on startup (e.g. in the init of the ZMClientMessageTranscoder) to fetch and delete those messages
 + (void)deleteOldEphemeralMessages:(NSManagedObjectContext *)context;
