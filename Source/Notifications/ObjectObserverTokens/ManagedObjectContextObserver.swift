@@ -269,6 +269,8 @@ extension NSManagedObjectContext {
         self.userInfo[ManagedObjectContextBackgroundObserverKey] = newObserver
         newObserver.setup()
         newObserver.propagateChanges = true
+        newObserver.isSyncDone = true
+        newObserver.globalConversationObserver.isSyncComplete = true
         return newObserver
     }
 }
