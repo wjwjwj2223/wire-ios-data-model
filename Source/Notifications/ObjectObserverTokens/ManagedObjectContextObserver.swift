@@ -245,7 +245,6 @@ public protocol DisplayNameDidChangeDelegate {
 // MARK: - ManagedObjectContextObserver
 
 let ManagedObjectContextObserverKey = "ManagedObjectContextObserverKey"
-let ManagedObjectContextBackgroundObserverKey = "ManagedObjectContextBackgroundObserverKey"
 
 extension NSManagedObjectContext {
     
@@ -257,20 +256,6 @@ extension NSManagedObjectContext {
         let newObserver = ManagedObjectContextObserver(managedObjectContext: self)
         self.userInfo[ManagedObjectContextObserverKey] = newObserver
         newObserver.setup()
-        return newObserver
-    }
-    
-    public var globalManagedObjectContextBackgroundObserver : ManagedObjectContextObserver {
-        if let observer = self.userInfo[ManagedObjectContextBackgroundObserverKey] as? ManagedObjectContextObserver {
-            return observer
-        }
-        
-        let newObserver = ManagedObjectContextObserver(managedObjectContext: self)
-        self.userInfo[ManagedObjectContextBackgroundObserverKey] = newObserver
-        newObserver.setup()
-        newObserver.propagateChanges = true
-        newObserver.isSyncDone = true
-        newObserver.globalConversationObserver.isSyncComplete = true
         return newObserver
     }
 }
