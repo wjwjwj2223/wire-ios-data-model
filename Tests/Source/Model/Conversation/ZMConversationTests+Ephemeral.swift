@@ -26,7 +26,10 @@ class ZMConversationMessageDestructionTimeoutTests : XCTestCase {
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.none.rawValue, 0)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.fiveSeconds.rawValue, 5)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.fifteenSeconds.rawValue, 15)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.thirtySeconds.rawValue, 30)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.oneMinute.rawValue, 60)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.fiveMinutes.rawValue, 300)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.oneDay.rawValue, 86400)
     }
     
     func testThatItReturnsTheClosestTimeOut() {
@@ -38,10 +41,19 @@ class ZMConversationMessageDestructionTimeoutTests : XCTestCase {
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 14), 14)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 15), 15)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 16), 16)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 29), 29)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 30), 30)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 31), 31)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 59), 59)
         XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 60), 60)
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 61), 60)
-        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 1501), 60)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 61), 61)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 299), 299)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 300), 300)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 301), 301)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 86399), 86399)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 86400), 86400)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 86401), 86400)
+        XCTAssertEqual(ZMConversationMessageDestructionTimeout.validTimeout(for: 1234567890), 86400)
     }
 
 }
