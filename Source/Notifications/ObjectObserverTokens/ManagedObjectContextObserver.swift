@@ -310,7 +310,7 @@ public final class ManagedObjectContextObserver: NSObject {
     
     func setup() {
         self.globalUserObserver = GlobalUserObserver(managedObjectContext: managedObjectContext!)
-        self.globalConversationObserver = GlobalConversationObserver(managedObjectContextObserver: self)
+        self.globalConversationObserver = GlobalConversationObserver(managedObjectContext: managedObjectContext!)
     }
     
     public func tearDown() {
