@@ -329,12 +329,12 @@ public extension UserClient {
     }
     
     /// Session identifier to use in Cryptobox
-    var sessionIdentifier : String? {
-        guard let userId = self.user?.remoteIdentifier?.transportString(),
+    public var sessionIdentifier : String? {
+        guard let userId = self.user?.remoteIdentifier,
             let remoteIdentifier = self.remoteIdentifier else {
             return nil
         }
-        return "\(userId)_\(remoteIdentifier)"
+        return UserClient.sessionIdentifier(userId: userId, clientId: remoteIdentifier)
     }
     
     /// Previously used session identifier to use in Cryptobox
@@ -344,6 +344,11 @@ public extension UserClient {
             return nil
         }
         return remoteIdentifier
+    }
+    
+    /// Returns the session identifier to use in cryptobox
+    public static func sessionIdentifier(userId: UUID, clientId: String) -> String {
+        return "\(userId.transportString())_\(clientId)"
     }
 }
 
