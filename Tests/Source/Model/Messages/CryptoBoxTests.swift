@@ -34,14 +34,15 @@ class CryptoBoxTest: OtrBaseTest {
     }
     
     func testThatCryptoBoxFolderIsMarkedForEncryption() {
+        
+        // when
+        _ = EncryptionKeysStore.setupContext()
+        
         #if (arch(i386) || arch(x86_64)) && os(iOS)
             // File protection API is not available on simulator
             XCTAssertTrue(true)
             return
         #else
-            // when
-            UserClientKeysStore.setupBox()
-            
             // then
             let attrs = try! NSFileManager.default.attributesOfItemAtPath(UserClientKeysStore.otrDirectoryURL.path)
             let fileProtectionAttr = (attrs[NSFileProtectionKey]! as! String)

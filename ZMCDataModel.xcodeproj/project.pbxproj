@@ -63,7 +63,7 @@
 		F9331C561CB3BCF300139ECC /* OtrBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C541CB3BCDA00139ECC /* OtrBaseTest.swift */; };
 		F9331C581CB3BE5300139ECC /* ZMConversationTests+OTR.m in Sources */ = {isa = PBXBuildFile; fileRef = F9331C571CB3BE5300139ECC /* ZMConversationTests+OTR.m */; };
 		F9331C5A1CB3BECB00139ECC /* ZMClientMessageTests+OTR.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C591CB3BECB00139ECC /* ZMClientMessageTests+OTR.swift */; };
-		F9331C5C1CB3BF9F00139ECC /* UserClientKeyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C5B1CB3BF9F00139ECC /* UserClientKeyStoreTests.swift */; };
+		F9331C5C1CB3BF9F00139ECC /* EncryptionKeysStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9331C5B1CB3BF9F00139ECC /* EncryptionKeysStoreTests.swift */; };
 		F9331C611CB3C7D500139ECC /* DatabaseInitTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F9331C5E1CB3C7D500139ECC /* DatabaseInitTests.m */; };
 		F9331C621CB3C7D500139ECC /* DatabaseMovingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F9331C5F1CB3C7D500139ECC /* DatabaseMovingTests.m */; };
 		F9331C631CB3C7D500139ECC /* OTRMigrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F9331C601CB3C7D500139ECC /* OTRMigrationTests.m */; };
@@ -430,7 +430,7 @@
 		F9331C541CB3BCDA00139ECC /* OtrBaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OtrBaseTest.swift; sourceTree = "<group>"; };
 		F9331C571CB3BE5300139ECC /* ZMConversationTests+OTR.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ZMConversationTests+OTR.m"; sourceTree = "<group>"; };
 		F9331C591CB3BECB00139ECC /* ZMClientMessageTests+OTR.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ZMClientMessageTests+OTR.swift"; sourceTree = "<group>"; };
-		F9331C5B1CB3BF9F00139ECC /* UserClientKeyStoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserClientKeyStoreTests.swift; sourceTree = "<group>"; };
+		F9331C5B1CB3BF9F00139ECC /* EncryptionKeysStoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EncryptionKeysStoreTests.swift; sourceTree = "<group>"; };
 		F9331C5E1CB3C7D500139ECC /* DatabaseInitTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DatabaseInitTests.m; sourceTree = "<group>"; };
 		F9331C5F1CB3C7D500139ECC /* DatabaseMovingTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DatabaseMovingTests.m; sourceTree = "<group>"; };
 		F9331C601CB3C7D500139ECC /* OTRMigrationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OTRMigrationTests.m; sourceTree = "<group>"; };
@@ -1384,7 +1384,7 @@
 		F9B720011CB2C68B001DB03F /* UserClient */ = {
 			isa = PBXGroup;
 			children = (
-				F9331C5B1CB3BF9F00139ECC /* UserClientKeyStoreTests.swift */,
+				F9331C5B1CB3BF9F00139ECC /* EncryptionKeysStoreTests.swift */,
 				F9B720021CB2C68B001DB03F /* UserClientTests.swift */,
 			);
 			name = UserClient;
@@ -2042,7 +2042,7 @@
 				F9B71FF61CB2C4C6001DB03F /* NewUnreadMessageObserverTokenTests.swift in Sources */,
 				F9B71FF91CB2C4C6001DB03F /* UserClientObserverTokenTests.swift in Sources */,
 				F9A7083C1CAEEB7500C2F5FE /* MockModelObjectContextFactory.m in Sources */,
-				F9331C5C1CB3BF9F00139ECC /* UserClientKeyStoreTests.swift in Sources */,
+				F9331C5C1CB3BF9F00139ECC /* EncryptionKeysStoreTests.swift in Sources */,
 				F9A708361CAEEB7500C2F5FE /* NSManagedObjectContext+TestHelpers.m in Sources */,
 				F9B71F911CB2BEEF001DB03F /* ZMClientMessageTests.m in Sources */,
 				F9331C631CB3C7D500139ECC /* OTRMigrationTests.m in Sources */,

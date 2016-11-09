@@ -22,7 +22,7 @@ import XCTest
 import Cryptobox
 
 
-class UserClientKeysStoreTests: OtrBaseTest {
+class EncryptionKeysStoreTests: OtrBaseTest {
     
     var sut: EncryptionKeysStore!
     
