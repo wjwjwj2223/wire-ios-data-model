@@ -30,7 +30,7 @@ class EncryptionKeysStoreTests: OtrBaseTest {
     
     static func cleanOTRFolder() {
         let fm = FileManager.default
-        for path in [EncryptionKeysStore.legacyOtrDirectory.path, EncryptionKeysStore.otrDirectory.path] {
+        for path in [EncryptionKeysStore.legacyOtrDirectory.path, EncryptionKeysStore.otrDirectoryURL.path] {
             _ = try? fm.removeItem(atPath: path)
         }
     }
@@ -52,7 +52,7 @@ class EncryptionKeysStoreTests: OtrBaseTest {
     func testThatTheOTRFolderHasBackupDisabled() {
         
         // given
-        let otrURL = EncryptionKeysStore.otrDirectory as URL
+        let otrURL = EncryptionKeysStore.otrDirectoryURL
         
         // then
         guard let values = try? otrURL.resourceValues(forKeys: Set(arrayLiteral: URLResourceKey.isExcludedFromBackupKey)) else {return XCTFail()}
@@ -181,7 +181,7 @@ class EncryptionKeysStoreTests: OtrBaseTest {
         let _ = EncryptionKeysStore(managedObjectContext: NSManagedObjectContext())
         
         // then
-        let fooData = try! Data(contentsOf: EncryptionKeysStore.otrDirectory.appendingPathComponent("dummy.txt"))
+        let fooData = try! Data(contentsOf: EncryptionKeysStore.otrDirectoryURL.appendingPathComponent("dummy.txt"))
         let fooString = String(data: fooData, encoding: String.Encoding.utf8)!
         XCTAssertEqual(fooString, "foo")
         XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
@@ -200,7 +200,7 @@ class EncryptionKeysStoreTests: OtrBaseTest {
         let otrURL = try! FileManager.default.url(for: FileManager.SearchPathDirectory.applicationSupportDirectory, in: FileManager.SearchPathDomainMask.userDomainMask, appropriateFor: nil, create: false).appendingPathComponent("otr")
         
         // then
-        XCTAssertEqual(EncryptionKeysStore.otrDirectory, otrURL)
+        XCTAssertEqual(EncryptionKeysStore.otrDirectoryURL, otrURL)
     }
     
 }

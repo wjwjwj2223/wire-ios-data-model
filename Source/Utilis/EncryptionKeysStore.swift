@@ -40,43 +40,32 @@ public class EncryptionKeysStore {
     
     public init(managedObjectContext: NSManagedObjectContext) {
         self.managedObjectContext = managedObjectContext
-        encryptionContext = EncryptionKeysStore.setupContext()!
+        encryptionContext = EncryptionKeysStore.setupContext()
     }
     
-    static func setupContext() -> EncryptionContext? {
+    static func setupContext() -> EncryptionContext {
         let encryptionContext : EncryptionContext
-        do {
-            if self.isPreviousOTRDirectoryPresent {
-                do {
-                    try FileManager.default.moveItem(at: self.legacyOtrDirectory, to: self.otrDirectoryURL)
-                }
-                catch let err {
-                    fatal("Cannot move legacy directory: \(err)")
-                }
+
+        if self.isPreviousOTRDirectoryPresent {
+            do {
+                try FileManager.default.moveItem(at: self.legacyOtrDirectory, to: self.otrDirectoryURL)
             }
-            
-            let otrDirectoryURL = EncryptionKeysStore.otrDirectory
-            encryptionContext = EncryptionContext(path: otrDirectoryURL)
-            try (otrDirectoryURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
-
-            let attributes = [FileAttributeKey.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
-            try FileManager.default.setAttributes(attributes, ofItemAtPath: otrDirectoryURL.path)
-
-            return encryptionContext
-        }
-        catch let err {
-            fatal("failed to init cryptobox: \(err)")
+            catch let err {
+                fatal("Cannot move legacy directory: \(err)")
+            }
         }
         
-        return nil
+        let otrDirectoryURL = EncryptionKeysStore.createOtrDirectory()
+        encryptionContext = EncryptionContext(path: otrDirectoryURL)
+        return encryptionContext
     }
     
     public func deleteAndCreateNewBox() {
         let fm = FileManager.default
-        _ = try? fm.removeItem(at: EncryptionKeysStore.otrDirectory)
+        _ = try? fm.removeItem(at: EncryptionKeysStore.otrDirectoryURL)
         self.managedObjectContext?.lastGeneratedPrekey = nil
         
-         encryptionContext = EncryptionKeysStore.setupContext()!
+         encryptionContext = EncryptionKeysStore.setupContext()
         
     }
     
@@ -100,19 +89,30 @@ extension EncryptionKeysStore {
         return url!
     }
     
-    /// URL for cryptobox storage
-    static public var otrDirectory : URL {
-        var url : URL?
-        do {
-            url = self.otrDirectoryURL
-            try FileManager.default.createDirectory(at: url!, withIntermediateDirectories: true, attributes: nil)
-        }
-        catch let err as NSError {
-            if (url == nil) {
-                fatal("Unable to initialize otrDirectory = error: \(err)")
+    /// Creates and return the directory for cryptobox storage
+    /// If the folder exists already, it will return it
+    static fileprivate func createOtrDirectory() -> URL {
+        let url = self.otrDirectoryURL
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
             }
+            catch {
+                fatal("Unable to initialize otrDirectory = error: \(error)")
+            }
+
         }
-        return url!
+        
+        do {
+            try (otrDirectoryURL as NSURL).setResourceValue(true, forKey: URLResourceKey.isExcludedFromBackupKey)
+        
+            let attributes = [FileAttributeKey.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication]
+            try FileManager.default.setAttributes(attributes, ofItemAtPath: otrDirectoryURL.path)
+        }
+        catch {
+            fatal("Unable to set properties on otrDirectory: \(error)")
+        }
+        return url
     }
     
     /// Legacy URL for cryptobox storage (transition phase)
@@ -135,10 +135,10 @@ extension EncryptionKeysStore {
         do {
             try FileManager.default.removeItem(atPath: oldIdentityPath)
         }
-        catch let err {
+        catch {
             // if it's still there, we failed to delete. Critical error.
             if self.isPreviousOTRDirectoryPresent {
-                fatal("Failed to remove identity from previous folder: \(err)")
+                fatal("Failed to remove identity from previous folder: \(error)")
             }
         }
     }
