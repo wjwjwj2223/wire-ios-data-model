@@ -60,7 +60,7 @@ public class EncryptionKeysStore {
         return encryptionContext
     }
     
-    public func deleteAndCreateNewBox() {
+    public func deleteAndCreateNewIdentity() {
         let fm = FileManager.default
         _ = try? fm.removeItem(at: EncryptionKeysStore.otrDirectoryURL)
         self.managedObjectContext?.lastGeneratedPrekey = nil

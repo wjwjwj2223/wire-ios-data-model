@@ -31,4 +31,7 @@ public protocol KeyStore {
     /// for a given range, or the previously generated prekeys will be invalidated.
     func generatePreKeys(_ count: UInt16 , start: UInt16) throws -> [(id: UInt16, prekey: String)]
     
+    /// Deletes the content of the current store and creates a new identity
+    func deleteAndCreateNewIdentity()
+    
 }
