@@ -21,10 +21,33 @@ import Foundation
 import XCTest
 
 class OtrBaseTest: XCTestCase {
+    
+    var someOTRFolder : URL {
+        return (try! FileManager.default.url(for: FileManager.SearchPathDirectory.applicationSupportDirectory,
+                                             in: FileManager.SearchPathDomainMask.userDomainMask,
+                                             appropriateFor: nil,
+                                             create: false)).appendingPathComponent("test-OTR-folder")
+    }
+    
     override func setUp() {
         super.setUp()
+        self.cleanOTRFolder()
+    }
+    
+    func cleanOTRFolder() {
+        let fm = FileManager.default
         
         //clean stored cryptobox files
-        let _ = try? FileManager.default.removeItem(at: EncryptionKeysStore.otrDirectoryURL)
+        _ = try? fm.removeItem(at: someOTRFolder)
+        
+        for url in EncryptionKeysStore.legacyOtrDirectories {
+            _ = try? fm.removeItem(atPath: url.path)
+        }
+        
+        Thread.sleep(forTimeInterval: 0.1) // disk is slow
+    }
+    
+    override func tearDown() {
+        self.cleanOTRFolder()
     }
 }

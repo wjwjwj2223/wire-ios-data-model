@@ -22,13 +22,13 @@ import Cryptobox
 @testable import ZMCDataModel
 
 class CryptoBoxTest: OtrBaseTest {
-    
+
     func testThatCryptoBoxFolderIsForbiddenFromBackup() {
         // when
-         _ = EncryptionKeysStore.setupContext()
+         _ = EncryptionKeysStore.setupContext(in: self.someOTRFolder)
         
         // then
-        guard let values = try? EncryptionKeysStore.otrDirectoryURL.resourceValues(forKeys: Set(arrayLiteral: .isExcludedFromBackupKey)) else {return XCTFail()}
+        guard let values = try? self.someOTRFolder.resourceValues(forKeys: Set(arrayLiteral: .isExcludedFromBackupKey)) else {return XCTFail()}
         
         XCTAssertTrue(values.isExcludedFromBackup!)
     }
@@ -36,17 +36,17 @@ class CryptoBoxTest: OtrBaseTest {
     func testThatCryptoBoxFolderIsMarkedForEncryption() {
         
         // when
-        _ = EncryptionKeysStore.setupContext()
+        _ = EncryptionKeysStore.setupContext(in: self.someOTRFolder)
+        
+        let attrs = try! FileManager.default.attributesOfItem(atPath: self.someOTRFolder.path)
+        let fileProtectionAttr = (attrs[FileAttributeKey.protectionKey] as? String)
+        
         
         #if (arch(i386) || arch(x86_64)) && os(iOS)
             // File protection API is not available on simulator
             XCTAssertTrue(true)
-            return
         #else
-            // then
-            let attrs = try! NSFileManager.default.attributesOfItemAtPath(UserClientKeysStore.otrDirectoryURL.path)
-            let fileProtectionAttr = (attrs[NSFileProtectionKey]! as! String)
-            XCTAssertEqual(fileProtectionAttr, NSFileProtectionCompleteUntilFirstUserAuthentication)
+            XCTAssertEqual(fileProtectionAttr, FileProtectionType.completeUntilFirstUserAuthentication)
         #endif
     }
 

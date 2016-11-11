@@ -77,7 +77,8 @@ NSString *const ZMPersistedClientIdKey = @"PersistedClientId";
     ZMConversationDefaultLastReadTimestampSaveDelay = 0.02;
     
     NSFileManager *fm = NSFileManager.defaultManager;
-    self.databaseDirectory = [fm URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:nil];
+    self.databaseDirectory = [[fm URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:YES error:nil] URLByAppendingPathComponent:[NSString stringWithFormat:@"OTR-TEST-%lu", (unsigned long)testName.hash]];
+    [[NSFileManager defaultManager] removeItemAtURL:self.databaseDirectory error:nil];
     [NSManagedObjectContext setUseInMemoryStore:self.shouldUseInMemoryStore];
     
     [self resetState];
@@ -92,6 +93,7 @@ NSString *const ZMPersistedClientIdKey = @"PersistedClientId";
 
 - (void)tearDown;
 {
+    [[NSFileManager defaultManager] removeItemAtURL:self.databaseDirectory error:nil];
     [self wipeCaches];
     ZMConversationDefaultLastReadTimestampSaveDelay = self.originalConversationLastReadTimestampTimerValue;
     [self resetState];
@@ -162,6 +164,10 @@ NSString *const ZMPersistedClientIdKey = @"PersistedClientId";
     self.uiMOC.globalManagedObjectContextObserver.propagateChanges = YES;
     [self.uiMOC addGroup:self.dispatchGroup];
     self.uiMOC.userInfo[@"TestName"] = self.testName;
+    [self performPretendingUiMocIsSyncMoc:^{
+        [self.uiMOC setupUserKeyStoreForDirectory:self.databaseDirectory];
+    }];
+    
     
     self.syncMOC = [NSManagedObjectContext createSyncContextWithStoreDirectory:self.databaseDirectory];
     [self.syncMOC performGroupedBlockAndWait:^{
@@ -178,7 +184,7 @@ NSString *const ZMPersistedClientIdKey = @"PersistedClientId";
     [self.syncMOC performGroupedBlockAndWait:^{        
         [self.syncMOC setZm_userInterfaceContext:self.uiMOC];
     }];
-    [self.uiMOC setZm_syncContext:self.syncMOC];
+    [self.uiMOC setZm_syncContext:self.syncMOC];    
 }
 
 @end

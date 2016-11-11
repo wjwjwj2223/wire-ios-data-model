@@ -24,43 +24,35 @@ import Cryptobox
 
 class EncryptionKeysStoreTests: OtrBaseTest {
     
-    var sut: EncryptionKeysStore!
-    
     var managedObjectContext: NSManagedObjectContext!
-    
-    static func cleanOTRFolder() {
-        let fm = FileManager.default
-        for path in [EncryptionKeysStore.legacyOtrDirectory.path, EncryptionKeysStore.otrDirectoryURL.path] {
-            _ = try? fm.removeItem(atPath: path)
-        }
-    }
     
     override func setUp() {
         super.setUp()
-        type(of: self).cleanOTRFolder()
+		self.cleanOTRFolder()
         self.managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        self.sut = EncryptionKeysStore(managedObjectContext: self.managedObjectContext)
     }
     
     override func tearDown() {
-        self.sut = nil
         self.managedObjectContext = nil
-        type(of: self).cleanOTRFolder()
+        self.cleanOTRFolder()
         super.tearDown()
     }
     
     func testThatTheOTRFolderHasBackupDisabled() {
         
         // given
-        let otrURL = EncryptionKeysStore.otrDirectoryURL
-        
+        _ = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
+        guard let values = try? self.someOTRFolder.resourceValues(forKeys: Set(arrayLiteral: URLResourceKey.isExcludedFromBackupKey)) else {return XCTFail()}
+
         // then
-        guard let values = try? otrURL.resourceValues(forKeys: Set(arrayLiteral: URLResourceKey.isExcludedFromBackupKey)) else {return XCTFail()}
-        
         XCTAssertTrue(values.isExcludedFromBackup!)
     }
     
     func testThatItCanGenerateMoreKeys() {
+        
+        // given
+        let sut = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
+        
         // when
         do {
             let newKeys = try sut.generatePreKeys(1, start: 0)
@@ -75,6 +67,7 @@ class EncryptionKeysStoreTests: OtrBaseTest {
     
     func testThatItWrapsKeysTo0WhenReachingTheMaximum() {
         // given
+        let sut = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
         let maxPreKey : UInt16 = EncryptionKeysStore.MaxPreKeyID
         print(maxPreKey)
         let prekeyBatchSize : UInt16 = 50
@@ -124,31 +117,101 @@ class EncryptionKeysStoreTests: OtrBaseTest {
         
     }
     
-    fileprivate static func createFakeOTRFolder() {
-        try! FileManager.default.createDirectory(atPath: EncryptionKeysStore.legacyOtrDirectory.path, withIntermediateDirectories: true, attributes: [:])
-    }
-    
     func testThatTheNonEmptyLegacyOTRFolderIsDetected() {
+
+        for folder in EncryptionKeysStore.legacyOtrDirectories {
+
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // given
+            try! FileManager.default.createDirectory(atPath: folder.path, withIntermediateDirectories: true, attributes: [:])
+            try! "foo".data(using: String.Encoding.utf8)!.write(to: folder.appendingPathComponent("aabb013ac313"), options: Data.WritingOptions.atomic)
+            
+            // then
+            XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // after
+            self.cleanOTRFolder()
+        }
+	}
+    
+    func testThatEmptyLegacyOTRFolderIsDetected() {
         
-        // given
-        type(of: self).createFakeOTRFolder()
-        try! "foo".data(using: String.Encoding.utf8)!.write(to: EncryptionKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
-        
-        // then
-        XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
+        for folder in EncryptionKeysStore.legacyOtrDirectories {
+            
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // given
+            try! FileManager.default.createDirectory(atPath: folder.path, withIntermediateDirectories: true, attributes: [:])
+            
+            // then
+            XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // after
+            self.cleanOTRFolder()
+        }
     }
     
-    func testThatANonEmptyLegacyOTRFolderIsDeleted() {
+    func testThatTheNonEmptyLegacyOTRFolderIsMigrated() {
+        
+        self.cleanOTRFolder()
+        for folder in EncryptionKeysStore.legacyOtrDirectories {
+            
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // given
+            let text = "folder: \(folder.path)"
+            let file = "aabb013ac313"
+            try! FileManager.default.createDirectory(atPath: folder.path, withIntermediateDirectories: true, attributes: [:])
+            try! text.data(using: String.Encoding.utf8)!.write(to: folder.appendingPathComponent(file), options: Data.WritingOptions.atomic)
+            XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
+
+            
+            // when
+            let _ = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
+            
+            // then
+            let fooData = try! Data(contentsOf: self.someOTRFolder.appendingPathComponent(file))
+            let fooString = String(data: fooData, encoding: String.Encoding.utf8)!
+            XCTAssertEqual(fooString, text)
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+
+            
+            // after
+            self.cleanOTRFolder()
+        }
+    }
+    
+    func testThatEmptyLegacyOTRFolderIsMigrated() {
+        
+        self.cleanOTRFolder()
+        for folder in EncryptionKeysStore.legacyOtrDirectories {
+            
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // given
+            try! FileManager.default.createDirectory(atPath: folder.path, withIntermediateDirectories: true, attributes: [:])
+            XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
+            
+            
+            // when
+            let _ = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
+            
+            // then
+            XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+            
+            // after
+            self.cleanOTRFolder()
+        }
+    }
+	
+    func testThatTheOTRFolderHasTheRightPath() {
         
         // given
-        type(of: self).createFakeOTRFolder()
-        XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
-        
-        // when
-        EncryptionKeysStore.removeOldIdentityFolder()
+        let sut = EncryptionKeysStore(managedObjectContext: self.managedObjectContext, in: self.someOTRFolder)
         
         // then
-        XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
+        XCTAssertEqual(sut.cryptoboxDirectoryURL.path, self.someOTRFolder.path)
     }
     
     func testThatItCanDeleteANonExistingOldIdentityFolder() {
@@ -160,47 +223,10 @@ class EncryptionKeysStoreTests: OtrBaseTest {
         XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
     }
 
-    func testThatTheEmptyLegacyOTRFolderIsDetected() {
-        
-        // given
-        type(of: self).createFakeOTRFolder()
-        
-        // then
-        XCTAssertTrue(EncryptionKeysStore.needToMigrateIdentity)
-    }
-
-    func testThatItMovesTheLegacyCryptobox() {
-        
-        // given
-        type(of: self).cleanOTRFolder()
-
-        type(of: self).createFakeOTRFolder()
-        try! "foo".data(using: String.Encoding.utf8)!.write(to: EncryptionKeysStore.legacyOtrDirectory.appendingPathComponent("dummy.txt"), options: Data.WritingOptions.atomic)
-
-        // when
-        let _ = EncryptionKeysStore(managedObjectContext: NSManagedObjectContext())
-        
-        // then
-        let fooData = try! Data(contentsOf: EncryptionKeysStore.otrDirectoryURL.appendingPathComponent("dummy.txt"))
-        let fooString = String(data: fooData, encoding: String.Encoding.utf8)!
-        XCTAssertEqual(fooString, "foo")
-        XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
-    }
-
     
-    func testThatTheLegacyOTRFolderIsNotDetected() {
+    func testThatItDoesNotNeedToMigrateWhenThereIsNoLegacyFolder() {
         
         // then
         XCTAssertFalse(EncryptionKeysStore.needToMigrateIdentity)
-    }
-    
-    func testThatTheOTRFolderHasTheRightPath() {
-        
-        // given
-        let otrURL = try! FileManager.default.url(for: FileManager.SearchPathDirectory.applicationSupportDirectory, in: FileManager.SearchPathDomainMask.userDomainMask, appropriateFor: nil, create: false).appendingPathComponent("otr")
-        
-        // then
-        XCTAssertEqual(EncryptionKeysStore.otrDirectoryURL, otrURL)
-    }
-    
+    }    
 }
