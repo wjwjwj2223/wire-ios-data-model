@@ -239,12 +239,12 @@ extension NSManagedObjectContext {
     }
     
     /// Returns the cryptobox instance associated with this managed object context
-    public var zm_cryptKeyStore : EncryptionKeysStore! {
+    public var zm_cryptKeyStore : KeyStore! {
         if !self.zm_isSyncContext {
             fatal("Can't access key store: Currently not on sync context")
         }
         let keyStore = self.userInfo.object(forKey: NSManagedObjectContext.encryptionKeysStoreKey)
-        if let keyStore = keyStore as? EncryptionKeysStore {
+        if let keyStore = keyStore as? KeyStore {
             return keyStore
         } else {
             fatal("Can't access key store: not keystore found.")
