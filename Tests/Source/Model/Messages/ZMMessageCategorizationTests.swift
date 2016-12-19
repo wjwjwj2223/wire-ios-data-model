@@ -46,6 +46,16 @@ class ZMMessageCategorizationTests : ZMBaseManagedObjectTest {
         // THEN
         XCTAssertEqual(message.categorization, MessageCategory.text)
     }
+    
+    func testThatItDoesNotCategorizeTimedMessages() {
+        
+        // GIVEN
+        self.conversation.updateMessageDestructionTimeout(timeout: .thirtySeconds)
+        let message = self.conversation.appendMessage(withText: "ramble on!")! as! ZMMessage
+        
+        // THEN
+        XCTAssertEqual(message.categorization, MessageCategory.undefined)
+    }
 
     func testThatItCategorizesATextMessageWithLink() {
         
@@ -317,7 +327,7 @@ extension ZMMessageCategorizationTests {
     func testThatItCreatesAFetchRequestToFetchLikedText() {
         
         // GIVEN
-        let textMessage = self.conversation.appendMessage(withText: "in the still of the night")! as! ZMMessage
+        let textMessage = self.conversation.appendMessage(withText: "в ночной тиши")! as! ZMMessage
         textMessage.cachedCategory = MessageCategory.text
         textMessage.serverTimestamp = Date(timeIntervalSince1970: 100)
         let knockMessage = self.conversation.appendMessage(withText: "in the still of the night")! as! ZMMessage

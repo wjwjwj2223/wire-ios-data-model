@@ -91,6 +91,26 @@ extension ZMMessage {
         return self.sortedFetchRequest(with: finalPredicate)!
     }
     
+    public static func fetchRequestMatching(matchPairs: [CategoryMatch],
+                                            conversation: ZMConversation? = nil) -> NSFetchRequest<NSFetchRequestResult> {
+        
+        let categoryPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: matchPairs.map {
+            if $0.excluding != .none {
+                return NSPredicate(format: "((%K & %d) = %d) && ((%K & %d) = 0)" ,
+                                   ZMMessageCachedCategoryKey, $0.including.rawValue, $0.including.rawValue,
+                                   ZMMessageCachedCategoryKey, $0.excluding.rawValue)
+            }
+            return NSPredicate(format: "(%K & %d) = %d", ZMMessageCachedCategoryKey, $0.including.rawValue, $0.including.rawValue)
+            }
+        )
+        let conversationPredicate : NSPredicate? = (conversation != nil)
+            ? NSPredicate(format: "%K = %@", ZMMessageConversationKey, conversation!)
+            : nil
+        
+        let finalPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, conversationPredicate].flatMap { $0 })
+        return self.sortedFetchRequest(with: finalPredicate)!
+    }
+    
 }
 
 // MARK: - Categories from specific content
@@ -100,6 +120,10 @@ extension ZMMessage {
 
     /// Category according only to content (excluding likes)
     fileprivate var categoryFromContent : MessageCategory {
+        
+        guard !self.isEphemeral, !self.isObfuscated, !self.isZombieObject else {
+            return .none
+        }
         
         let category = [self.textCategory,
                         self.imageCategory,
@@ -136,7 +160,7 @@ extension ZMMessage {
             category.update(with: .link)
         }
         // now check in the msg text
-        let matches = linkParser.matches(in: text.messageText, range: NSRange(location: 0, length: text.messageText.utf8.count))
+        let matches = linkParser.matches(in: text.messageText, range: NSRange(location: 0, length: text.messageText.characters.count))
         if matches.count > 0 {
             category.update(with: .link)
         }
