@@ -145,6 +145,9 @@ extension ZMMessage {
             return .none
         }
         var category = MessageCategory.image
+        if let asset = self as? ZMAssetClientMessage, (asset.imageAssetStorage?.mediumGenericMessage == nil && imageData.mediumData == nil) {
+            category.update(with: .excludedFromCollection)
+        }
         if imageData.isAnimatedGIF {
             category.update(with: .GIF)
         }
@@ -173,6 +176,9 @@ extension ZMMessage {
             return .none
         }
         var category = MessageCategory.file
+        if let asset = self as? ZMAssetClientMessage, asset.transferState == .cancelledUpload || asset.transferState == .failedUpload {
+            category.update(with: .excludedFromCollection)
+        }
         if fileData.isAudio() {
             category.update(with: .audio)
         }
@@ -236,6 +242,7 @@ public struct MessageCategory : OptionSet {
     public static let liked = MessageCategory(rawValue: 1 << 9)
     public static let knock = MessageCategory(rawValue: 1 << 10)
     public static let systemMessage = MessageCategory(rawValue: 1 << 11)
+    public static let excludedFromCollection = MessageCategory(rawValue: 1 << 12)
     
     public init(rawValue: Int32) {
         self.rawValue = rawValue
