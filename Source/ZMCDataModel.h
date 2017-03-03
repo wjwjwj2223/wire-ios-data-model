@@ -34,6 +34,8 @@
 
 #import <ZMCDataModel/ZMUser.h>
 #import <ZMCDataModel/ZMUser+Internal.h>
+#import <ZMCDataModel/ZMBareUser.h>
+#import <ZMCDataModel/ZMBareUser+UserSession.h>
 #import <ZMCDataModel/UserClientTypes.h>
 
 #import <ZMCDataModel/ZMSearchUser.h>
