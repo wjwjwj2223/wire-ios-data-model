@@ -16,14 +16,19 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
+import Foundation
 
-#import "ZMUser.h"
-
-@class Team;
-
-
-@interface ZMUser (OneOnOne)
-
-@property (nonatomic, nullable) ZMConversation *oneToOneConversation;
-
-@end
+extension NSManagedObjectContext {
+    
+    /// Tear down the context. Using the context after this call results in
+    /// undefined behavior.
+    public func tearDown() {
+        self.performGroupedBlockAndWait {
+            self.userInfo.removeAllObjects()
+            let objects = self.registeredObjects
+            objects.forEach {
+                self.refresh($0, mergeChanges: false)
+            }
+        }
+    }
+}
