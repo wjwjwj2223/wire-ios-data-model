@@ -503,24 +503,51 @@ extension ZMUserTests {
         XCTAssertEqual(users, [user1, user2, user3])
     }
     
-    // MARK: - Filename
-    func testFilenameForUser() {
+}
+
+// MARK: - Filename
+extension ZMUserTests {
+    
+    /// check the generated filename matches several critirias and a regex pattern
+    ///
+    /// - Parameters:
+    ///   - pattern: pattern string for regex
+    ///   - filename: filename to check
+    func checkFilenameIsValid(pattern: String, filename: String) {
+        XCTAssertEqual(filename.count, 214)
+        XCTAssertTrue(filename.hasPrefix("Some"))
+        XCTAssertTrue(filename.contains("body"))
+
+        let regexp = try! NSRegularExpression(pattern: pattern, options: [])
+        let matches = regexp.matches(in: filename as String, options: [], range: NSMakeRange(0, filename.count))
+        
+        XCTAssertTrue(matches.count > 0)
+    }
+    
+    func testFilenameForUser() throws {
         // Given
         let user = ZMUser.insert(in: self.uiMOC, name: "Some body with a very long name and a emoji 🇭🇰 and some Chinese 中文 and some German Fußgängerübergänge")
         
         // When
-        let filename = user.filename
+        let filename = user.filename()
         
         // Then
-        XCTAssertEqual(filename.length, 214)
-        XCTAssertTrue(filename.hasPrefix("Some"))
-        XCTAssertTrue(filename.contains("body"))
-        
         /// check ends with a date stamp, e.g. -2017-10-24-11.05.43
         let pattern = "^.*[0-9-.]{20,20}$"
-        let regexp = try! NSRegularExpression(pattern: pattern, options: [])
-        let matches = regexp.matches(in: filename as String, options: [], range: NSMakeRange(0, filename.length))
+        checkFilenameIsValid(pattern: pattern, filename: filename)
+    }
+
+    func testFilenameWithSuffixForUser() throws {
+        // Given
+        let user = ZMUser.insert(in: self.uiMOC, name: "Some body with a very long name and a emoji 🇭🇰 and some Chinese 中文 and some German Fußgängerübergänge")
         
-        XCTAssertTrue(matches.count > 0)
+        // When
+        let suffix: String = "-Jellyfish"
+        let filename = user.filename(suffix: suffix)
+        
+        // Then
+        /// check ends with a date stamp and a suffix, e.g. -2017-10-24-11.05.43-Jellyfish
+        let pattern = "^.*[0-9-.]{20,20}\(suffix)$"
+        checkFilenameIsValid(pattern: pattern, filename: filename)
     }
 }
