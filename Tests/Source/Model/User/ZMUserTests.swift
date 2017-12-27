@@ -342,7 +342,7 @@ extension ZMUserTests {
         let all = NSArray(array: [anna, otto, user])
         
         // When
-        let nonBots = all.filtered(using: ZMUser.nonBotUsersPredicate) as! [ZMUser]
+        let nonBots = all.filtered(using: ZMUser.nonServicePredicate) as! [ZMUser]
         
         // Then
         XCTAssertEqual(nonBots.count, 1)
