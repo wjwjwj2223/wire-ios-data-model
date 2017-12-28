@@ -171,6 +171,26 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
         self.providerIdentifier = payload[@"provider"];
     }
     
+    NSArray *assets = payload[@"assets"];
+    if (nil != assets && [assets isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *asset in assets) {
+            NSString *type = asset[@"type"];
+            NSString *size = asset[@"size"];
+            NSString *key  = asset[@"key"];
+            
+            if (type.length == 0 || size.length == 0 || key.length == 0) {
+                continue;
+            }
+            
+            if ([type isEqualToString:@"image"]) {
+                if ([size isEqualToString:@"preview"]) {
+                    [ZMSearchUser.searchUserToMediumAssetIDCache setObject:[[SearchUserAssetObjC alloc] initWithAssetKey:key]
+                                                                    forKey:identifier];
+                }
+            }
+        }
+    }
+    
     if (nil != self) {
         self.totalCommonConnections = [[payload optionalNumberForKey:ZMSearchUserTotalMutualFriendsKey] unsignedIntegerValue];
     }
@@ -568,7 +588,8 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
     [searchUserObserverCenter notifyUpdatedSearchUser:self];
 }
 
-- (void)refreshData {
+- (void)refreshData
+{
     [self.user refreshData];
 }
 
