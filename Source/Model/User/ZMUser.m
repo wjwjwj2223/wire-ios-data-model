@@ -80,7 +80,7 @@ static NSString *const AddressBookEntryKey = @"addressBookEntry";
 static NSString *const MembershipKey = @"membership";
 static NSString *const CreatedTeamsKey = @"createdTeams";
 NSString *const AvailabilityKey = @"availability";
-NSString *const IsServiceKey = @"isService";
+NSString *const ProviderIdentifierKey = @"providerIdentifier";
 
 
 @interface ZMBoxedSelfUser : NSObject
@@ -138,7 +138,6 @@ NSString *const IsServiceKey = @"isService";
 @property (nonatomic, copy) NSData *imageSmallProfileData;
 @property (nonatomic, copy) NSString *phoneNumber;
 @property (nonatomic, copy) NSString *normalizedEmailAddress;
-@property (nonatomic, readwrite) BOOL isService;
 @property (nullable, nonatomic, readwrite) NSString *providerIdentifier;
 
 @property (nonatomic, readonly) UserClient *selfClient;
@@ -189,7 +188,6 @@ NSString *const IsServiceKey = @"isService";
 @dynamic clients;
 @dynamic handle;
 @dynamic addressBookEntry;
-@dynamic isService;
 @dynamic providerIdentifier;
 
 - (UserClient *)selfClient
@@ -302,11 +300,6 @@ NSString *const IsServiceKey = @"isService";
     return [self _isGuestIn:conversation];
 }
 
-- (NSString *)serviceIdentifier
-{
-    return self.remoteIdentifier.transportString;
-}
-
 + (NSSet *)keyPathsForValuesAffectingIsConnected
 {
     return [NSSet setWithObjects:ConnectionKey, @"connection.status", nil];
@@ -377,7 +370,8 @@ NSString *const IsServiceKey = @"isService";
     return clientsRequiringUserAttention;
 }
 
-- (void)refreshData {
+- (void)refreshData
+{
     self.needsToBeUpdatedFromBackend = true;
 }
 
@@ -438,11 +432,6 @@ NSString *const IsServiceKey = @"isService";
 
 + (instancetype)userWithRemoteID:(NSUUID *)UUID createIfNeeded:(BOOL)create inContext:(nonnull NSManagedObjectContext *)moc;
 {
-    return [self userWithRemoteID:UUID isService:NO createIfNeeded:create inContext:moc];
-}
-
-+ (instancetype)userWithRemoteID:(NSUUID *)UUID isService:(BOOL)isService createIfNeeded:(BOOL)create inContext:(nonnull NSManagedObjectContext *)moc;
-{
     // We must only ever call this on the sync context. Otherwise, there's a race condition
     // where the UI and sync contexts could both insert the same user (same UUID) and we'd end up
     // having two duplicates of that user, and we'd have a really hard time recovering from that.
@@ -455,7 +444,6 @@ NSString *const IsServiceKey = @"isService";
         return result;
     } else if(create) {
         ZMUser *user = [ZMUser insertNewObjectInManagedObjectContext:moc];
-        user.isService = isService;
         user.remoteIdentifier = UUID;
         return user;
     }

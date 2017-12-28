@@ -47,11 +47,9 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
 @property (nonatomic) NSString *initials;
 @property (nonatomic) NSString *name; //< name received from BE
 @property (nonatomic) NSString *handle;
-@property (nonatomic) NSString *serviceIdentifier; // for service
 @property (nonatomic) NSString *providerIdentifier; // for service
 
 @property (nonatomic) BOOL isConnected;
-@property (nonatomic) BOOL isService;
 @property (nonatomic) ZMAccentColor accentColorValue;
 
 @property (nonatomic, copy) NSString *connectionRequestMessage;
@@ -82,7 +80,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                  accentColor:(ZMAccentColor)color
                     remoteID:(NSUUID *)remoteID
                         user:(ZMUser *)user
-                   isService:(BOOL)isService
     syncManagedObjectContext:(NSManagedObjectContext *)syncMOC
       uiManagedObjectContext:(NSManagedObjectContext *)uiMOC;
 {
@@ -91,7 +88,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
         _user = user;
         _syncMOC = syncMOC;
         _uiMOC = uiMOC;
-        _isService = isService;
 
         if (self.user == nil) {
             _name = name.stringByRemovingExtremeCombiningCharacters;
@@ -115,7 +111,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                  accentColor:(ZMAccentColor)color
                     remoteID:(NSUUID *)remoteID
                         user:(ZMUser *)user
-                   isService:(BOOL)isService
                  userSession:(id<ZMManagedObjectContextProvider>)userSession;
 {
     return [self initWithName:name
@@ -123,7 +118,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                   accentColor:color
                      remoteID:remoteID
                          user:user
-                    isService:isService
      syncManagedObjectContext:userSession.syncManagedObjectContext
        uiManagedObjectContext:userSession.managedObjectContext];
 }
@@ -136,7 +130,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                   accentColor:user.accentColorValue
                      remoteID:user.remoteIdentifier
                          user:user
-                    isService:NO
                   userSession:userSession];
     if (nil != self) {
         self.totalCommonConnections = user.totalCommonConnections;
@@ -159,7 +152,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
 }
 
 - (instancetype)initWithPayload:(NSDictionary *)payload
-                      isService:(BOOL)isService
                     userSession:(id<ZMManagedObjectContextProvider>)userSession
 {
     NSUUID *identifier = [payload optionalUuidForKey:@"id"];
@@ -173,10 +165,9 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                   accentColor:[ZMUser accentColorFromPayloadValue:accentId]
                      remoteID:identifier
                          user:existingUser
-                    isService:isService
                   userSession:userSession];
     
-    if (isService) {
+    if (nil != payload[@"provider"]) {
         self.providerIdentifier = payload[@"provider"];
     }
     
@@ -186,20 +177,7 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
     return self;
 }
 
-+ (NSArray *)servicesWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
-                          userSession:(id<ZMManagedObjectContextProvider> )userSession
-{
-    return [self usersWithPayloadArray:payloadArray isService:YES userSession:userSession];
-}
-
 + (NSArray <ZMSearchUser *> *)usersWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
-                                        userSession:(id<ZMManagedObjectContextProvider>)userSession
-{
-    return [self usersWithPayloadArray:payloadArray isService:NO userSession:userSession];
-}
-
-+ (NSArray <ZMSearchUser *> *)usersWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
-                                          isService:(BOOL)isService
                                         userSession:(id<ZMManagedObjectContextProvider>)userSession;
 {
     NSMutableArray <ZMSearchUser *> *searchUsers = [[NSMutableArray alloc] init];
@@ -211,7 +189,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
         }
         
         ZMSearchUser *searchUser = [[ZMSearchUser alloc] initWithPayload:payload
-                                                               isService:isService
                                                              userSession:userSession];
         if (searchUser != nil) {
             [searchUsers addObject:searchUser];
@@ -230,7 +207,6 @@ NSString *const ZMSearchUserTotalMutualFriendsKey = @"total_mutual_friends";
                   accentColor:ZMAccentColorUndefined
                      remoteID:nil
                          user:user
-                    isService:NO
                   userSession:userSession];
     
     if (self != nil) {

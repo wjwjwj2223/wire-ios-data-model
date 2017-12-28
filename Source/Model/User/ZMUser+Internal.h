@@ -31,7 +31,6 @@ extern NSString * __nonnull const SessionObjectIDKey;
 extern NSString * __nonnull const ZMUserActiveConversationsKey;
 extern NSString * __nonnull const UserClientsKey;
 extern NSString * __nonnull const AvailabilityKey;
-extern NSString * __nonnull const IsServiceKey;
 
 @interface ZMUser (Internal)
 
@@ -54,7 +53,6 @@ extern NSString * __nonnull const IsServiceKey;
 - (void)updateWithTransportData:(nonnull NSDictionary *)transportData authoritative:(BOOL)authoritative;
 
 + (nullable instancetype)userWithRemoteID:(nonnull NSUUID *)UUID createIfNeeded:(BOOL)create inContext:(nonnull NSManagedObjectContext *)moc;
-+ (nullable instancetype)userWithRemoteID:(nonnull NSUUID *)UUID isService:(BOOL)isService createIfNeeded:(BOOL)create inContext:(nonnull NSManagedObjectContext *)moc;
 + (nullable instancetype)userWithEmailAddress:(nonnull NSString *)emailAddress inContext:(nonnull NSManagedObjectContext *)context;
 + (nullable instancetype)userWithPhoneNumber:(nonnull NSString *)phoneNumber inContext:(nonnull NSManagedObjectContext *)context;
 

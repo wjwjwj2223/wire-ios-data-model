@@ -35,7 +35,6 @@ FOUNDATION_EXPORT NSString *const ZMSearchUserTotalMutualFriendsKey;
                  accentColor:(ZMAccentColor)color
                     remoteID:(NSUUID *)remoteID
                         user:(ZMUser *)user
-                   isService:(BOOL)isService
     syncManagedObjectContext:(NSManagedObjectContext *)syncMOC
       uiManagedObjectContext:(NSManagedObjectContext *)uiMOC;
 
@@ -44,22 +43,20 @@ FOUNDATION_EXPORT NSString *const ZMSearchUserTotalMutualFriendsKey;
                  accentColor:(ZMAccentColor)color
                     remoteID:(NSUUID *)remoteID
                         user:(ZMUser *)user
-                   isService:(BOOL)isService
                  userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
-+ (NSArray <ZMSearchUser *> *)usersWithUsers:(NSArray <ZMUser *> *)users userSession:(id<ZMManagedObjectContextProvider>)userSession;
++ (NSArray <ZMSearchUser *> *)usersWithUsers:(NSArray <ZMUser *> *)users
+                                 userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
 - (instancetype)initWithPayload:(NSDictionary *)payload
-                      isService:(BOOL)isService
                     userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
 + (NSArray <ZMSearchUser *> *)usersWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
                                         userSession:(id<ZMManagedObjectContextProvider> )userSession;
 
-+ (NSArray *)servicesWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
-                          userSession:(id<ZMManagedObjectContextProvider> )userSession;
-
-- (instancetype)initWithContact:(ZMAddressBookContact *)contact user:(ZMUser *)user userSession:(id<ZMManagedObjectContextProvider> )userSession;
+- (instancetype)initWithContact:(ZMAddressBookContact *)contact
+                           user:(ZMUser *)user
+                    userSession:(id<ZMManagedObjectContextProvider> )userSession;
 
 @property (nonatomic) NSUUID *remoteIdentifier;
 /// Returns @c YES if the receiver has a local user or cached profile image data.
