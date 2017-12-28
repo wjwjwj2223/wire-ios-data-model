@@ -80,8 +80,6 @@ static NSString *const AddressBookEntryKey = @"addressBookEntry";
 static NSString *const MembershipKey = @"membership";
 static NSString *const CreatedTeamsKey = @"createdTeams";
 NSString *const AvailabilityKey = @"availability";
-NSString *const ProviderIdentifierKey = @"providerIdentifier";
-
 
 @interface ZMBoxedSelfUser : NSObject
 
@@ -138,7 +136,6 @@ NSString *const ProviderIdentifierKey = @"providerIdentifier";
 @property (nonatomic, copy) NSData *imageSmallProfileData;
 @property (nonatomic, copy) NSString *phoneNumber;
 @property (nonatomic, copy) NSString *normalizedEmailAddress;
-@property (nullable, nonatomic, readwrite) NSString *providerIdentifier;
 
 @property (nonatomic, readonly) UserClient *selfClient;
 
@@ -188,7 +185,6 @@ NSString *const ProviderIdentifierKey = @"providerIdentifier";
 @dynamic clients;
 @dynamic handle;
 @dynamic addressBookEntry;
-@dynamic providerIdentifier;
 
 - (UserClient *)selfClient
 {
@@ -648,11 +644,6 @@ NSString *const ProviderIdentifierKey = @"providerIdentifier";
     if (handle != nil && handle != self.handle) {
         self.handle = handle;
     }
-}
-
-- (void)updateWithProviderIdentifier:(nullable NSString *)providerIdentifier;
-{
-    self.providerIdentifier = providerIdentifier;
 }
 
 @end

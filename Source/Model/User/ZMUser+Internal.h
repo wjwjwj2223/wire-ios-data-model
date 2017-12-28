@@ -64,8 +64,6 @@ extern NSString * __nonnull const AvailabilityKey;
 /// Should be called when creating a @c ZMSearchUser to ensure it's underlying user is updated.
 - (void)updateWithSearchResultName:(nullable NSString *)name handle:(nullable NSString *)handle;
 
-- (void)updateWithProviderIdentifier:(nullable NSString *)providerIdentifier;
-
 @end
 
 @interface ZMUser (SelfUser)
