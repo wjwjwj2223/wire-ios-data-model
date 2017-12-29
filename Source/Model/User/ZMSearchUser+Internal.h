@@ -45,18 +45,13 @@ FOUNDATION_EXPORT NSString *const ZMSearchUserTotalMutualFriendsKey;
                         user:(ZMUser *)user
                  userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
-+ (NSArray <ZMSearchUser *> *)usersWithUsers:(NSArray <ZMUser *> *)users
-                                 userSession:(id<ZMManagedObjectContextProvider>)userSession;
++ (NSArray <ZMSearchUser *> *)usersWithUsers:(NSArray <ZMUser *> *)users userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
-- (instancetype)initWithPayload:(NSDictionary *)payload
-                    userSession:(id<ZMManagedObjectContextProvider>)userSession;
+- (instancetype)initWithPayload:(NSDictionary *)payload userSession:(id<ZMManagedObjectContextProvider>)userSession;
 
-+ (NSArray <ZMSearchUser *> *)usersWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray
-                                        userSession:(id<ZMManagedObjectContextProvider> )userSession;
++ (NSArray <ZMSearchUser *> *)usersWithPayloadArray:(NSArray <NSDictionary *> *)payloadArray userSession:(id<ZMManagedObjectContextProvider> )userSession;
 
-- (instancetype)initWithContact:(ZMAddressBookContact *)contact
-                           user:(ZMUser *)user
-                    userSession:(id<ZMManagedObjectContextProvider> )userSession;
+- (instancetype)initWithContact:(ZMAddressBookContact *)contact user:(ZMUser *)user userSession:(id<ZMManagedObjectContextProvider> )userSession;
 
 @property (nonatomic) NSUUID *remoteIdentifier;
 /// Returns @c YES if the receiver has a local user or cached profile image data.
