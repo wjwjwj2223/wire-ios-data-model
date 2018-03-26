@@ -33,7 +33,7 @@ extension StorageStack {
 
     public enum BackupError: Error {
         case failedToRead
-        case failedToWrite
+        case failedToWrite(Error)
     }
     
     public struct BackupInfo {
@@ -48,7 +48,7 @@ extension StorageStack {
     ///   - applicationContainer: shared application container
     ///   - dispatchGroup: group for testing
     ///   - completion: called on main thread when done. Result will contain the folder where all data was written to.
-    public static func backupLocalStorage(accountIdentifier: UUID, clientIdentifier: String, applicationContainer: URL, dispatchGroup: ZMSDispatchGroup? = nil, completion: @escaping ((Result<BackupInfo>) -> Void)) {
+    public static func backupLocalStorage(accountIdentifier: UUID, clientIdentifier: String, applicationContainer: URL, dispatchGroup: ZMSDispatchGroup? = nil, completion: @escaping (Result<BackupInfo>) -> Void) {
         func fail(_ error: BackupError) {
             DispatchQueue.main.async {
                 completion(.failure(error))
@@ -90,8 +90,68 @@ extension StorageStack {
                     dispatchGroup?.leave()
                 }
             } catch {
-                fail(.failedToWrite)
+                fail(.failedToWrite(error))
             }
         }
     }
+    
+    public enum BackupImportError: Error {
+        case incompatibleBackup(Error)
+        case failedToCopy(Error)
+    }
+    
+    /// Will import a backup for a given account
+    ///
+    /// - Parameters:
+    ///   - accountIdentifier: account for which to import the backup
+    ///   - backupDirectory: root directory of the decrypted and uncompressed backup
+    ///   - applicationContainer: shared application container
+    ///   - dispatchGroup: group for testing
+    ///   - completion: called on main thread when done. Result will contain the folder where all data was written to.
+    public static func importLocalStorage(accountIdentifier: UUID, from backupDirectory: URL, applicationContainer: URL, dispatchGroup: ZMSDispatchGroup? = nil, completion: @escaping ((Result<URL>) -> Void)) {
+        func fail(_ error: BackupImportError) {
+            DispatchQueue.main.async {
+                completion(.failure(error))
+                dispatchGroup?.leave()
+            }
+        }
+        
+        let queue = DispatchQueue(label: "Database import", qos: .userInitiated)
+        
+        dispatchGroup?.enter()
+        
+        let accountDirectory = accountFolder(accountIdentifier: accountIdentifier, applicationContainer: applicationContainer)
+        let accountStoreFile = accountDirectory.appendingPersistentStoreLocation()
+        let backupStoreFile = backupDirectory.appendingPathComponent(databaseDirectoryName).appendingStoreFile()
+        let metadataURL = backupDirectory.appendingPathComponent(metadataFilename)
+        
+        queue.async() {
+            do {
+                let metadata = try BackupMetadata(url: metadataURL)
+                
+                if let verificationError = metadata.verify(using: accountIdentifier) {
+                    fail(.incompatibleBackup(verificationError))
+                    return
+                }
+                
+                let model = NSManagedObjectModel.loadModel()
+                let coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
+                
+                // Create target directory
+                try FileManager.default.createDirectory(at: accountStoreFile.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
+                let options = NSPersistentStoreCoordinator.persistentStoreOptions(supportsMigration: false)
+                
+                // Import the persistent store to the account data directory
+                try coordinator.replacePersistentStore(at: accountStoreFile, destinationOptions: options, withPersistentStoreFrom: backupStoreFile, sourceOptions: options, ofType: NSSQLiteStoreType)
+                
+                DispatchQueue.main.async {
+                    completion(.success(accountDirectory))
+                    dispatchGroup?.leave()
+                }
+            } catch let error {
+                fail(.failedToCopy(error))
+            }
+        }
+    }
+
 }
