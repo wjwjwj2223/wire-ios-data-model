@@ -173,16 +173,20 @@ extension ZMGenericMessage {
         func allAuthorizedRecipients() -> Set<ZMUser> {
             if let connectedUser = conversation.connectedUser { return Set(arrayLiteral: connectedUser, selfUser) }
 
-            let authorizedServices = services.filtered { service in
-                self.textData?.mention?.contains { $0.userId == service.remoteIdentifier?.transportString() } ?? false
+            func mentionedServices() -> Set<ZMUser> {
+                return services.filtered { service in
+                    self.textData?.mention?.contains { $0.userId == service.remoteIdentifier?.transportString() } ?? false
+                }
             }
+            
+            let authorizedServices = ZMUser.servicesMustBeMentioned ? mentionedServices() : services
 
             return otherUsers.union(authorizedServices).union([selfUser])
         }
 
         var recipientUsers = Set<ZMUser>()
 
-        if self.hasConfirmation() || self.hasEphemeral() {
+        if self.hasConfirmation() {
             guard let recipients = recipientForConfirmationMessage() ?? recipientForOtherUsers() else {
                 let confirmationInfo = hasConfirmation() ? ", original message: \(self.confirmation.firstMessageId)" : ""
                 fatal("confirmation need a recipient\n ConvType: \(conversation.conversationType.rawValue) \(confirmationInfo)")
