@@ -131,6 +131,9 @@
     if(lastReadIndex != NSNotFound) {
         ZMMessage *lastRead = conversation.messages[lastReadIndex];
         conversation.lastReadServerTimeStamp = lastRead.serverTimestamp;
+    } else {
+        [conversation markAsRead];
+        WaitForAllGroupsToBeEmpty(0.5);
     }
     NSOrderedSet *expectedMessages = [[self messagesUntilEndOfConversation:conversation fromIndex:minExpectedMessage] reversedOrderedSet];
     
@@ -382,8 +385,38 @@
     XCTAssertEqualObjects(sut.messages, [NSOrderedSet orderedSetWithObject:newMessage]);
 }
 
-@end
+- (void)testThatDeletedMessagesAreHidden
+{
+    // given
+    ZMConversation *conversation = [self createConversationWithMessages:1];
+    ZMMessage *lastReadMessage = conversation.messages.lastObject;
+    conversation.lastReadServerTimeStamp = lastReadMessage.serverTimestamp;
 
+    ZMConversationMessageWindow *sut = [conversation conversationWindowWithSize:30];
+    ZMClientMessage *newMessage = [[ZMClientMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
+    [conversation.mutableMessages addObject:newMessage];
+    
+    // when
+    [sut recalculateMessages];
+    
+    
+    // then
+    NSOrderedSet *expected = [NSOrderedSet orderedSetWithArray:@[newMessage, lastReadMessage]];
+    XCTAssertEqualObjects(sut.messages, expected);
+    
+    // given
+    newMessage.hiddenInConversation = conversation;
+    newMessage.visibleInConversation = nil;
+    XCTAssert(newMessage.hasBeenDeleted);
+
+    // when
+    [sut recalculateMessages];
+    
+    // then
+    XCTAssertEqualObjects(sut.messages, [NSOrderedSet orderedSetWithObject:lastReadMessage]);
+}
+
+@end
 
 
 @implementation ZMConversationMessageWindowTests (ScrollingNotification)
@@ -391,21 +424,22 @@
 - (void)testThatScrollingTheWindowUpCausesAScrollingNotification
 {
     // given
-    id mockObserverCenter = [OCMockObject niceMockForClass:[MessageWindowObserverCenter class]];
-    id partialMockForContext = [OCMockObject partialMockForObject:self.uiMOC];
-    [[[partialMockForContext stub] andReturn: mockObserverCenter] messageWindowObserverCenter];
-    
     ZMConversation *conversation = [self createConversationWithMessages:20];
+    [conversation markAsRead];
+    WaitForAllGroupsToBeEmpty(0.5);
     ZMConversationMessageWindow *window = [conversation conversationWindowWithSize:10];
     
     // expect
-    [[mockObserverCenter expect] windowDidScroll:window];
-    
+    [self expectationForNotification:@"MessageWindowDidChangeNotification" object:nil handler:^BOOL(NSNotification * _Nonnull notification) {
+        NOT_USED(notification);
+        return YES;
+    }];
+
     // when
     [window moveUpByMessages:10];
-    
+
     // then
-    [mockObserverCenter verify];
+    XCTAssertTrue([self waitForCustomExpectationsWithTimeout:0.5]);
 }
 
 @end

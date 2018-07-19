@@ -52,10 +52,10 @@
         
         self.size = size;
         
-        // find last read, offset size from there
-        if(conversation.lastReadMessage != nil) {
-            const NSUInteger lastReadIndex = [conversation.messages indexOfObject:conversation.lastReadMessage];
-            self.size = MAX(0u, conversation.messages.count - lastReadIndex - 1 + size);
+        // find first unread, offset size from there
+        if (conversation.firstUnreadMessage != nil) {
+            const NSUInteger firstUnreadIndex = [conversation.messages indexOfObject:conversation.firstUnreadMessage];
+            self.size = MAX(0u, conversation.messages.count - firstUnreadIndex + size);
         }
             
         [self recalculateMessages];
@@ -83,10 +83,15 @@
     const NSUInteger numberOfMessages = self.activeSize;
     const NSRange range = NSMakeRange(messages.count - numberOfMessages, numberOfMessages);
     NSMutableOrderedSet *newMessages = [NSMutableOrderedSet orderedSetWithOrderedSet:messages range:range copyItems:NO];
+
     if (self.conversation.clearedTimeStamp != nil) {
         [newMessages filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(ZMMessage * _Nullable message, NSDictionary<NSString *,id> * _Nullable __unused bindings) {
-            return !message.isZombieObject &&
+            return message.shouldBeDisplayed &&
                    (message.deliveryState == ZMDeliveryStatePending || [message.serverTimestamp compare:self.conversation.clearedTimeStamp] == NSOrderedDescending);
+        }]];
+    } else {
+        [newMessages filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(ZMMessage * _Nullable message, NSDictionary<NSString *,id> * _Nullable __unused bindings) {
+            return message.shouldBeDisplayed;
         }]];
     }
     

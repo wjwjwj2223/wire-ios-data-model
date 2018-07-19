@@ -1691,50 +1691,14 @@ extension ZMAssetClientMessageTests {
             
             // when
             let sut = ZMAssetClientMessage.messageUpdateResult(from: updateEvent1, in: self.syncMOC, prefetchResult: nil).message as! ZMAssetClientMessage
-            sut.update(with: updateEvent2!, for: conversation, isUpdatingExistingMessage: true)
+            sut.update(with: updateEvent2!, for: conversation)
             
             // then
             XCTAssertEqual(sut.serverTimestamp, firstDate)
 
         }
     }
-    
-    func testThatItUpdatesTheTimestampIfEarlier() {
-        self.syncMOC.performGroupedBlockAndWait {
-            // given
-            let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
-            conversation.remoteIdentifier = UUID.create()
-            let nonce = UUID.create()
-            let thumbnailId = UUID.create()
-            let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data.zmRandomSHA256Key(), sha256: Data.zmRandomSHA256Key())
-            let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
-            let asset = ZMAsset.asset(withOriginal: nil, preview: ZMAssetPreview.preview(withSize: 256, mimeType: "video/mp4", remoteData: remoteData, imageMetaData: imageMetaData))
-            let firstDate = Date(timeIntervalSince1970: 12334)
-            let secondDate = firstDate.addingTimeInterval(234444)
-            
-            let genericMessage = ZMGenericMessage.genericMessage(asset: asset, messageID: nonce)
-            
-            let dataPayload = [
-                "info" : genericMessage.data().base64String(),
-                "id" : thumbnailId.transportString()
-            ]
-            
-            let payload1 = self.payloadForMessage(in: conversation, type: EventConversationAddOTRAsset, data: dataPayload, time: secondDate)
-            let updateEvent1 = ZMUpdateEvent(fromEventStreamPayload: payload1!, uuid: nil)
-            let payload2 = self.payloadForMessage(in: conversation, type: EventConversationAddOTRAsset, data: dataPayload, time: firstDate)
-            let updateEvent2 = ZMUpdateEvent(fromEventStreamPayload: payload2!, uuid: nil)
-            
-            
-            // when
-            let sut = ZMAssetClientMessage.messageUpdateResult(from: updateEvent1, in: self.syncMOC, prefetchResult: nil).message as! ZMAssetClientMessage
-            sut.update(with: updateEvent2!, for: conversation, isUpdatingExistingMessage: true)
-            
-            // then
-            XCTAssertEqual(sut.serverTimestamp, firstDate)
-        }
-    }
-    
-    
+
     func testThatItUpdatesTheServerTimestampAfterPreviewWasUploaded() {
         
         // given
@@ -2118,6 +2082,25 @@ extension ZMAssetClientMessageTests {
 
         // then
         XCTAssertEqual(sut.transferState, .downloading)
+    }
+    
+    func testThatRequestingFileDoesNotResetTheTransferStateForUnavailableAssets_V3() {
+        // given
+        let (sut, nonce) = createMessageWithNonce()
+        let image = ZMAssetImageMetaData.imageMetaData(withWidth: 123, height: 4569)
+        let original = originalGenericMessage(nonce: nonce, image: image, preview: nil)
+        let uploaded = uploadedGenericMessage(nonce: nonce)
+        
+        // when
+        sut.update(with: original, updateEvent: ZMUpdateEvent(), initialUpdate: false)
+        sut.update(with: uploaded, updateEvent: ZMUpdateEvent(), initialUpdate: false)
+        sut.transferState = .unavailable
+        
+        // when
+        sut.requestImageDownload()
+        
+        // then
+        XCTAssertEqual(sut.transferState, .unavailable)
     }
 
 }

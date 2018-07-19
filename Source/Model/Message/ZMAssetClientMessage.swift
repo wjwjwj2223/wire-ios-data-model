@@ -230,6 +230,19 @@ import Foundation
 
     }
     
+    public override func markAsSent() {
+        super.markAsSent()
+        setObfuscationTimerIfNeeded()
+    }
+    
+    func setObfuscationTimerIfNeeded() {
+        guard self.isEphemeral else {
+            return
+        }
+        
+        startDestructionIfNeeded()
+    }
+    
     public override func resend() {
         if self.v3_isImage {
             self.uploadState = .uploadingFullAsset
@@ -255,17 +268,7 @@ import Foundation
             }
         }
     }
-    
-    //For image messages we have two events - for preview and medium format
-    //To preserve messages order we need to keep the earliest serverTimestamp of these two events
-    public override func updateTimestamp(_ timestamp: Date?, isUpdatingExistingMessage isUpdate: Bool) {
-        if isUpdate {
-            self.serverTimestamp = NSDate.earliest(of: self.serverTimestamp, and: timestamp)
-        } else if timestamp != nil {
-            self.serverTimestamp = timestamp
-        }
-    }
-    
+        
     public override func update(withPostPayload payload: [AnyHashable : Any], updatedKeys: Set<AnyHashable>?) {
         guard let updatedKeys = updatedKeys,
             updatedKeys.contains(#keyPath(ZMAssetClientMessage.uploadState))
@@ -278,10 +281,9 @@ import Foundation
         if shouldUpdate {
             if let serverTimestamp = (payload as NSDictionary).date(forKey: "time") {
                 self.serverTimestamp = serverTimestamp
-                self.conversation?.updateLastReadServerTimeStampIfNeeded(withTimeStamp: serverTimestamp, andSync: false)
             }
-            self.conversation?.resortMessages(withUpdatedMessage: self)
-            self.conversation?.update(with: self, timeStamp: serverTimestamp)
+            conversation?.resortMessages(withUpdatedMessage: self)
+            conversation?.updateTimestampsAfterUpdatingMessage(self)
         }
         
         _ = self.startDestructionIfNeeded()

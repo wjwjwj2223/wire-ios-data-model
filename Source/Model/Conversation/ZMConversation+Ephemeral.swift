@@ -192,8 +192,9 @@ public extension ZMConversation {
             if let newTimeout = newValue {
                 switch (currentValue, newTimeout) {
                 case (_, .synced(let value)):
-                    precondition(conversationType == .group)
-                    syncedMessageDestructionTimeout = value.rawValue
+                    if conversationType == .group {
+                        syncedMessageDestructionTimeout = value.rawValue
+                    }
                 case (.synced?, .local):
                     // It is not allowed to set a local timeout while a synced timeout is set, this should never happen.
                     fatal("Not allowed to set local timeout when synced timeout is set")
@@ -249,5 +250,17 @@ public extension ZMConversation {
     
     @NSManaged internal var localMessageDestructionTimeout: TimeInterval
     @NSManaged internal var syncedMessageDestructionTimeout: TimeInterval
+    
+    public var hasSyncedDestructionTimeout: Bool {
+        guard let timeout = messageDestructionTimeout,
+            case .synced(_) = timeout else { return false }
+        return true
+    }
+    
+    public var hasLocalDestructionTimeout: Bool {
+        guard let timeout = messageDestructionTimeout,
+            case .local = timeout else { return false }
+        return true
+    }
 }
 
