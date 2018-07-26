@@ -81,6 +81,7 @@ NSString * const ZMMessageDurationKey = @"duration";
 NSString * const ZMMessageChildMessagesKey = @"childMessages";
 NSString * const ZMMessageParentMessageKey = @"parentMessage";
 NSString * const ZMSystemMessageMessageTimerKey = @"messageTimer";
+NSString * const ZMSystemMessageRelevantForConversationStatusKey = @"relevantForConversationStatus";
 NSString * const ZMSystemMessageAllTeamUsersAddedKey = @"allTeamUsersAdded";
 NSString * const ZMSystemMessageNumberOfGuestsAddedKey = @"numberOfGuestsAdded";
 
@@ -687,8 +688,9 @@ NSString * const ZMSystemMessageNumberOfGuestsAddedKey = @"numberOfGuestsAdded";
                              ZMMessageChildMessagesKey,
                              ZMMessageParentMessageKey,
                              ZMSystemMessageMessageTimerKey,
+                             ZMSystemMessageRelevantForConversationStatusKey,
                              ZMSystemMessageAllTeamUsersAddedKey,
-                             ZMSystemMessageNumberOfGuestsAddedKey,
+                             ZMSystemMessageNumberOfGuestsAddedKey
                              ];
         ignoredKeys = [keys setByAddingObjectsFromArray:newKeys];
     });
@@ -815,6 +817,20 @@ NSString * const ZMSystemMessageNumberOfGuestsAddedKey = @"numberOfGuestsAdded";
 @dynamic childMessages;
 @dynamic parentMessage;
 @dynamic messageTimer;
+@dynamic relevantForConversationStatus;
+
+- (instancetype)initWithNonce:(NSUUID *)nonce managedObjectContext:(NSManagedObjectContext *)managedObjectContext
+{
+    NSEntityDescription *entity = [NSEntityDescription entityForName:[self.class entityName] inManagedObjectContext:managedObjectContext];
+    self = [super initWithEntity:entity insertIntoManagedObjectContext:managedObjectContext];
+    
+    if (self != nil) {
+        self.nonce = nonce;
+        self.relevantForConversationStatus = YES; //default value
+    }
+    
+    return self;
+}
 
 + (instancetype)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent *)updateEvent
                               inManagedObjectContext:(NSManagedObjectContext *)moc
