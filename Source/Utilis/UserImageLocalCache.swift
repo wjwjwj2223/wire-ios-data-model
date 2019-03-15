@@ -18,7 +18,6 @@
 
 
 import Foundation
-import PINCache
 import WireTransport
 
 private let MEGABYTE = UInt(1 * 1000 * 1000)
@@ -63,10 +62,10 @@ extension NSManagedObjectContext
     fileprivate let log = ZMSLog(tag: "UserImageCache")
     
     /// Cache for large user profile image
-    fileprivate let largeUserImageCache : PINCache
+    fileprivate let largeUserImageCache : FileCache
     
     /// Cache for small user profile image
-    fileprivate let smallUserImageCache : PINCache
+    fileprivate let smallUserImageCache : FileCache
     
     
     /// Create UserImageLocalCache
@@ -76,26 +75,16 @@ extension NSManagedObjectContext
         let largeUserImageCacheName = "largeUserImages"
         let smallUserImageCacheName = "smallUserImages"
         
-        if let rootPath = location?.path {
-            largeUserImageCache = PINCache(name: largeUserImageCacheName, rootPath: rootPath)
-            smallUserImageCache = PINCache(name: smallUserImageCacheName, rootPath: rootPath)
-        } else {
-            largeUserImageCache = PINCache(name: largeUserImageCacheName)
-            smallUserImageCache = PINCache(name: smallUserImageCacheName)
-        }
+        largeUserImageCache = FileCache(name: largeUserImageCacheName, location: location)
+        smallUserImageCache = FileCache(name: smallUserImageCacheName, location: location)
         
-        largeUserImageCache.configureLimits(50 * MEGABYTE)
-        smallUserImageCache.configureLimits(25 * MEGABYTE)
-        
-        largeUserImageCache.makeURLSecure()
-        smallUserImageCache.makeURLSecure()
         super.init()
     }
     
     /// Stores image in cache and returns true if the data was stored
-    private func setImage(inCache cache: PINCache, cacheKey: String?, data: Data) -> Bool {
+    private func setImage(inCache cache: FileCache, cacheKey: String?, data: Data) -> Bool {
         if let resolvedCacheKey = cacheKey {
-            cache.setObject(data as NSCoding, forKey: resolvedCacheKey)
+            cache.storeAssetData(data, key: resolvedCacheKey)
             return true
         }
         return false
@@ -103,8 +92,8 @@ extension NSManagedObjectContext
     
     /// Removes all images for user
     open func removeAllUserImages(_ user: ZMUser) {
-        user.imageCacheKey(for: .complete).apply(largeUserImageCache.removeObject)
-        user.imageCacheKey(for: .preview).apply(smallUserImageCache.removeObject)
+        user.imageCacheKey(for: .complete).apply(largeUserImageCache.deleteAssetData)
+        user.imageCacheKey(for: .preview).apply(smallUserImageCache.deleteAssetData)
     }
     
     open func setUserImage(_ user: ZMUser, imageData: Data, size: ProfileImageSize) {
@@ -129,9 +118,9 @@ extension NSManagedObjectContext
         queue.async {
             switch size {
             case .preview:
-                completion(self.smallUserImageCache.object(forKey: cacheKey) as? Data)
+                completion(self.smallUserImageCache.assetData(cacheKey))
             case .complete:
-                completion(self.largeUserImageCache.object(forKey: cacheKey) as? Data)
+                completion(self.largeUserImageCache.assetData(cacheKey))
             }
         }
     }
@@ -141,9 +130,9 @@ extension NSManagedObjectContext
         let data: Data?
         switch size {
         case .preview:
-            data = smallUserImageCache.object(forKey: cacheKey) as? Data
+            data = smallUserImageCache.assetData(cacheKey)
         case .complete:
-            data = largeUserImageCache.object(forKey: cacheKey) as? Data
+            data = largeUserImageCache.assetData(cacheKey)
         }
         if let data = data {
             log.info("Getting [\(user.displayName)] \(size == .preview ? "preview" : "complete") image [\(data)] cache key: [\(cacheKey)]")
@@ -157,9 +146,9 @@ extension NSManagedObjectContext
         
         switch size {
         case .preview:
-            return smallUserImageCache.containsObject(forKey: cacheKey)
+            return smallUserImageCache.hasDataForKey(cacheKey)
         case .complete:
-            return largeUserImageCache.containsObject(forKey: cacheKey)
+            return largeUserImageCache.hasDataForKey(cacheKey)
         }
     }
     
@@ -167,7 +156,7 @@ extension NSManagedObjectContext
 
 public extension UserImageLocalCache {
     func wipeCache() {
-        smallUserImageCache.removeAllObjects()
-        largeUserImageCache.removeAllObjects()
+        smallUserImageCache.wipeCaches()
+        largeUserImageCache.wipeCaches()
     }
 }

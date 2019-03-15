@@ -41,7 +41,7 @@ extension NSManagedObjectContext
 /// Any thread can read objects that are never deleted without any problem.
 /// Objects purged from the cache folder by the OS are not a problem as the
 /// OS will terminate the app before purging the cache.
-private struct FileCache : Cache {
+struct FileCache : Cache {
     
     private let cacheFolderURL : URL
     
