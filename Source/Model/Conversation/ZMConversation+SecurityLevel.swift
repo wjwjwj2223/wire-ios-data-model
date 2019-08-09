@@ -316,12 +316,7 @@ extension ZMConversation {
     ///   - dateOptional: if provide a nil, current date will be used
     @objc(addParticipantIfMissing:date:)
     public func addParticipantIfMissing(_ user: ZMUser, date dateOptional: Date?) {
-        let date: Date
-        if let dataOptional = dateOptional{
-            date = dataOptional
-        } else {
-            date = Date()
-        }
+        let date = dateOptional ?? Date()
 
         guard !activeParticipants.contains(user) else { return }
         
