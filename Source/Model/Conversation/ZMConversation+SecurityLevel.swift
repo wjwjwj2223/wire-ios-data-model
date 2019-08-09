@@ -311,6 +311,10 @@ extension ZMConversation {
 
     /// Adds the user to the list of participants if not already present and inserts a .participantsAdded system message
     @objc(addParticipantIfMissing:date:)
+    public func addParticipantIfMissing(_ user: ZMUser, date: Date?) {
+        addParticipantIfMissing(user, at: date ?? Date())
+    }
+
     public func addParticipantIfMissing(_ user: ZMUser, at date: Date = Date()) {
         guard !activeParticipants.contains(user) else { return }
         

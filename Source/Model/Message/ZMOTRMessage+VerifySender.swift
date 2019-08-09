@@ -25,6 +25,6 @@ extension ZMConversation {
         guard let senderUUID = updateEvent.senderUUID(),
               let user = ZMUser(remoteID: senderUUID, createIfNeeded: true, in: moc) else { return }
 
-        addParticipantIfMissing(user, at: updateEvent.timeStamp()?.addingTimeInterval(-0.01) ?? Date())
+        addParticipantIfMissing(user, date: updateEvent.timeStamp()?.addingTimeInterval(-0.01))
     }
 }
