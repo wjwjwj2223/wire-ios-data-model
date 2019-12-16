@@ -437,6 +437,16 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         // given
         makeSelfUserTeamMember(withPermissions: .modifyConversationMetaData)
         conversation.conversationType = .group
+        let participantRole = ParticipantRole.insertNewObject(in: uiMOC)
+        participantRole.conversation = conversation
+        participantRole.user = selfUser
+        let action = Action.insertNewObject(in: uiMOC)
+        action.name = "modify_conversation_access"
+        let adminRole = Role.insertNewObject(in: uiMOC)
+        adminRole.name = "wire_admin"
+        adminRole.actions = Set([action])
+        participantRole.role = adminRole
+        selfUser.participantRoles = Set([participantRole])
         
         // then
         XCTAssertTrue(ZMUser.selfUser(in: uiMOC).canModifyAccessControlSettings(in: conversation))

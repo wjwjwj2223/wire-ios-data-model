@@ -18,6 +18,32 @@
 
 import Foundation
 
+enum ActionNames {
+    case addConversationMember
+    case removeConversationMember
+    case modifyConversationName
+    case modifyConversationMessageTimer
+    case modifyConversationReceiptMode
+    case modifyConversationAccess
+    case modifyOtherConversationMember
+    case leaveConversation
+    case deleteConvesation
+    
+    var name: String {
+        switch self {
+        case .addConversationMember: return "add_conversation_member"
+        case .removeConversationMember: return "remove_conversation_member"
+        case .modifyConversationName: return "modify_conversation_name"
+        case .modifyConversationMessageTimer: return "modify_conversation_message_timer"
+        case .modifyConversationReceiptMode: return "modify_conversation_receipt_mode"
+        case .modifyConversationAccess: return "modify_conversation_access"
+        case .modifyOtherConversationMember: return "modify_other_conversation_member"
+        case .leaveConversation: return "leave_conversation"
+        case .deleteConvesation: return "delete_convesation"
+        }
+    }
+}
+
 public extension ZMUser {
     
     var teamRole: TeamRole {
@@ -41,18 +67,40 @@ public extension ZMUser {
     
     @objc(canAddUserToConversation:)
     func canAddUser(to conversation: ZMConversation) -> Bool {
-        guard conversation.teamRemoteIdentifier == nil || !isGuest(in: conversation), conversation.isSelfAnActiveMember else { return false }
-        return permissions?.contains(.addRemoveConversationMember) ?? true
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.addConversationMember.name})
+            return canModifyConversationName ?? false
+        } else {
+            guard conversation.teamRemoteIdentifier == nil || !isGuest(in: conversation), conversation.isSelfAnActiveMember else { return false }
+            return permissions?.contains(.addRemoveConversationMember) ?? true
+        }
     }
     
     @objc(canRemoveUserFromConversation:)
     func canRemoveUser(from conversation: ZMConversation) -> Bool {
-        return canAddUser(to: conversation)
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.removeConversationMember.name})
+            return canModifyConversationName ?? false
+        } else {
+            return canAddUser(to: conversation)
+        }
     }
     
     @objc(canDeleteConversation:)
     func canDeleteConversation(_ conversation: ZMConversation) -> Bool {
-        return conversation.teamRemoteIdentifier != nil && conversation.isSelfAnActiveMember && conversation.creator == self
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.deleteConvesation.name})
+            return canModifyConversationName ?? false
+        } else {
+            return conversation.teamRemoteIdentifier != nil && conversation.isSelfAnActiveMember && conversation.creator == self
+        }
+    }
+    
+    @objc(canModifyOtherMemberInConversation:)
+    func canModifyOtherMember(in conversation: ZMConversation) -> Bool {
+        guard conversation.conversationType == .group else { return false }
+        let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.modifyOtherConversationMember.name})
+        return canModifyConversationName ?? false
     }
     
     @objc(canModifyReadReceiptSettingsInConversation:)
@@ -63,8 +111,20 @@ public extension ZMUser {
     
     @objc(canModifyEphemeralSettingsInConversation:)
     func canModifyEphemeralSettings(in conversation: ZMConversation) -> Bool {
-        guard  conversation.teamRemoteIdentifier == nil || !isGuest(in: conversation), conversation.isSelfAnActiveMember else { return false }
-        return permissions?.contains(.modifyConversationMetaData) ?? true
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.modifyConversationMessageTimer.name})
+            return canModifyConversationName ?? false
+        } else {
+            guard  conversation.teamRemoteIdentifier == nil || !isGuest(in: conversation), conversation.isSelfAnActiveMember else { return false }
+            return permissions?.contains(.modifyConversationMetaData) ?? true
+        }
+    }
+    
+    @objc(canModifyReceiptModeInConversation:)
+    func canModifyReceiptMode(in conversation: ZMConversation) -> Bool {
+        guard conversation.conversationType == .group else { return true }
+        let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.modifyConversationReceiptMode.name})
+        return canModifyConversationName ?? false
     }
     
     @objc(canModifyNotificationSettingsInConversation:)
@@ -76,29 +136,46 @@ public extension ZMUser {
     @objc(canModifyAccessControlSettingsInConversation:)
     func canModifyAccessControlSettings(in conversation: ZMConversation) -> Bool {
         
-        // Check conversation
-        guard conversation.conversationType == .group,
-            let moc = self.managedObjectContext,
-            team?.remoteIdentifier != nil
-            else { return false }
-        
-        // Check user
-        let selfUser = ZMUser.selfUser(in: moc)
-        guard selfUser.isTeamMember,
-            !selfUser.isGuest(in: conversation),
-            selfUser.team == self.team,
-            isTeamMember,
-            conversation.isSelfAnActiveMember else {
-                return false
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.modifyConversationAccess.name})
+            return canModifyConversationName ?? false
+        } else {
+            // Check conversation
+            guard conversation.conversationType == .group,
+                let moc = self.managedObjectContext,
+                team?.remoteIdentifier != nil
+                else { return false }
+            
+            // Check user
+            let selfUser = ZMUser.selfUser(in: moc)
+            guard selfUser.isTeamMember,
+                !selfUser.isGuest(in: conversation),
+                selfUser.team == self.team,
+                isTeamMember,
+                conversation.isSelfAnActiveMember else {
+                    return false
+            }
+            
+            return permissions?.contains(.modifyConversationMetaData) ?? false
         }
-        
-        return permissions?.contains(.modifyConversationMetaData) ?? false
     }
     
     @objc(canModifyTitleInConversation:)
     func canModifyTitle(in conversation: ZMConversation) -> Bool {
-        guard conversation.isSelfAnActiveMember else { return false }
-        return permissions?.contains(.modifyConversationMetaData) ?? true
+        if conversation.conversationType == .group {
+            let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.modifyConversationName.name})
+            return canModifyConversationName ?? false
+        } else {
+            guard conversation.isSelfAnActiveMember else { return false }
+            return permissions?.contains(.modifyConversationMetaData) ?? true
+        }
+    }
+    
+    @objc(canLeave:)
+    func canLeave(_ conversation: ZMConversation) -> Bool {
+        guard conversation.conversationType == .group else { return true }
+        let canModifyConversationName = self.participantRoles.filter({$0.conversation == conversation}).first?.role?.actions.contains(where: {$0.name == ActionNames.leaveConversation.name})
+        return canModifyConversationName ?? false
     }
     
     @objc var canCreateConversation: Bool {
