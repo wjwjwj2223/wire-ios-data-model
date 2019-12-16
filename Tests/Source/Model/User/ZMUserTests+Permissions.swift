@@ -511,7 +511,11 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         // then
         XCTAssertFalse(ZMUser.selfUser(in: uiMOC).canModifyTitle(in: conversation))
     }
-    
+}
+
+ // MARK: New permissions for groups
+
+extension ZMUserTests_Permissions {
     func testThatConversationTitleCanBeModified_ByGroupParticipant() {
         // given
         makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
@@ -520,6 +524,15 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         createARoleForSelfUserWith("modify_conversation_name")
         // then
         XCTAssertTrue(selfUser.canModifyTitle(in: conversation))
+    }
+    
+    func testThatConversationTitleCantBeModified_ByGroupParticipant() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canModifyTitle(in: conversation))
     }
     
     func testThatGroupParticipantCanAddAnotherMemberToTheConversation() {
@@ -532,6 +545,15 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         XCTAssertTrue(selfUser.canAddUser(to: conversation))
     }
     
+    func testThatGroupParticipantCantAddAnotherMemberToTheConversation() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canAddUser(to: conversation))
+    }
+    
     func testThatGroupParticipantCanRemoveAnotherMemberFromTheConversation() {
         // given
         makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
@@ -540,6 +562,15 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         
         // then
         XCTAssertTrue(selfUser.canRemoveUser(from: conversation))
+    }
+    
+    func testThatGroupParticipantCantRemoveAnotherMemberFromTheConversation() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canRemoveUser(from: conversation))
     }
     
     func testThatGroupParticipantCanModifyConversationMessageTimer() {
@@ -552,34 +583,70 @@ class ZMUserTests_Permissions: ModelObjectsTests {
         XCTAssertTrue(selfUser.canModifyEphemeralSettings(in: conversation))
     }
     
+    func testThatGroupParticipantCantModifyConversationMessageTimer() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canModifyEphemeralSettings(in: conversation))
+    }
+    
     func testThatGroupParticipantCanModifyConversationReceiptMode() {
         // given
         makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
         conversation.conversationType = .group
         createARoleForSelfUserWith("modify_conversation_receipt_mode")
-
+        
         // then
         XCTAssertTrue(selfUser.canModifyReceiptMode(in: conversation))
     }
-
+    
+    func testThatGroupParticipantCantModifyConversationReceiptMode() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canModifyReceiptMode(in: conversation))
+    }
+    
     func testThatGroupParticipantCanModifyOtherConversationMember() {
         // given
         makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
         conversation.conversationType = .group
         createARoleForSelfUserWith("modify_other_conversation_member")
-
+        
         // then
         XCTAssertTrue(selfUser.canModifyOtherMember(in: conversation))
     }
-
+    
+    func testThatGroupParticipantCantModifyOtherConversationMember() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canModifyOtherMember(in: conversation))
+    }
+    
     func testThatGroupParticipantCanDeleteConvesation() {
         // given
         makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
         conversation.conversationType = .group
         createARoleForSelfUserWith("delete_convesation")
-
+        
         // then
         XCTAssertTrue(selfUser.canDeleteConversation(conversation))
+    }
+    
+    func testThatGroupParticipantCantDeleteConvesation() {
+        // given
+        makeSelfUserTeamMember(withPermissions: .addRemoveConversationMember)
+        conversation.conversationType = .group
+        
+        // then
+        XCTAssertFalse(selfUser.canDeleteConversation(conversation))
     }
     
     private func createARoleForSelfUserWith(_ actionName: String) {
