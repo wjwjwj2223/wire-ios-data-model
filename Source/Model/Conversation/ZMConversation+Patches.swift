@@ -56,7 +56,7 @@ extension ZMConversation {
         let allConversations = moc.executeFetchRequestOrAssert(request) as! [ZMConversation]
         
         for conversation in allConversations {
-            if conversation.isSelfAnActiveMember {
+            if conversation.isSelfAnActiveMember {///TODO: no need?
                 var participantRoleForSelfUser: ParticipantRole
                 let adminRole = conversation.getRoles().first(where: {$0.name == defaultAdminRoleName} )
                 
@@ -66,6 +66,7 @@ extension ZMConversation {
                     participantRoleForSelfUser = getAParticipantRole(in: moc, adminRole: adminRole, user: selfUser, conversation: conversation, team: nil)
                 }
                 conversation.participantRoles.insert(participantRoleForSelfUser)
+                ///TODO: should other users in the convo needed to be added??
             }
         }
     }
@@ -105,7 +106,7 @@ extension ZMConversation {
             )
         )
         (moc.executeFetchRequestOrAssert(groupConversationsFetch) as! [ZMConversation]).forEach {
-            guard $0.isSelfAnActiveMember else { return }
+//            guard $0.isSelfAnActiveMember else { return } ///TODO: no check??
             $0.needsToBeUpdatedFromBackend = true
             $0.needsToDownloadRoles = $0.team == nil
         }
