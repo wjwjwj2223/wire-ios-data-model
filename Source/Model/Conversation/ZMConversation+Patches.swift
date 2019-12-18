@@ -97,10 +97,10 @@ extension ZMConversation {
     // definitions for teams and conversations.
     static func forceToFetchConversationRoles(in moc: NSManagedObjectContext) {
         
-        // Mark group conversation membership to be refetched
-        let groupConversationsFetch = ZMConversation.sortedFetchRequest()
+        // refetched all conversations
+        let conversationsFetch = ZMConversation.sortedFetchRequest()
         
-        (moc.executeFetchRequestOrAssert(groupConversationsFetch) as! [ZMConversation]).forEach {
+        (moc.executeFetchRequestOrAssert(conversationsFetch) as! [ZMConversation]).forEach {
             guard $0.isSelfAnActiveMember else { return }
             $0.needsToBeUpdatedFromBackend = true
             $0.needsToDownloadRoles = $0.team == nil
