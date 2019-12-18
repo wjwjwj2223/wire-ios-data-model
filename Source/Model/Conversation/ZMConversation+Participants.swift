@@ -26,7 +26,7 @@ extension ZMConversation {
     
     @objc
     public var isSelfAnActiveMember: Bool {
-        return self.participantRoles.contains(where: { (role) -> Bool in
+        return participantRoles.contains(where: { (role) -> Bool in
             role.user.isSelfUser == true
         })
     }
