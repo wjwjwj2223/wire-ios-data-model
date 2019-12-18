@@ -136,7 +136,7 @@ public extension ZMUser {
             team?.remoteIdentifier != nil
             else { return false }
         
-        if conversation.conversationType == .group && team?.remoteIdentifier != nil {
+        if conversation.conversationType == .group {
             return hasRoleWithAction(actionName: ConversationAction.modifyConversationAccess.name, conversation: conversation)
         }
         
