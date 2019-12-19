@@ -67,7 +67,7 @@ public extension ZMUser {
     
     @objc(canAddUserToConversation:)
     func canAddUser(to conversation: ZMConversation) -> Bool {
-        if conversation.conversationType == .group {
+        if conversation.conversationType == .group, isTeamMember {
             return hasRoleWithAction(actionName: ConversationAction.addConversationMember.name, conversation: conversation)
         } else {
             guard conversation.teamRemoteIdentifier == nil || !isGuest(in: conversation), conversation.isSelfAnActiveMember else { return false }
@@ -77,7 +77,7 @@ public extension ZMUser {
     
     @objc(canRemoveUserFromConversation:)
     func canRemoveUser(from conversation: ZMConversation) -> Bool {
-        if conversation.conversationType == .group {
+        if conversation.conversationType == .group, isTeamMember { ///TODO: appear to all neighbours
             return hasRoleWithAction(actionName: ConversationAction.removeConversationMember.name, conversation: conversation)
         } else {
             return canAddUser(to: conversation)
@@ -216,7 +216,7 @@ public extension ZMUser {
     }
     
     private func hasRoleWithAction(actionName: String, conversation: ZMConversation) -> Bool {
-        let canModifyConversation = self.role(in: conversation)?.actions.contains(where: {$0.name == actionName})
+        let canModifyConversation = role(in: conversation)?.actions.contains(where: {$0.name == actionName})
         return canModifyConversation ?? false
     }
 }
