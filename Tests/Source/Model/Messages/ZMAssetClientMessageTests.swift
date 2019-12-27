@@ -1123,7 +1123,7 @@ extension ZMAssetClientMessageTests {
             message.expire()
         }
         if state == .delivered {
-            _ = ZMMessageConfirmation(type: .delivered, message: message, sender: message.sender!, serverTimestamp: Date(), managedObjectContext: message.managedObjectContext!)
+            _ = ZMMessageConfirmation(type: .delivered, message: message, sender: message.sender! as! ZMUser, serverTimestamp: Date(), managedObjectContext: message.managedObjectContext!)
             message.managedObjectContext?.saveOrRollback()
         }
     }

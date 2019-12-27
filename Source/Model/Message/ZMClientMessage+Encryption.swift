@@ -154,7 +154,7 @@ extension ZMGenericMessage {
         func recipientForConfirmationMessage() -> Set<ZMUser>? {
             guard self.hasConfirmation(), self.confirmation.firstMessageId != nil else { return nil }
             guard let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageId), for:conversation, in:conversation.managedObjectContext!) else { return nil }
-            guard let sender = message.sender else { return nil }
+            guard let sender = message.sender as? ZMUser else { return nil }
             return Set(arrayLiteral: sender)
         }
 
@@ -169,14 +169,14 @@ extension ZMGenericMessage {
             let nonce = UUID(uuidString: self.deleted.messageId)
             guard let message = ZMMessage.fetch(withNonce:nonce, for:conversation, in:conversation.managedObjectContext!) else { return nil }
             guard message.destructionDate != nil else { return nil }
-            guard let sender = message.sender else {
+            guard let sender = message.sender as? ZMUser else {
                 zmLog.error("sender of deleted ephemeral message \(String(describing: self.deleted.messageId)) is already cleared \n ConvID: \(String(describing: conversation.remoteIdentifier)) ConvType: \(conversation.conversationType.rawValue)")
                 return Set(arrayLiteral: selfUser)
             }
             
             // if self deletes their own message, we want to send delete msg
             // for everyone, so return nil.
-            guard !sender.isSelfUser else { return nil }
+            guard false == sender.isSelfUser else { return nil }
             
             // otherwise we delete only for self and the sender, all other
             // recipients are unaffected.

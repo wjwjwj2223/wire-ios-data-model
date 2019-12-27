@@ -32,7 +32,7 @@ extension ZMClientMessage {
               let originalText = genericMessage?.textData,
               let editedText = messageEdit.text,
               messageEdit.hasText(),
-              senderUUID == sender?.remoteIdentifier
+              senderUUID == (sender as? ZMUser)?.remoteIdentifier
         else { return false }
         
         add(ZMGenericMessage.message(content: originalText.applyEdit(from: editedText), nonce: nonce).data())

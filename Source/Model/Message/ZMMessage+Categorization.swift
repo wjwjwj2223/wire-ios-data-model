@@ -20,6 +20,9 @@ import Foundation
 
 
 extension ZMMessage {
+    var zmSender: ZMUser? {
+        return sender as? ZMUser
+    }
     
     /// Type of content present in the message
     public var category : MessageCategory {

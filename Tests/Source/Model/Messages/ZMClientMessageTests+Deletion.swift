@@ -419,7 +419,7 @@ extension ZMClientMessageTests_Deletion {
         }
         
         XCTAssertEqual(systemMessage.serverTimestamp, timestamp)
-        XCTAssertEqual(systemMessage.sender, otherUser)
+        XCTAssertEqual(systemMessage.sender as? ZMUser, otherUser)
     }
     
     

@@ -498,7 +498,7 @@ extension ZMConversation {
             
             guard let systemMessage = msg as? ZMSystemMessage,
                 systemMessage.systemMessageType == .newClient,
-                systemMessage.sender == selfUser else {
+                systemMessage.sender as? ZMUser == selfUser else {
                     return
             }
             

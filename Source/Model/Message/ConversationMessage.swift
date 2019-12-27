@@ -47,7 +47,7 @@ public protocol ZMConversationMessage : NSObjectProtocol {
     var nonce: UUID? { get }
         
     /// The user who sent the message
-    var sender: ZMUser? { get }
+    var sender: UserType? { get }
     
     /// The timestamp as received by the server
     var serverTimestamp: Date? { get }
@@ -178,6 +178,7 @@ extension ZMMessage {
 // MARK:- Conversation Message protocol implementation
 
 extension ZMMessage : ZMConversationMessage {
+    
     @NSManaged public var linkAttachments: [LinkAttachment]?
     @NSManaged public var needsLinkAttachmentsUpdate: Bool
     @NSManaged public var replies: Set<ZMMessage>
@@ -235,7 +236,7 @@ extension ZMMessage : ZMConversationMessage {
 
 extension ZMMessage {
     
-    @NSManaged public var sender : ZMUser?
+    @NSManaged public var sender : UserType?
     @NSManaged public var serverTimestamp : Date?
 
     @objc public var textMessageData : ZMTextMessageData? {

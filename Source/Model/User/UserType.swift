@@ -28,6 +28,9 @@ public protocol UserConnectionType: NSObjectProtocol {
 @objc
 public protocol UserType: NSObjectProtocol {
     
+    /// The remote identifier
+    var remoteIdentifier: UUID? { get set }
+    
     /// The full name
     var name: String? { get }
 

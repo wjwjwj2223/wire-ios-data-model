@@ -28,10 +28,10 @@ extension ZMConversation {
     @discardableResult
     func confirmUnreadMessagesAsRead(until timestamp: Date) -> [ZMClientMessage] {
         
-        let unreadMessagesNeedingConfirmation = unreadMessages(until: timestamp).filter({ $0.needsReadConfirmation })
+        let unreadMessagesNeedingConfirmation: [ZMMessage] = unreadMessages(until: timestamp).filter({ $0.needsReadConfirmation })
         var confirmationMessages: [ZMClientMessage] = []
         
-        for messages in unreadMessagesNeedingConfirmation.partition(by: \.sender).values {
+        for messages in unreadMessagesNeedingConfirmation.partition(by: \.zmSender).values {
             guard !messages.isEmpty else { continue }
             
             let confirmation = ZMConfirmation.confirm(messages: messages.compactMap(\.nonce), type: .READ)

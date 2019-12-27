@@ -105,7 +105,7 @@ extension ZMClientMessageTests_Reaction {
     func testThatItRemovesAReactionWhenReceivingUpdateEventWithValidReaction() {
         
         let message = insertMessage()
-        message.addReaction("❤️", forUser: message.sender!)
+        message.addReaction("❤️", forUser: message.sender! as! ZMUser)
         uiMOC.saveOrRollback()
         
         let event = updateEventForRemovingReaction(to: message)
