@@ -151,6 +151,15 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
         }
     }
     
+    @objc(displayNameInConversation:)
+    public func displayName(in conversation: ZMConversation?) -> String {
+        if let user = user {
+            return user.displayName(in: conversation)
+        } else {
+            return ""
+        }
+    }
+
     public var handle: String? {
         get {
             return user != nil ? user?.handle : internalHandle

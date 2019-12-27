@@ -26,7 +26,7 @@ public protocol UserConnectionType: NSObjectProtocol {
 }
 
 @objc
-public protocol UserType: NSObjectProtocol {
+public protocol UserType: class, NSObjectProtocol {
     
     /// The remote identifier
     var remoteIdentifier: UUID? { get set }
@@ -208,4 +208,9 @@ public protocol UserType: NSObjectProtocol {
     /// The role in the given conversation.
     @objc(roleInConversation:)
     func role(in conversation: ZMConversation) -> Role?
+
+    //MARK: - conversation
+    
+    @objc(displayNameInConversation:)
+    func displayName(in conversation: ZMConversation?) -> String
 }
