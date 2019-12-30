@@ -18,7 +18,14 @@
 
 import Foundation
 
-public extension ZMSystemMessage {
-    @NSManaged var numberOfGuestsAdded: Int16  // Only filled for .newConversation
-    @NSManaged var allTeamUsersAdded: Bool     // Only filled for .newConversation
+extension ZMSystemMessage: SystemMessageNewConversationProperties {
+    @NSManaged public var numberOfGuestsAdded: Int16  // Only filled for .newConversation
+    @NSManaged public var allTeamUsersAdded: Bool     // Only filled for .newConversation
+}
+
+
+/// System message properties only filled for .newConversation
+public protocol SystemMessageNewConversationProperties {
+    var numberOfGuestsAdded: Int16 { get }
+    var allTeamUsersAdded: Bool { get }
 }
