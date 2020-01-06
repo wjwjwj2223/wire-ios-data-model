@@ -372,6 +372,10 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
     public func canModifyTitle(in conversation: ZMConversation) -> Bool {
         return user?.canModifyTitle(in: conversation) == true
     }
+
+    public func canModifyOtherMember(in conversation: ZMConversation) -> Bool {
+        return user?.canModifyOtherMember(in: conversation) == true
+    }
     
     public func canModifyEphemeralSettings(in conversation: ZMConversation) -> Bool {
         return user?.canModifyEphemeralSettings(in: conversation) == true
@@ -387,6 +391,10 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
     
     public func canModifyAccessControlSettings(in conversation: ZMConversation) -> Bool {
         return user?.canModifyAccessControlSettings(in: conversation) == true
+    }
+
+    public func canLeave(_ conversation: ZMConversation) -> Bool {
+        return user?.canLeave(conversation) == true
     }
 
     public func role(in conversation: ZMConversation) -> Role? {
