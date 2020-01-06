@@ -93,7 +93,7 @@ import WireLinkPreview
               let senderUUID = updateEvent.senderUUID(),
               let originalText = genericMessage?.textData,
               let updatedText = updatedMessage.textData,
-              senderUUID == (sender as? ZMUser)?.remoteIdentifier,
+              senderUUID == sender?.remoteIdentifier,
               originalText.content == updatedText.content
         else { return }
         

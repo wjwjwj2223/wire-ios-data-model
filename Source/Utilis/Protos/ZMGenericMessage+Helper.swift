@@ -1064,7 +1064,7 @@ extension ZMConfirmation: MessageContentType {
 extension ZMMention {
     
     public static func mention(_ mention: Mention) -> ZMMention? {
-        guard let userId = (mention.user as? ZMUser)?.remoteIdentifier else { return nil }
+        guard let userId = mention.user.remoteIdentifier else { return nil }
         
         let builder = ZMMentionBuilder()
         
