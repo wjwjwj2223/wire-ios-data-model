@@ -396,6 +396,11 @@ public extension LinkPreview {
                 $0.image = WireProtos.Asset(imageSize: CGSize(width: 0, height: 0), mimeType: "image/jpeg", size: UInt64(imageData.count))
             }
             
+            $0.article = WireProtos.Article.with({
+                $0.permanentURL = twitterMetadata.permanentURL?.absoluteString ?? twitterMetadata.resolvedURL?.absoluteString ?? twitterMetadata.originalURLString
+                $0.title = twitterMetadata.message ?? ""
+            })
+            
             guard let author = twitterMetadata.author,
                 let username = twitterMetadata.username else { return }
             
