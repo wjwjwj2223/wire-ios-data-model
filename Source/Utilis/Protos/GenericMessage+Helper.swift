@@ -378,6 +378,11 @@ public extension LinkPreview {
             if let imageData = articleMetadata.imageData.first {
                 $0.image = WireProtos.Asset(imageSize: CGSize(width: 0, height: 0), mimeType: "image/jpeg", size: UInt64(imageData.count))
             }
+            $0.article = WireProtos.Article.with({
+                $0.permanentURL = articleMetadata.permanentURL?.absoluteString ?? articleMetadata.resolvedURL?.absoluteString ?? articleMetadata.originalURLString
+                $0.title = articleMetadata.title ?? ""
+                $0.summary = articleMetadata.summary ?? ""
+            })
         }
     }
     
