@@ -345,7 +345,7 @@ extension ZMReaction {
 
 extension WireProtos.UserId {
     public func validatingFields() -> WireProtos.UserId? {
-        return UUID.isValid(object: uuid) ? self : nil
+        return UUID.isValid(bytes: uuid) ? self : nil
     }
 }
 

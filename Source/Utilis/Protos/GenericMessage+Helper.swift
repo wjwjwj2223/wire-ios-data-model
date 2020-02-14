@@ -207,7 +207,7 @@ extension Knock: EphemeralMessageCapable {
 
 extension Text: EphemeralMessageCapable {
     
-    public init(content: String, mentions: [Mention], linkPreviews: [LinkMetadata], replyingTo: ZMOTRMessage?) {
+    public init(content: String, mentions: [Mention] = [], linkPreviews: [LinkMetadata] = [], replyingTo: ZMOTRMessage? = nil) {
         self = Text.with {
             $0.content = content
             $0.mentions = mentions.compactMap { WireProtos.Mention($0) }
@@ -321,6 +321,39 @@ extension WireProtos.MessageEdit: MessageCapable {
         set {
             
         }
+    }
+}
+
+extension Cleared: MessageCapable {
+    public func setContent(on message: inout GenericMessage) {
+        message.cleared = self
+    }
+    
+    public var expectsReadConfirmation: Bool {
+        get { return false }
+        set {}
+    }
+}
+
+extension MessageHide: MessageCapable {
+    public func setContent(on message: inout GenericMessage) {
+        message.hidden = self
+    }
+    
+    public var expectsReadConfirmation: Bool {
+        get { return false }
+        set {}
+    }
+}
+
+extension MessageDelete: MessageCapable {
+    public func setContent(on message: inout GenericMessage) {
+        message.deleted = self
+    }
+    
+    public var expectsReadConfirmation: Bool {
+        get { return false }
+        set {}
     }
 }
 
