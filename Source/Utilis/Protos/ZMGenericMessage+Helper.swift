@@ -576,7 +576,6 @@ extension ZMExternal: MessageContentType {
     public func updateLegalHoldStatus(_ value: ZMLegalHoldStatus) -> MessageContentType? {
         return nil
     }
-    
 }
 
 public extension ZMClientEntry {
