@@ -443,12 +443,19 @@ extension ZMConversation {
     /// Expire all pending messages
     fileprivate func expireAllPendingMessagesBecauseOfSecurityLevelDegradation() {
         for message in undeliveredMessages {
-            if let clientMessage = message as? ZMClientMessage, let genericMessage = clientMessage.genericMessage, genericMessage.hasConfirmation() {
-                // Delivery receipt: just expire it
-                message.expire()
-            } else {
+            message.expire()
+            guard let clientMessage = message as? ZMClientMessage,
+                let genericMessage = clientMessage.underlyingMessage,
+                let content = genericMessage.content else {
+                    message.causedSecurityLevelDegradation = true
+                    continue
+            }
+            
+            switch content {
+            case .confirmation:
+                break
+            default:
                 // All other messages: expire and mark that it caused security degradation
-                message.expire()
                 message.causedSecurityLevelDegradation = true
             }
         }
