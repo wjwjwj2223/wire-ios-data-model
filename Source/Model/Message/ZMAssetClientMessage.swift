@@ -47,7 +47,7 @@ import Foundation
     public override var hashOfContent: Data? {
         guard let serverTimestamp = serverTimestamp else { return nil }
         
-        return genericAssetMessage?.hashOfContent(with: serverTimestamp)
+        return underlyingMessage?.hashOfContent(with: serverTimestamp)
     }
     
     /// Remote asset ID
