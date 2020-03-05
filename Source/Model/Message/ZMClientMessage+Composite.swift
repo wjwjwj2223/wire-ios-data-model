@@ -26,7 +26,7 @@ public enum CompositeMessageItem {
     case text(ZMTextMessageData)
     case button(ButtonMessageData)
     
-    internal init?(with protoItem: CompositeMessage.Item, message: ZMClientMessage) {
+    internal init?(with protoItem: Composite.Item, message: ZMClientMessage) {
         guard let content = protoItem.content else { return nil }
         let itemContent = CompositeMessageItemContent(with: protoItem, message: message)
         switch content {
@@ -52,11 +52,11 @@ public enum ButtonMessageState {
 
 extension ZMClientMessage: CompositeMessageData {
     public var items: [CompositeMessageItem] {
-        guard let message = underlyingMessage, case .some(.compositeMessage) = message.content else {
+        guard let message = underlyingMessage, case .some(.composite) = message.content else {
             return []
         }
         var items = [CompositeMessageItem]()
-        for protoItem in message.compositeMessage.items {
+        for protoItem in message.composite.items {
             guard let compositeMessageItem = CompositeMessageItem(with: protoItem, message: self) else { continue }
             items += [compositeMessageItem]
         }
@@ -66,7 +66,7 @@ extension ZMClientMessage: CompositeMessageData {
 
 extension ZMClientMessage: ConversationCompositeMessage {
     public var compositeMessageData: CompositeMessageData? {
-        guard case .some(.compositeMessage) = underlyingMessage?.content else {
+        guard case .some(.composite) = underlyingMessage?.content else {
             return nil
         }
         return self
@@ -75,7 +75,7 @@ extension ZMClientMessage: ConversationCompositeMessage {
 
 fileprivate class CompositeMessageItemContent: NSObject {
     private let parentMessage: ZMClientMessage
-    private let item: CompositeMessage.Item
+    private let item: Composite.Item
     
     private var text: Text? {
         guard case .some(.text) = item.content else { return nil }
@@ -87,7 +87,7 @@ fileprivate class CompositeMessageItemContent: NSObject {
         return item.button
     }
     
-    init(with item: CompositeMessage.Item, message: ZMClientMessage) {
+    init(with item: Composite.Item, message: ZMClientMessage) {
         self.item = item
         self.parentMessage = message
     }

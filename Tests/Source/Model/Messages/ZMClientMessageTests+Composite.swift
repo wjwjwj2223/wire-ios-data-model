@@ -24,14 +24,14 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
     func testThatCompositeMessageDataIsReturned() {
         // GIVEN
         let nonce = UUID()
-        let item1 = CompositeMessage.Item.with { $0.button = Button.with {
+        let item1 = Composite.Item.with { $0.button = Button.with {
             $0.text = "Button text"
             $0.id = UUID().transportString()
         }}
-        let item2 = CompositeMessage.Item.with { $0.text = Text.with { $0.content = "Text" } }
-        let expectedCompositeMessage = CompositeMessage.with { $0.items = [item1, item2] }
+        let item2 = Composite.Item.with { $0.text = Text.with { $0.content = "Text" } }
+        let expectedCompositeMessage = Composite.with { $0.items = [item1, item2] }
         let genericMessage = GenericMessage.with {
-            $0.compositeMessage = expectedCompositeMessage
+            $0.composite = expectedCompositeMessage
             $0.messageID = nonce.transportString()
         }
         let message = ZMClientMessage(nonce: nonce, managedObjectContext: uiMOC)
@@ -39,7 +39,7 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
         message.add(data)
         
         // WHEN
-        let compositeMessage = message.underlyingMessage?.compositeMessage
+        let compositeMessage = message.underlyingMessage?.composite
         
         // THEN
         XCTAssertEqual(compositeMessage, expectedCompositeMessage)
