@@ -42,17 +42,17 @@ extension ZMAssetClientMessage {
     @objc override public func obfuscate() {
         super.obfuscate()
         
-        var obfuscatedMessage: ZMGenericMessage? = nil
+        var obfuscatedMessage: GenericMessage? = nil
         if let medium = self.mediumGenericMessage {
             obfuscatedMessage = medium.obfuscatedMessage()
         } else if self.fileMessageData != nil {
-            obfuscatedMessage = self.genericAssetMessage?.obfuscatedMessage()
+            obfuscatedMessage = self.underlyingMessage?.obfuscatedMessage()
         }
         
         self.deleteContent()
         
         if let obfuscatedMessage = obfuscatedMessage {
-            _ = self.createNewGenericMessage(with: obfuscatedMessage.data())
+            _ = try? self.createNewGenericMessage(with: obfuscatedMessage.serializedData())
         }
     }
     

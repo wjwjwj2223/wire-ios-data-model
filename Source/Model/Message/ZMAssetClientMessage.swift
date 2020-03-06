@@ -125,11 +125,11 @@ import Foundation
         var hasEncryptionKeys = false
         
         if self.fileMessageData != nil {
-            if let remote = self.genericAssetMessage?.assetData?.preview.remote, remote.hasOtrKey() {
+            if let remote = self.underlyingMessage?.assetData?.preview.remote, remote.hasOtrKey {
                 hasEncryptionKeys = true
             }
         } else if self.imageMessageData != nil {
-            if let imageAsset = mediumGenericMessage?.imageAssetData, imageAsset.hasOtrKey() {
+            if let imageAsset = mediumGenericMessage?.imageAssetData, imageAsset.hasOtrKey {
                 hasEncryptionKeys = true
             }
         }

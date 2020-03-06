@@ -27,16 +27,16 @@ extension ZMAssetClientMessage {
             .first
     }
     
-    public var mediumGenericMessage: ZMGenericMessage? {
-        return self.genericMessageDataFromDataSet(for: .medium)?.genericMessage
+    public var mediumGenericMessage: GenericMessage? {
+        return self.genericMessageDataFromDataSet(for: .medium)?.underlyingMessage
     }
     
     static func keyPathsForValuesAffectingMediumGenericMessage() -> Set<String> {
         return Set([#keyPath(ZMOTRMessage.dataSet), #keyPath(ZMOTRMessage.dataSet)+".data"])
     }
     
-    public var previewGenericMessage: ZMGenericMessage? {
-        return self.genericMessageDataFromDataSet(for: .preview)?.genericMessage
+    public var previewGenericMessage: GenericMessage? {
+        return self.genericMessageDataFromDataSet(for: .preview)?.underlyingMessage
     }
     
     static func keyPathsForValuesAffectingPreviewGenericMessage() -> Set<String> {
@@ -51,7 +51,7 @@ extension ZMAssetClientMessage {
     /// all generic messages from the dataset that contain an asset
     public var genericAssetMessage: ZMGenericMessage? {
         guard !isZombieObject else { return nil }
-        
+
         if self.cachedGenericAssetMessage == nil {
             self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet(filter: {
                 $0.assetData != nil
@@ -145,25 +145,31 @@ extension ZMAssetClientMessage {
     }
     
     /// Returns the generic message for the given representation
-    func genericMessage(dataType: AssetClientMessageDataType) -> ZMGenericMessage? {
+    func genericMessage(dataType: AssetClientMessageDataType) -> GenericMessage? {
         
         if self.fileMessageData != nil {
             switch dataType {
             case .fullAsset:
-                guard let genericMessage = self.genericAssetMessage,
+                guard let genericMessage = self.underlyingMessage,
                     let assetData = genericMessage.assetData,
-                    assetData.hasUploaded()
+                    case .uploaded? = assetData.status
                     else { return nil }
                 return genericMessage
             case .placeholder:
-                return self.genericMessageMergedFromDataSet(filter: { (message) -> Bool in
+                return self.underlyingMessageMergedFromDataSet(filter: { (message) -> Bool in
                     guard let assetData = message.assetData else { return false }
-                    return assetData.hasOriginal() || assetData.hasNotUploaded()
+                    guard case .notUploaded? = assetData.status else {
+                        return assetData.hasOriginal
+                    }
+                    return true
                 })
             case .thumbnail:
-                return self.genericMessageMergedFromDataSet(filter: { (message) -> Bool in
+                return self.underlyingMessageMergedFromDataSet(filter: { (message) -> Bool in
                     guard let assetData = message.assetData else { return false }
-                    return assetData.hasPreview() && !assetData.hasUploaded()
+//                    guard case .uploaded? = assetData.status else {
+//                        return false
+//                    }
+                    return assetData.hasPreview
                 })
             }
         }
@@ -211,6 +217,28 @@ extension ZMAssetClientMessage {
                 self.updateTransferState(.uploadingFailed, synchronize: false)
             @unknown default:
                 fatalError()
+            }
+        }
+    }
+    
+    //FIX ME
+    public func update(with message: GenericMessage, updateEvent: ZMUpdateEvent, initialUpdate: Bool) {
+        self.add(message)
+        self.version = 3 // We assume received assets are V3 since backend no longer supports sending V2 assets.
+        
+        if let assetData = message.assetData {
+            if assetData.uploaded.hasAssetID {
+                self.updateTransferState(.uploaded, synchronize: false)
+                return
+            }
+        }
+        
+        if let assetData = message.assetData, self.transferState != .uploaded {
+            switch assetData.notUploaded {
+            case .cancelled:
+                self.managedObjectContext?.delete(self)
+            case .failed:
+                self.updateTransferState(.uploadingFailed, synchronize: false)
             }
         }
     }

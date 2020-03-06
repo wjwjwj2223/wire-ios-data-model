@@ -35,6 +35,22 @@ extension MessageCapable {
     }
 }
 
+extension GenericMessage {
+    var v3_isImage: Bool {
+        return assetData?.original.hasRasterImage ?? false
+    }
+    
+    var v3_uploadedAssetId: String? {
+        guard assetData?.uploaded.hasAssetID == true else { return nil }
+        return assetData?.uploaded.assetID
+    }
+
+    var previewAssetId: String? {
+        guard assetData?.preview.remote.hasAssetID == true else { return nil }
+        return assetData?.preview.remote.assetID
+    }
+}
+
 public extension GenericMessage {
     init?(withBase64String base64String: String?) {
         guard
@@ -153,6 +169,26 @@ extension GenericMessage {
     }
 }
 
+extension GenericMessage {
+    var linkPreviews: [LinkPreview] {
+        guard let content = content else { return [] }
+        switch content {
+        case .text:
+            return text.linkPreview.compactMap { $0 }
+        case .edited:
+            return edited.text.linkPreview.compactMap { $0 }
+        case .ephemeral(let ephemeral):
+            if case .text? = ephemeral.content {
+                return ephemeral.text.linkPreview.compactMap { $0 }
+            } else {
+                return []
+            }
+        default:
+            return []
+        }
+    }
+}
+    
 extension Ephemeral: MessageCapable {
     public var expectsReadConfirmation: Bool {
         get {
@@ -281,6 +317,13 @@ public extension NewOtrMessage {
 }
 
 extension Location: EphemeralMessageCapable {
+    init(latitude: Float, longitude: Float) {
+        self = WireProtos.Location.with({
+            $0.latitude = latitude
+            $0.longitude = longitude
+        })
+    }
+    
     public func setEphemeralContent(on ephemeral: inout Ephemeral) {
         ephemeral.location = self
     }
@@ -524,6 +567,13 @@ extension WireProtos.Asset: EphemeralMessageCapable {
         })
     }
     
+    init(original: WireProtos.Asset.Original, preview: WireProtos.Asset.Preview) {
+        self = WireProtos.Asset.with({
+            $0.original = original
+            $0.preview = preview
+        })
+    }
+    
     public func setEphemeralContent(on ephemeral: inout Ephemeral) {
         ephemeral.asset = self
     }
@@ -708,6 +758,23 @@ extension GenericMessage {
                 if let token = token {
                     self.ephemeral.asset.uploaded.assetToken = token
                 }
+            default:
+                return
+            }
+        default:
+            return
+        }
+    }
+    
+    public mutating func update(asset: WireProtos.Asset) {
+        guard let content = content else { return }
+        switch content {
+        case .asset:
+            self.asset = asset
+        case .ephemeral(let data):
+            switch data.content {
+            case .asset?:
+                self.ephemeral.asset = asset
             default:
                 return
             }

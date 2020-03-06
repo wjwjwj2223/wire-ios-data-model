@@ -40,3 +40,44 @@ public extension ZMEphemeral {
     }
 }
 
+public extension WireProtos.Asset.Original {
+    var hasRasterImage: Bool {
+        guard let content = metaData else { return false }
+        switch content {
+        case .image:
+            return UTType(mimeType: mimeType)?.isSVG == false
+        default:
+            return false
+        }
+    }
+}
+
+fileprivate extension ImageAsset {
+    var isRaster: Bool {
+        return UTType(mimeType: mimeType)?.isSVG == false
+    }
+}
+
+public extension GenericMessage {
+    var hasRasterImage: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .image(let image):
+            return image.isRaster
+        default:
+            return false
+        }
+    }
+}
+
+public extension Ephemeral {
+    var hasRasterImage: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .image(let image):
+            return image.isRaster
+        default:
+            return false
+        }
+    }
+}
