@@ -72,7 +72,7 @@ import Foundation
     
     /// Original file size
     public var size: UInt64 {
-        guard let asset = self.genericAssetMessage?.assetData else { return 0 }
+        guard let asset = self.underlyingMessage?.assetData else { return 0 }
         let originalSize = asset.original.size
         let previewSize = asset.preview.size
     
@@ -378,33 +378,33 @@ struct CacheAsset: Asset {
     }
     
     var isUploaded: Bool {
-        guard let genericMessage = owner.genericMessage else { return false }
+        guard let genericMessage = owner.underlyingMessage else { return false }
         
         switch type {
         case .thumbnail:
-            return genericMessage.assetData?.preview.remote.hasAssetId() ?? false
+            return genericMessage.assetData?.preview.remote.hasAssetID ?? false
         case .file, .image:
-            return genericMessage.assetData?.uploaded.hasAssetId() ?? false
+            return genericMessage.assetData?.uploaded.hasAssetID ?? false
         }
         
     }
     
     func updateWithAssetId(_ assetId: String, token: String?) {
         guard var genericMessage = owner.underlyingMessage else { return }
-        
+
         switch type {
         case .thumbnail:
-            genericMessage.updatedPreview(withAssetId: assetId, token: token)
+            genericMessage.updatePreview(assetId: assetId, token: token)
         case .image, .file:
-            genericMessage.updatedUploaded(withAssetId: assetId, token: token)
+            genericMessage.updateUploaded(assetId: assetId, token: token)
         }
-        
+
         do {
             _ = owner.mergeWithExistingData(data: try genericMessage.serializedData())
         } catch {
             return
         }
-        
+
         // Now that we've stored the assetId when can safely delete the encrypted data
         switch type {
         case .file:
@@ -416,31 +416,29 @@ struct CacheAsset: Asset {
     
     func updateWithPreprocessedData(_ preprocessedImageData: Data, imageProperties: ZMIImageProperties) {
         guard needsPreprocessing else { return }
-        guard let genericMessage = owner.genericMessage else { return }
+        guard var genericMessage = owner.underlyingMessage else { return }
         
         cache.storeAssetData(owner, format: .medium, encrypted: false, data: preprocessedImageData)
         
-        var updatedGenericMessage: ZMGenericMessage
         switch (type) {
         case .file:
             return
         case .image:
-            updatedGenericMessage = genericMessage.updatedAssetOriginal(withImageProperties: imageProperties)!
+            genericMessage.updateAssetOriginal(imageProperties: imageProperties)
         case .thumbnail:
-            updatedGenericMessage = genericMessage.updatedAssetPreview(withImageProperties: imageProperties)!
+            genericMessage.updateAssetPreview(imageProperties: imageProperties)
         }
         
-        owner.add(updatedGenericMessage)
+        owner.add(genericMessage)
     }
     
     func encrypt() {
-        guard let genericMessage = owner.genericMessage else { return }
+        guard var genericMessage = owner.underlyingMessage else { return }
         
-        var updatedGenericMessage: ZMGenericMessage?
         switch type {
         case .file:
             if let keys = cache.encryptFileAndComputeSHA256Digest(owner) {
-                updatedGenericMessage = genericMessage.updatedAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                genericMessage.update(asset: WireProtos.Asset(otrKey: keys.otrKey, sha256: keys.sha256!))
             }
         case .image:
             if !needsPreprocessing, let original = original {
@@ -449,17 +447,14 @@ struct CacheAsset: Asset {
             }
             
             if let keys = cache.encryptImageAndComputeSHA256Digest(owner, format: .medium) {
-                updatedGenericMessage = genericMessage.updatedAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                 genericMessage.update(asset: WireProtos.Asset(otrKey: keys.otrKey, sha256: keys.sha256!))
             }
         case .thumbnail:
             if let keys = cache.encryptImageAndComputeSHA256Digest(owner, format: .medium) {
-                updatedGenericMessage = genericMessage.updatedAssetPreview(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                genericMessage.updateAssetPreview(otrKey: keys.otrKey, sha256: keys.sha256!)
             }
         }
-        
-        if let updatedGenericMessage = updatedGenericMessage {
-            owner.add(updatedGenericMessage)
-        }
+        owner.add(genericMessage)
     }
     
 }

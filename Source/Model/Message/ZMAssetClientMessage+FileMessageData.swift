@@ -103,12 +103,12 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     // MIME type of the file being transfered (implied from file extension)
     public var mimeType: String? {
         
-        guard let asset = self.genericAssetMessage?.assetData else { return nil }
-        if asset.original.hasMimeType() {
+        guard let asset = self.underlyingMessage?.assetData else { return nil }
+        if asset.original.hasMimeType {
             return asset.original.mimeType
         }
         
-        if asset.preview.hasMimeType() {
+        if asset.preview.hasMimeType {
             return asset.preview.mimeType
         }
         
@@ -187,7 +187,7 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     
     /// File name as was sent or `nil` in case of an image asset
     public var filename: String? {
-        return self.genericAssetMessage?.assetData?.original.name.removingExtremeCombiningCharacters
+        return self.underlyingMessage?.assetData?.original.name.removingExtremeCombiningCharacters
     }
     
     public var thumbnailAssetID: String? {
@@ -222,7 +222,7 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     }
     
     private func replaceGenericMessageForThumbnail(with genericMessage: GenericMessage) {
-        self.cachedGenericAssetMessage = nil
+        self.cachedUnderlyingAssetMessage = nil
         
         self.dataSet
             .map { $0 as! ZMGenericMessageData }
@@ -255,18 +255,18 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     }
     
     public var v3_isImage: Bool {
-        return self.genericAssetMessage?.v3_isImage ?? false
+        return self.underlyingMessage?.v3_isImage ?? false
     }
     
     public var videoDimensions: CGSize {
-        guard let assetData = self.genericAssetMessage?.assetData else { return CGSize.zero }
+        guard let assetData = self.underlyingMessage?.assetData else { return CGSize.zero }
         let w = assetData.original.video.width
         let h = assetData.original.video.height
         return CGSize(width: Int(w), height: Int(h))
     }
 
     public var durationMilliseconds: UInt64 {
-        guard let assetData = self.genericAssetMessage?.assetData else { return 0 }
+        guard let assetData = self.underlyingMessage?.assetData else { return 0 }
         if self.isVideo {
             return assetData.original.video.durationInMillis
         }
@@ -278,8 +278,8 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     
     public var normalizedLoudness: [Float]? {
         guard self.isAudio,
-            let assetData = self.genericAssetMessage?.assetData,
-            assetData.original.audio.hasNormalizedLoudness() else
+            let assetData = self.underlyingMessage?.assetData,
+            assetData.original.audio.hasNormalizedLoudness else
         {
             return nil
         }

@@ -43,9 +43,9 @@ extension ZMAssetClientMessage {
         return Set([#keyPath(ZMOTRMessage.dataSet), #keyPath(ZMOTRMessage.dataSet)+".data"])
     }
     
-    public override var genericMessage: ZMGenericMessage? {
-        return genericAssetMessage
-    }
+//    public override var genericMessage: ZMGenericMessage? {
+//        return genericAssetMessage
+//    }
     
     /// The generic asset message that is constructed by merging
     /// all generic messages from the dataset that contain an asset
@@ -194,20 +194,20 @@ extension ZMAssetClientMessage {
     }
     
     override public var fileMessageData: ZMFileMessageData? {
-        let isFileMessage = self.genericAssetMessage?.assetData != nil
+        let isFileMessage = self.underlyingMessage?.assetData != nil
         return isFileMessage ? self : nil
     }
     
     public override func update(with message: ZMGenericMessage, updateEvent: ZMUpdateEvent, initialUpdate: Bool) {
         self.add(message)
         self.version = 3 // We assume received assets are V3 since backend no longer supports sending V2 assets.
-        
+
         if let assetData = message.assetData, assetData.hasUploaded() {
             if assetData.uploaded.hasAssetId() {
                 self.updateTransferState(.uploaded, synchronize: false)
             }
         }
-        
+
         if let assetData = message.assetData, assetData.hasNotUploaded(), self.transferState != .uploaded {
             ///TODO: change ZMAssetNotUploaded to NS_CLOSED_ENUM
             switch assetData.notUploaded {
@@ -229,7 +229,7 @@ extension ZMAssetClientMessage {
         if let assetData = message.assetData {
             if assetData.uploaded.hasAssetID {
                 self.updateTransferState(.uploaded, synchronize: false)
-                return
+//                return
             }
         }
         

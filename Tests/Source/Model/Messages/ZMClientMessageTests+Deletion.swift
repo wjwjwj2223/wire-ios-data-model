@@ -81,8 +81,7 @@ class ZMClientMessageTests_Deletion: BaseZMClientMessageTests {
             $0.uploaded.sha256 = .init()
         }
         var uploaded = GenericMessage(content: asset, nonce: sut.nonce!)
-        uploaded.updatedUploaded(withAssetId: assetId, token: nil)
-//        let uploaded = ZMGenericMessage.message(content: ZMAsset.asset(withUploadedOTRKey: .init(), sha256: .init()), nonce: sut.nonce!).updatedUploaded(withAssetId: assetId, token: nil)!
+        uploaded.updateUploaded(assetId: assetId, token: nil)
         sut.update(with: uploaded, updateEvent: ZMUpdateEvent(), initialUpdate: true)
         let observer = AssetDeletionNotificationObserver()
         

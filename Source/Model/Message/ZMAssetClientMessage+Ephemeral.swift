@@ -24,10 +24,18 @@ extension ZMAssetClientMessage {
         return self.destructionDate != nil || self.ephemeral != nil || self.isObfuscated
     }
     
-    var ephemeral: ZMEphemeral? {
+    var ephemeral: Ephemeral? {
         let first = self.dataSet.array
-            .compactMap { ($0 as? ZMGenericMessageData)?.genericMessage }
-            .filter { $0.hasEphemeral() }
+            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
+            .filter({ (message) -> Bool in
+                guard let content = message.content else { return false }
+                switch content {
+                case .ephemeral:
+                    return true
+                default:
+                    return false
+                }
+            })
             .first
         return first?.ephemeral
     }

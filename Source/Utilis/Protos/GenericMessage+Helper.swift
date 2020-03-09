@@ -567,11 +567,24 @@ extension WireProtos.Asset: EphemeralMessageCapable {
         })
     }
     
-    init(original: WireProtos.Asset.Original, preview: WireProtos.Asset.Preview) {
+    init(original: WireProtos.Asset.Original?, preview: WireProtos.Asset.Preview?) {
         self = WireProtos.Asset.with({
-            $0.original = original
-            $0.preview = preview
+            if let original = original {
+                $0.original = original
+            }
+            if let preview = preview {
+                $0.preview = preview
+            }
         })
+    }
+    
+    init(otrKey: Data, sha256: Data) {
+        self = WireProtos.Asset.with {
+            $0.uploaded = WireProtos.Asset.RemoteData.with {
+                $0.otrKey = otrKey
+                $0.sha256 = sha256
+            }
+        }
     }
     
     public func setEphemeralContent(on ephemeral: inout Ephemeral) {
@@ -720,7 +733,7 @@ public extension LinkPreview {
 
 extension GenericMessage {
     
-    public mutating func updatedPreview(withAssetId assetId: String, token: String?) {
+    public mutating func updatePreview(assetId: String, token: String?) {
         guard let content = content else { return }
         switch content {
         case .asset:
@@ -743,7 +756,7 @@ extension GenericMessage {
         }
     }
     
-    public mutating func updatedUploaded(withAssetId assetId: String, token: String?) {
+    public mutating func updateUploaded(assetId: String, token: String?) {
         guard let content = content else { return }
         switch content {
         case .asset:
@@ -781,6 +794,32 @@ extension GenericMessage {
         default:
             return
         }
+    }
+    
+    public mutating func updateAssetOriginal(imageProperties: ZMIImageProperties) {
+        update(asset: WireProtos.Asset(imageSize: imageProperties.size, mimeType: imageProperties.mimeType, size: UInt64(imageProperties.length)))
+    }
+    
+    public mutating func updateAssetPreview(imageProperties: ZMIImageProperties) {
+        let imageMetadata = WireProtos.Asset.ImageMetaData.with {
+            $0.width = Int32(imageProperties.size.width)
+            $0.height = Int32(imageProperties.size.height)
+        }
+        let preview = WireProtos.Asset.Preview(size: UInt64(imageProperties.length), mimeType: imageProperties.mimeType ?? "", remoteData: nil, imageMetadata: imageMetadata)
+        let asset = WireProtos.Asset(original: nil, preview: preview)
+
+        update(asset: asset)
+    }
+    
+    public mutating func updateAssetPreview(otrKey: Data, sha256: Data) {
+        guard var asset = assetData else { return }
+        
+        let remotedata =  WireProtos.Asset.RemoteData.with {
+            $0.otrKey = otrKey
+            $0.sha256 = sha256
+        }
+        asset.preview.remote = remotedata
+        update(asset: WireProtos.Asset(original: nil, preview: asset.preview))
     }
 }
 
