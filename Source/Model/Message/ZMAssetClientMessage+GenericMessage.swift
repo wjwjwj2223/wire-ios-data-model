@@ -43,10 +43,6 @@ extension ZMAssetClientMessage {
         return Set([#keyPath(ZMOTRMessage.dataSet), #keyPath(ZMOTRMessage.dataSet)+".data"])
     }
     
-//    public override var genericMessage: ZMGenericMessage? {
-//        return genericAssetMessage
-//    }
-    
     /// The generic asset message that is constructed by merging
     /// all generic messages from the dataset that contain an asset
     public var genericAssetMessage: ZMGenericMessage? {
@@ -166,9 +162,6 @@ extension ZMAssetClientMessage {
             case .thumbnail:
                 return self.underlyingMessageMergedFromDataSet(filter: { (message) -> Bool in
                     guard let assetData = message.assetData else { return false }
-//                    guard case .uploaded? = assetData.status else {
-//                        return false
-//                    }
                     return assetData.hasPreview
                 })
             }
@@ -221,25 +214,28 @@ extension ZMAssetClientMessage {
         }
     }
     
-    //FIX ME
     public func update(with message: GenericMessage, updateEvent: ZMUpdateEvent, initialUpdate: Bool) {
         self.add(message)
         self.version = 3 // We assume received assets are V3 since backend no longer supports sending V2 assets.
         
-        if let assetData = message.assetData {
+        guard let assetData = message.assetData else { return }
+        
+        switch assetData.status {
+        case .uploaded?:
             if assetData.uploaded.hasAssetID {
                 self.updateTransferState(.uploaded, synchronize: false)
-//                return
             }
-        }
-        
-        if let assetData = message.assetData, self.transferState != .uploaded {
-            switch assetData.notUploaded {
-            case .cancelled:
-                self.managedObjectContext?.delete(self)
-            case .failed:
-                self.updateTransferState(.uploadingFailed, synchronize: false)
+        case .notUploaded?:
+            if self.transferState != .uploaded {
+                switch assetData.notUploaded {
+                case .cancelled:
+                    self.managedObjectContext?.delete(self)
+                case .failed:
+                    self.updateTransferState(.uploadingFailed, synchronize: false)
+                }
             }
+        default:
+            break
         }
     }
 }
