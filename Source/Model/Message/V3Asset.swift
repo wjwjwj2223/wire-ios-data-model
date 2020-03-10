@@ -108,7 +108,8 @@ private let zmLog = ZMSLog(tag: "AssetV3")
     }
 
     public var isAnimatedGIF: Bool {
-        return [assetClientMessage.underlyingMessage?.assetData?.original.mimeType].compactMap {$0}.contains(where: { UTType.init(mimeType: $0)?.isGIF == true })        
+        guard let asset = assetClientMessage.underlyingMessage?.assetData else { return false }
+        return [asset.original.mimeType].contains(where: { UTType.init(mimeType: $0)?.isGIF == true })        
     }
 
     public var imageType: String? {
