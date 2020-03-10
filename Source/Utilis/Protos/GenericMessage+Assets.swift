@@ -1,6 +1,6 @@
 //
 // Wire
-// Copyright (C) 2016 Wire Swiss GmbH
+// Copyright (C) 2020 Wire Swiss GmbH
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ public extension WireProtos.Asset.Original {
     var normalizedLoudnessLevels : [Float] {
         
         guard self.audio.hasNormalizedLoudness else { return [] }
-        guard self.audio.normalizedLoudness.count > 0 else { return [] }
+        guard !self.audio.normalizedLoudness.isEmpty else { return [] }
         
         let data = self.audio.normalizedLoudness 
         let offsets = 0..<data.count

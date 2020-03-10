@@ -42,9 +42,8 @@ public extension ZMEphemeral {
 
 public extension WireProtos.Asset.Original {
     var hasRasterImage: Bool {
-        guard let content = metaData else { return false }
-        switch content {
-        case .image:
+        switch metaData {
+        case .image?:
             return UTType(mimeType: mimeType)?.isSVG == false
         default:
             return false
@@ -62,20 +61,15 @@ public extension GenericMessage {
     var hasRasterImage: Bool {
         guard let content = content else { return false }
         switch content {
-        case .image(let image):
-            return image.isRaster
-        default:
-            return false
-        }
-    }
-}
-
-public extension Ephemeral {
-    var hasRasterImage: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .image(let image):
-            return image.isRaster
+        case .image(let data):
+            return data.isRaster
+        case .ephemeral(let data):
+            switch data.content {
+            case .image(let image)?:
+                return image.isRaster
+            default:
+                return false
+            }
         default:
             return false
         }
