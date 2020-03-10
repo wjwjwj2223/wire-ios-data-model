@@ -115,7 +115,7 @@ extension GenericMessage {
         }        
     }
     
-    var imageAssetData : ImageAsset? {
+    public var imageAssetData : ImageAsset? {
         guard let content = content else { return nil }
         switch content {
         case .image(let data):
@@ -132,7 +132,7 @@ extension GenericMessage {
         }        
     }
 
-    var assetData: WireProtos.Asset? {
+    public var assetData: WireProtos.Asset? {
         guard let content = content else { return nil }
         switch content {
         case .asset(let data):
