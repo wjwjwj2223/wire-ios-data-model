@@ -578,7 +578,7 @@ extension WireProtos.Asset: EphemeralMessageCapable {
         })
     }
     
-    init(otrKey: Data, sha256: Data) {
+    public init(otrKey: Data, sha256: Data) {
         self = WireProtos.Asset.with {
             $0.uploaded = WireProtos.Asset.RemoteData.with {
                 $0.otrKey = otrKey
