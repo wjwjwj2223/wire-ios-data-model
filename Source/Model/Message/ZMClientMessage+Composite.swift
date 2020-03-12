@@ -48,6 +48,25 @@ public enum ButtonMessageState {
     case unselected
     case selected
     case confirmed
+    
+    init(from state: ButtonState.State?) {
+        guard let state = state else {
+            self = .unselected
+            return
+        }
+        self = ButtonMessageState(from: state)
+    }
+    
+    init(from state: ButtonState.State) {
+        switch state {
+        case .unselected:
+            self = .unselected
+        case .selected:
+            self = .selected
+        case .confirmed:
+            self = .confirmed
+        }
+    }
 }
 
 extension ZMClientMessage: CompositeMessageData {
@@ -145,14 +164,35 @@ extension CompositeMessageItemContent: ButtonMessageData {
     }
     
     var state: ButtonMessageState {
-        // TODO: Get message state from database
-        return .unselected
+        return ButtonMessageState(from: buttonState?.state)
     }
     
     func touchAction() {
-        // TODO:
-        // 1. Update button state
-        // 2. Insert ButtonAction as silent message in conversation with service as a recipient
-        // 3. Save changes
+        guard let moc = parentMessage.managedObjectContext,
+            let buttonId = button?.id,
+            let messageId = parentMessage.nonce,
+            !hasSelectedButton else { return }
+
+        moc.performGroupedBlock { [weak self] in
+            guard let `self` = self else { return }
+            let buttonState = self.buttonState ??
+                ButtonState.insert(with: buttonId, message: self.parentMessage, inContext: moc)
+            buttonState.state = .selected
+            self.parentMessage.conversation?.append(buttonActionWithId: buttonId, referenceMessageId: messageId)
+            moc.saveOrRollback()
+        }
+    }
+    
+    private var hasSelectedButton: Bool {
+        return parentMessage.buttonStates?.contains(where: {$0.state == .selected}) ?? false
+    }
+    
+    private var buttonState: ButtonState? {
+        guard let button = button else { return nil }
+
+        return parentMessage.buttonStates?.first(where: { buttonState in
+            guard let remoteIdentifier = buttonState.remoteIdentifier else { return false }
+            return remoteIdentifier == button.id
+        })
     }
 }
