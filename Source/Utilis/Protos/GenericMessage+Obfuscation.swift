@@ -161,6 +161,6 @@ extension WireProtos.Asset {
             assetPreview?.size = 10
             assetPreview?.mimeType = preview.mimeType
         }
-        return WireProtos.Asset(original: assetOriginal!, preview: assetPreview!)
+        return WireProtos.Asset(original: assetOriginal, preview: assetPreview)
     }
 }
