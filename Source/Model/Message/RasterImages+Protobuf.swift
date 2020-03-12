@@ -15,25 +15,28 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
-
+@available(*, deprecated)
 public extension ZMAssetOriginal {
     var hasRasterImage: Bool {
         return hasImage() && UTType(mimeType: mimeType)?.isSVG == false
     }
 }
 
+@available(*, deprecated)
 fileprivate extension ZMImageAsset {
     var isRaster: Bool {
         return UTType(mimeType: mimeType)?.isSVG == false
     }
 }
 
+@available(*, deprecated)
 public extension ZMGenericMessage {
     var hasRasterImage: Bool {
         return hasImage() && image.isRaster
     }
 }
 
+@available(*, deprecated)
 public extension ZMEphemeral {
     var hasRasterImage: Bool {
         return hasImage() && image.isRaster

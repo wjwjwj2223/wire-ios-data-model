@@ -339,7 +339,7 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     return -1;
 }
 
-- (void)obfuscate;
+- (void)obfuscate __deprecated;
 {
     [super obfuscate];
     if (self.genericMessage.knockData == nil) {
