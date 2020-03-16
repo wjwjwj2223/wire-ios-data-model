@@ -22,6 +22,7 @@ class ButtonState: ZMManagedObject {
     @NSManaged private var stateValue: Int16
     @NSManaged var message: ZMMessage?
     @NSManaged var remoteIdentifier: String?
+    @NSManaged var isExpired: Bool
 
     static func insert(with id: String, message: ZMMessage, inContext moc: NSManagedObjectContext) -> ButtonState {
         let buttonState = ButtonState.insertNewObject(in: moc)
@@ -50,6 +51,22 @@ class ButtonState: ZMManagedObject {
         }
         set {
             stateValue = newValue.rawValue
+        }
+    }
+}
+
+extension Set where Element: ButtonState {
+    func confirmButtonState(withId id: String) {
+        for button in self {
+            button.state = button.remoteIdentifier == id ?
+                .confirmed :
+                .unselected
+        }
+    }
+    
+    func resetExpired() {
+        for button in self {
+            button.isExpired = false
         }
     }
 }

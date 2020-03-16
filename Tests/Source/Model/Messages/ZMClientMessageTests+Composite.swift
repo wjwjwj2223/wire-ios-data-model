@@ -36,8 +36,7 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
         return Composite.with { $0.items = items }
     }
     
-    func compositeMessage(with proto: Composite) -> ZMClientMessage {
-        let nonce = UUID()
+    func compositeMessage(with proto: Composite, nonce: UUID = UUID()) -> ZMClientMessage {
         let genericMessage = GenericMessage.with {
             $0.composite = proto
             $0.messageID = nonce.transportString()
@@ -113,5 +112,82 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
         let buttonState = message.buttonStates?.first(where: {$0.remoteIdentifier == id})
         XCTAssertNotNil(buttonState)
         XCTAssertEqual(WireDataModel.ButtonState.State.selected, buttonState?.state)
+    }
+    
+    func testThatItUpdatesButtonStates_WhenReceivingButtonActionConfirmation() {
+        // GIVEN
+        let nonce = UUID()
+        let buttonItems = [
+            compositeItemButton(buttonID: "1"),
+            compositeItemButton(buttonID: "2"),
+            compositeItemButton(buttonID: "3"),
+            compositeItemButton(buttonID: "4")
+        ]
+        
+        let message = compositeMessage(with: compositeProto(items: buttonItems[0], buttonItems[1], buttonItems[2], buttonItems[3]), nonce: nonce)
+        
+        let conversation = ZMConversation.insertNewObject(in: uiMOC)
+        conversation.append(message)
+
+        var buttonStates: [WireDataModel.ButtonState]!
+        
+        uiMOC.performAndWait { [uiMOC] in
+            buttonStates = buttonItems.map { buttonItem in
+                return WireDataModel.ButtonState.insert(with: buttonItem.button.id, message: message, inContext: uiMOC)
+            }
+
+            buttonStates[0].state = .selected
+            buttonStates[1].state = .confirmed
+            buttonStates[2].state = .unselected
+            buttonStates[3].state = .selected
+
+            uiMOC.saveOrRollback()
+        }
+        
+        let builder = ZMButtonActionConfirmationBuilder()
+        builder.setReferenceMessageId(nonce.transportString())
+        builder.setButtonId("1")
+        
+        let confirmation = builder.build()
+        
+        // WHEN
+        uiMOC.performAndWait { [uiMOC] in
+            ZMClientMessage.updateButtonStates(withConfirmation: confirmation!, forConversation: conversation, inContext: uiMOC)
+            uiMOC.saveOrRollback()
+        }
+        
+        // THEN
+        XCTAssertEqual(buttonStates[0].state, WireDataModel.ButtonState.State.confirmed)
+        for buttonState in buttonStates[1...3] {
+            XCTAssertEqual(buttonState.state, WireDataModel.ButtonState.State.unselected)
+        }
+    }
+    
+    func testThatItSetsIsExpiredAndUnselectsButtonState_WhenButtonActionMessageExpires() {
+        // GIVEN
+        let nonce = UUID()
+        let message = compositeMessage(with: compositeProto(items: compositeItemButton(buttonID: "1")), nonce: nonce)
+        let conversation = ZMConversation.insertNewObject(in: uiMOC)
+        conversation.append(message)
+        
+        var buttonState:  WireDataModel.ButtonState!
+        uiMOC.performAndWait { [uiMOC] in
+            buttonState = WireDataModel.ButtonState.insert(with: "1", message: message, inContext: uiMOC)
+            buttonState.state = .selected
+            uiMOC.saveOrRollback()
+        }
+        
+        let builder = ZMButtonActionBuilder()
+        builder.setReferenceMessageId(nonce.transportString())
+        builder.setButtonId("1")
+        let buttonAction = builder.build()
+        
+        // WHEN
+        ZMClientMessage.expireButtonState(forButtonAction: buttonAction!, forConversation: conversation, inContext: uiMOC)
+        _ = waitForAllGroupsToBeEmpty(withTimeout: 0.5)
+        
+        // THEN
+        XCTAssertEqual(buttonState.isExpired, true)
+        XCTAssertEqual(buttonState.state, WireDataModel.ButtonState.State.unselected)
     }
 }

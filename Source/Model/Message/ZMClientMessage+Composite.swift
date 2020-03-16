@@ -41,6 +41,7 @@ public enum CompositeMessageItem {
 public protocol ButtonMessageData {
     var title: String? { get }
     var state: ButtonMessageState { get }
+    var isExpired: Bool { get }
     func touchAction()
 }
 
@@ -89,6 +90,40 @@ extension ZMClientMessage: ConversationCompositeMessage {
             return nil
         }
         return self
+    }
+}
+
+extension ZMClientMessage {
+    @objc static func updateButtonStates(withConfirmation confirmation: ZMButtonActionConfirmation,
+                                         forConversation conversation: ZMConversation,
+                                         inContext moc: NSManagedObjectContext) {
+        let nonce = UUID(uuidString: confirmation.referenceMessageId)
+        let message = ZMClientMessage.fetch(withNonce: nonce, for: conversation, in: moc)
+        message?.updateButtonStates(withConfirmation: confirmation)
+    }
+    
+    private func updateButtonStates(withConfirmation confirmation: ZMButtonActionConfirmation) {
+        guard let states = buttonStates, states.contains(where: { $0.remoteIdentifier == confirmation.buttonId }) else {
+            return
+        }
+        states.confirmButtonState(withId: confirmation.buttonId)
+    }
+    
+    @objc static func expireButtonState(forButtonAction buttonAction: ZMButtonAction,
+                                        forConversation conversation: ZMConversation,
+                                        inContext moc: NSManagedObjectContext) {
+        let nonce = UUID(uuidString: buttonAction.referenceMessageId)
+        let message = ZMClientMessage.fetch(withNonce: nonce, for: conversation, in: moc)
+        message?.expireButtonState(withButtonAction: buttonAction)
+    }
+    
+    private func expireButtonState(withButtonAction buttonAction: ZMButtonAction) {
+        let state = buttonStates?.first(where: { $0.remoteIdentifier == buttonAction.buttonId })
+        managedObjectContext?.performGroupedBlock { [managedObjectContext] in
+            state?.isExpired = true
+            state?.state = .unselected
+            managedObjectContext?.saveOrRollback()
+        }
     }
 }
 
@@ -167,6 +202,10 @@ extension CompositeMessageItemContent: ButtonMessageData {
         return ButtonMessageState(from: buttonState?.state)
     }
     
+    var isExpired: Bool {
+        return buttonState?.isExpired ?? false
+    }
+    
     func touchAction() {
         guard let moc = parentMessage.managedObjectContext,
             let buttonId = button?.id,
@@ -178,6 +217,7 @@ extension CompositeMessageItemContent: ButtonMessageData {
             let buttonState = self.buttonState ??
                 ButtonState.insert(with: buttonId, message: self.parentMessage, inContext: moc)
             buttonState.state = .selected
+            self.parentMessage.buttonStates?.resetExpired()
             self.parentMessage.conversation?.append(buttonActionWithId: buttonId, referenceMessageId: messageId)
             moc.saveOrRollback()
         }
