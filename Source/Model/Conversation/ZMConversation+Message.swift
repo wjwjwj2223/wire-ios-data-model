@@ -26,7 +26,7 @@ extension ZMConversation {
     @discardableResult
     func append(buttonActionWithId id: String, referenceMessageId: UUID, nonce: UUID = UUID()) -> ZMClientMessage? {
         let buttonAction = ButtonAction(buttonId: id, referenceMessageId: referenceMessageId)
-        return appendClientMessage(with: GenericMessage(content: buttonAction, nonce: nonce))
+        return appendClientMessage(with: GenericMessage(content: buttonAction, nonce: nonce), hidden: true)
     }
     
     @discardableResult @objc(appendLocation:nonce:)
