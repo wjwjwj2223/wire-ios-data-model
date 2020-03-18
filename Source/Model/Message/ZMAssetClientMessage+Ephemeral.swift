@@ -28,9 +28,8 @@ extension ZMAssetClientMessage {
         let first = self.dataSet.array
             .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
             .filter({ (message) -> Bool in
-               guard case .ephemeral = message.content else { return false }
+               guard case .ephemeral? = message.content else { return false }
                return true
-                }
             })
             .first
         return first?.ephemeral
