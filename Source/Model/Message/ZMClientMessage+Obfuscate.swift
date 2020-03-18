@@ -31,15 +31,6 @@ extension ZMClientMessage {
         }
     }
     
-    private func deleteContent() {
-        self.dataSet.map { $0 as! ZMGenericMessageData }.forEach {
-            $0.managedObjectContext?.delete($0)
-        }
-        self.dataSet = NSOrderedSet()
-        self.normalizedText = nil
-        self.quote = nil
-    }
-    
     @objc(mergeWithExistingData:)
     func mergeWithExistingData(_ data: Data) -> ZMGenericMessageData? {
         let existingMessageData = self.dataSet
