@@ -109,6 +109,14 @@ extension LinkPreview {
                 $0.image = obfImage
             }
             $0.tweet = tweet.obfuscated()
+            $0.article = Article.with {
+                $0.title = obfTitle
+                $0.summary = obfSummary
+                $0.permanentURL = permanentURL.obfuscated()
+                if let obfImage = obfImage {
+                    $0.image = obfImage
+                }
+            }
         }
     }
 }

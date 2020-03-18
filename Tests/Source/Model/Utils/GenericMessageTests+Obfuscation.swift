@@ -165,13 +165,14 @@ class ZMGenericMessageTests_Obfuscation : ZMBaseManagedObjectTest {
         XCTAssertNotEqual(obfuscatedLinkPreview.url, origURL)
         XCTAssertEqual(obfuscatedLinkPreview.url, obfOrgURL)
         XCTAssertEqual(obfuscatedLinkPreview.urlOffset, offset)
-//        XCTAssertTrue(obfuscatedLinkPreview.article)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL, permURL)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL.count, 0)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.title, title)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.title.count, 0)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary, summary)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary.count, 0)
+        
+        XCTAssertNotNil(obfuscatedLinkPreview.article)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL, permURL)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL.count, 0)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.title, title)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.title.count, 0)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary, summary)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary.count, 0)
     }
     
     func testThatItObfuscatesLinkPreviews_Images(){
