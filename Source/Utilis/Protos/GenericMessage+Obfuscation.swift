@@ -153,9 +153,15 @@ extension WireProtos.Asset {
                 assetOriginal?.name = obfName
             }
             
-            assetOriginal?.audio = WireProtos.Asset.AudioMetaData()
-            assetOriginal?.video = WireProtos.Asset.VideoMetaData()
-            
+            let metaData = original.metaData
+            switch metaData {
+            case .audio?:
+                assetOriginal?.audio = WireProtos.Asset.AudioMetaData()
+            case .video?:
+                assetOriginal?.video = WireProtos.Asset.VideoMetaData()
+            default:
+                break
+            }            
             assetOriginal?.size = 10
             assetOriginal?.mimeType = original.mimeType
         }
