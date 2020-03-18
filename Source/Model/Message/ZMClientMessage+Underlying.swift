@@ -19,6 +19,17 @@
 import Foundation
 
 extension ZMClientMessage {
+
+    /// In memory cache
+//    public var cachedUnderlyingAssetMessage: GenericMessage? {
+//        get {
+//            return nil
+//        }
+//        set {
+//            //self = newValue
+//        }
+//    }
+    
     public var underlyingMessage: GenericMessage? {
         let filteredData = self.dataSet
             .compactMap { $0 as? ZMGenericMessageData }

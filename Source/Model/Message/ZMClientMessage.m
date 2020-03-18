@@ -65,43 +65,43 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 
 @synthesize genericMessage = _genericMessage;
 
-+ (NSString *)entityName;
-{
-    return @"ClientMessage";
-}
+//+ (NSString *)entityName;
+//{
+//    return @"ClientMessage";
+//}
 
-- (NSSet *)ignoredKeys
-{
-    return [[super ignoredKeys] setByAddingObject:ClientMessageUpdateTimestamp];
-}
+//- (NSSet *)ignoredKeys
+//{
+//    return [[super ignoredKeys] setByAddingObject:ClientMessageUpdateTimestamp];
+//}
 
-- (NSDate *)updatedAt
-{
-    return self.updatedTimestamp;
-}
+//- (NSDate *)updatedAt
+//{
+//    return self.updatedTimestamp;
+//}
 
-- (NSData *)hashOfContent
-{
-    if (self.serverTimestamp == nil) {
-        return nil;
-    }
-    
-    return [self.genericMessage hashOfContentWith:self.serverTimestamp];
-}
+//- (NSData *)hashOfContent
+//{
+//    if (self.serverTimestamp == nil) {
+//        return nil;
+//    }
+//    
+//    return [self.genericMessage hashOfContentWith:self.serverTimestamp];
+//}
 
 - (void)addData:(NSData *)data
 {
     if (data == nil) {
         return;
     }
-    
+
     ZMGenericMessageData *messageData = [self mergeWithExistingData:data];
     [self setGenericMessage:self.genericMessageFromDataSet];
-    
+
     if (self.nonce == nil) {
         self.nonce = [NSUUID uuidWithTransportString:messageData.genericMessage.messageId];
     }
-    
+
     [self updateCategoryCache];
     [self setLocallyModifiedKeys:[NSSet setWithObject:ClientMessageDataSetKey]];
 }
@@ -117,12 +117,12 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     return _genericMessage;
 }
 
-- (void)setGenericMessage:(ZMGenericMessage *)genericMessage
-{
-    if ([genericMessage knownMessage] && genericMessage.imageAssetData == nil) {
-        _genericMessage = genericMessage;
-    }
-}
+//- (void)setGenericMessage:(ZMGenericMessage *)genericMessage
+//{
+//    if ([genericMessage knownMessage] && genericMessage.imageAssetData == nil) {
+//        _genericMessage = genericMessage;
+//    }
+//}
 
 - (void)awakeFromFetch
 {
@@ -142,25 +142,25 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     _genericMessage = nil;
 }
 
-- (ZMGenericMessage *)genericMessageFromDataSet
-{
-    NSArray <ZMGenericMessage *> *filteredMessages = [[self.dataSet.array mapWithBlock:^ZMGenericMessage *(ZMGenericMessageData *data) {
-        return data.genericMessage;
-    }] filterWithBlock:^BOOL(ZMGenericMessage *message) {
-        return [message knownMessage] && message.imageAssetData == nil;
-    }];
-
-    if (0 == filteredMessages.count) {
-        return nil;
-    }
-    
-    ZMGenericMessageBuilder *builder = ZMGenericMessage.builder;
-    for (ZMGenericMessage *message in filteredMessages) {
-        [builder mergeFrom:message];
-    }
-    
-    return builder.build;
-}
+//- (ZMGenericMessage *)genericMessageFromDataSet
+//{
+//    NSArray <ZMGenericMessage *> *filteredMessages = [[self.dataSet.array mapWithBlock:^ZMGenericMessage *(ZMGenericMessageData *data) {
+//        return data.genericMessage;
+//    }] filterWithBlock:^BOOL(ZMGenericMessage *message) {
+//        return [message knownMessage] && message.imageAssetData == nil;
+//    }];
+//
+//    if (0 == filteredMessages.count) {
+//        return nil;
+//    }
+//    
+//    ZMGenericMessageBuilder *builder = ZMGenericMessage.builder;
+//    for (ZMGenericMessage *message in filteredMessages) {
+//        [builder mergeFrom:message];
+//    }
+//    
+//    return builder.build;
+//}
 
 + (NSSet *)keyPathsForValuesAffectingGenericMessage
 {
@@ -312,25 +312,25 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 @end
 
 
-@implementation ZMClientMessage (ZMKnockMessage)
-
-@end
-
-@implementation ZMClientMessage (Ephemeral)
-
-- (BOOL)isEphemeral
-{
-    return self.destructionDate != nil || self.genericMessage.hasEphemeral || self.isObfuscated;
-}
-
-- (NSTimeInterval)deletionTimeout
-{
-    if (self.isEphemeral) {
-        return self.genericMessage.ephemeral.expireAfterMillis/1000;
-    }
-    return -1;
-}
-@end
-
+//@implementation ZMClientMessage (ZMKnockMessage)
+//
+//@end
+//
+//@implementation ZMClientMessage (Ephemeral)
+//
+//- (BOOL)isEphemeral
+//{
+//    return self.destructionDate != nil || self.genericMessage.hasEphemeral || self.isObfuscated;
+//}
+//
+//- (NSTimeInterval)deletionTimeout
+//{
+//    if (self.isEphemeral) {
+//        return self.genericMessage.ephemeral.expireAfterMillis/1000;
+//    }
+//    return -1;
+//}
+//@end
+//
 
 
