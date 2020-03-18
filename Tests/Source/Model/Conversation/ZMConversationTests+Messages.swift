@@ -595,7 +595,8 @@ class ZMConversationMessagesTests: ZMConversationTestsBase {
         let message = conversation.append(buttonActionWithId: buttonId, referenceMessageId: messageId)
 
         // THEN
-        XCTAssertEqual(message, conversation.lastMessage)
+        let expectedMessage = conversation.hiddenMessages.first
+        XCTAssertEqual(message, expectedMessage)
         XCTAssertEqual(message?.underlyingMessage?.buttonAction.buttonID , buttonId)
         XCTAssertEqual(message?.underlyingMessage?.buttonAction.referenceMessageID, messageId.transportString())
     }

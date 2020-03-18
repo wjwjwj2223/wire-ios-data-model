@@ -72,8 +72,8 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
         _ = waitForAllGroupsToBeEmpty(withTimeout: 0.5)
         
         // THEN
-        let lastMessage = conversation.lastMessage as? ZMClientMessage
-        guard case .some(.buttonAction) = lastMessage?.underlyingMessage?.content else { return XCTFail() }
+        let hiddenMessage = conversation.hiddenMessages.first as? ZMClientMessage
+        guard case .some(.buttonAction) = hiddenMessage?.underlyingMessage?.content else { return XCTFail() }
     }
     
     func testThatButtonTouchActionDoesNotInsertMessageInConversationIfAButtonIsSelected() {
