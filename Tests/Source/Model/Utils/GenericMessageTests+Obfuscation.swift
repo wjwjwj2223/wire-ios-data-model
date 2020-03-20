@@ -165,13 +165,14 @@ class ZMGenericMessageTests_Obfuscation : ZMBaseManagedObjectTest {
         XCTAssertNotEqual(obfuscatedLinkPreview.url, origURL)
         XCTAssertEqual(obfuscatedLinkPreview.url, obfOrgURL)
         XCTAssertEqual(obfuscatedLinkPreview.urlOffset, offset)
-//        XCTAssertTrue(obfuscatedLinkPreview.article)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL, permURL)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL.count, 0)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.title, title)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.title.count, 0)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary, summary)
-//        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary.count, 0)
+        
+        XCTAssertNotNil(obfuscatedLinkPreview.article)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL, permURL)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.permanentURL.count, 0)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.title, title)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.title.count, 0)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary, summary)
+        XCTAssertNotEqual(obfuscatedLinkPreview.article.summary.count, 0)
     }
     
     func testThatItObfuscatesLinkPreviews_Images(){
@@ -318,7 +319,7 @@ class ZMGenericMessageTests_Obfuscation : ZMBaseManagedObjectTest {
         XCTAssertFalse(obfuscatedAsset.original.video.hasDurationInMillis)
     }
     
-    func checkThatItObfuscatesAudioMessages() {
+    func testCheckThatItObfuscatesAudioMessages() {
         // given
         let original = WireProtos.Asset.Original.with({
             $0.size = 200
@@ -329,22 +330,23 @@ class ZMGenericMessageTests_Obfuscation : ZMBaseManagedObjectTest {
                 $0.normalizedLoudness = NSData(bytes: [2.9], length: [2.9].count) as Data
             })
         })
-        
+ 
         let asset  = WireProtos.Asset(original: original, preview: nil)
         let genericMessage = GenericMessage(content: asset, nonce: UUID.create(), expiresAfter: 20.0)
         
         // when
         let obfuscated =  genericMessage.obfuscatedMessage()
-        
+
         // then
         guard let obfuscatedAsset = obfuscated?.asset else { return XCTFail()}
-        
+
         XCTAssertTrue(obfuscatedAsset.hasOriginal)
         XCTAssertEqual(obfuscatedAsset.original.size, 10)
         XCTAssertEqual(obfuscatedAsset.original.mimeType, "audio")
         XCTAssertNotEqual(obfuscatedAsset.original.name, "foo")
-        
-//        XCTAssertTrue(obfuscatedAsset.original.hasAudio())
+
+        guard case .audio? = obfuscatedAsset.original.metaData else { return XCTFail() }
+
         XCTAssertFalse(obfuscatedAsset.original.audio.hasDurationInMillis)
         XCTAssertFalse(obfuscatedAsset.original.audio.hasNormalizedLoudness)
     }

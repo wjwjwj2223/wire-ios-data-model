@@ -37,6 +37,8 @@ extern NSString * _Nonnull const ZMClientMessageLinkPreviewKey;
 @property (nonatomic) NSDate * _Nullable updatedTimestamp;
 
 //- (void)addData:(NSData * _Nonnull)data;
+- (void)addData:(NSData * _Nonnull)data;
+- (void)deleteContent;
 
 - (BOOL)hasDownloadedImage;
 

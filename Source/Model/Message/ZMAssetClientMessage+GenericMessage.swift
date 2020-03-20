@@ -167,7 +167,10 @@ extension ZMAssetClientMessage {
             case .thumbnail:
                 return self.underlyingMessageMergedFromDataSet(filter: { (message) -> Bool in
                     guard let assetData = message.assetData else { return false }
-//                    guard case .notUploaded? = assetData.status else { return false }
+                    if let status = assetData.status {
+                        guard case .notUploaded = status else { return false }
+                        return assetData.hasPreview
+                    }
                     return assetData.hasPreview
                 })
             }

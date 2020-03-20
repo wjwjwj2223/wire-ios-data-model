@@ -99,7 +99,7 @@ extension GenericMessage {
         }        
     }
     
-    var imageAssetData : ImageAsset? {
+    public var imageAssetData : ImageAsset? {
         guard let content = content else { return nil }
         switch content {
         case .image(let data):

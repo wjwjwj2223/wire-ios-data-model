@@ -109,6 +109,14 @@ extension LinkPreview {
                 $0.image = obfImage
             }
             $0.tweet = tweet.obfuscated()
+            $0.article = Article.with {
+                $0.title = obfTitle
+                $0.summary = obfSummary
+                $0.permanentURL = permanentURL.obfuscated()
+                if let obfImage = obfImage {
+                    $0.image = obfImage
+                }
+            }
         }
     }
 }
@@ -145,9 +153,15 @@ extension WireProtos.Asset {
                 assetOriginal?.name = obfName
             }
             
-            assetOriginal?.audio = WireProtos.Asset.AudioMetaData()
-            assetOriginal?.video = WireProtos.Asset.VideoMetaData()
-            
+            let metaData = original.metaData
+            switch metaData {
+            case .audio?:
+                assetOriginal?.audio = WireProtos.Asset.AudioMetaData()
+            case .video?:
+                assetOriginal?.video = WireProtos.Asset.VideoMetaData()
+            default:
+                break
+            }            
             assetOriginal?.size = 10
             assetOriginal?.mimeType = original.mimeType
         }
