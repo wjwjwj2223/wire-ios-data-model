@@ -46,7 +46,9 @@ public extension ZMEphemeral {
 
 public extension WireProtos.Asset.Original {
     var hasRasterImage: Bool {
-        return UTType(mimeType: mimeType)?.isSVG == false
+        guard case .image? = self.metaData,
+            UTType(mimeType: mimeType)?.isSVG == false else { return false }
+        return true
     }
 }
 
