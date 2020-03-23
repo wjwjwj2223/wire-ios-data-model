@@ -1,4 +1,4 @@
-//                 
+//
 // Wire
 // Copyright (C) 2020 Wire Swiss GmbH
 //
@@ -19,23 +19,21 @@
 import Foundation
 
 extension ZMClientMessage {
-    @objc override public var isEphemeral: Bool {
-        return self.destructionDate != nil || self.ephemeral != nil || self.isObfuscated
+    
+    func deleteContent() {
+        self.cachedGenericMessage = nil
+        self.cachedUnderlyingMessage = nil
+        self.dataSet.map { $0 as! ZMGenericMessageData }.forEach {
+            $0.managedObjectContext?.delete($0)
+        }
+        self.dataSet = NSOrderedSet()
+        self.normalizedText = nil
+        self.quote = nil
     }
     
-    var ephemeral: ZMEphemeral? {
-        let first = self.dataSet.array
-            .compactMap { ($0 as? ZMGenericMessageData)?.genericMessage }
-            .filter { $0.hasEphemeral() }
-            .first
-        return first?.ephemeral
-    }
-
-    @objc override public var deletionTimeout: TimeInterval {
-        if let ephemeral = self.ephemeral {
-            return TimeInterval(ephemeral.expireAfterMillis / 1000)
-        }
-        return -1
+    public override func removeClearingSender(_ clearingSender: Bool) {
+        super.removeClearingSender(clearingSender)
+        
+        deleteContent()
     }
 }
-

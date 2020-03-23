@@ -17,29 +17,28 @@
 // 
 
 
-@import WireImages;
-#import "ZMMessage+Internal.h"
-#import "ZMOTRMessage.h"
-
-@class UserClient;
-@class EncryptionSessionsDirectory;
-@protocol ZMConversationMessage;
-
-extern NSString * _Nonnull const ZMFailedToCreateEncryptedMessagePayloadString;
-extern NSUInteger const ZMClientMessageByteSizeExternalThreshold;
-extern NSString * _Nonnull const ZMClientMessageLinkPreviewStateKey;
-extern NSString * _Nonnull const ZMClientMessageLinkPreviewKey;
-
-
-@interface ZMClientMessage : ZMOTRMessage
-
-/// Link Preview state
-@property (nonatomic) NSDate * _Nullable updatedTimestamp;
-
+//@import WireImages;
+//#import "ZMMessage+Internal.h"
+//#import "ZMOTRMessage.h"
+//
+//@class UserClient;
+//@class EncryptionSessionsDirectory;
+//@protocol ZMConversationMessage;
+//
+//extern NSString * _Nonnull const ZMFailedToCreateEncryptedMessagePayloadString;
+//extern NSUInteger const ZMClientMessageByteSizeExternalThreshold;
+//extern NSString * _Nonnull const ZMClientMessageLinkPreviewStateKey;
+//extern NSString * _Nonnull const ZMClientMessageLinkPreviewKey;
+//
+//
+//@interface ZMClientMessage : ZMOTRMessage
+//
+///// Link Preview state
+//@property (nonatomic) NSDate * _Nullable updatedTimestamp;
+//
 //- (void)addData:(NSData * _Nonnull)data;
-- (void)addData:(NSData * _Nonnull)data;
-- (void)deleteContent;
-
-- (BOOL)hasDownloadedImage;
-
-@end
+////- (void)deleteContent;
+//
+//- (BOOL)hasDownloadedImage;
+//
+//@end

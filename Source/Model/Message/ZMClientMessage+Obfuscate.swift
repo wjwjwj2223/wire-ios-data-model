@@ -33,6 +33,9 @@ extension ZMClientMessage {
     
     @objc(mergeWithExistingData:)
     func mergeWithExistingData(_ data: Data) -> ZMGenericMessageData? {
+        self.cachedGenericMessage = nil
+        self.cachedUnderlyingMessage = nil
+        
         let existingMessageData = self.dataSet
             .compactMap { $0 as? ZMGenericMessageData }
             .first

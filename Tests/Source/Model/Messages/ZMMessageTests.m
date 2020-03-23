@@ -36,6 +36,7 @@
 
 NSString * const IsExpiredKey = @"isExpired";
 NSString * const ReactionsKey = @"reactions";
+NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 
 @implementation BaseZMMessageTests : ModelObjectsTests
 

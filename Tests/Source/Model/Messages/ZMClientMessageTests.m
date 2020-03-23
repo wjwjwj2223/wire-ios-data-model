@@ -33,6 +33,8 @@
 @interface ZMClientMessageTests : BaseZMMessageTests
 @end
 
+NSString * const ZMClientMessageLinkPreviewStateKey = @"linkPreviewState";
+
 @implementation ZMClientMessageTests
 
 - (void)testThatItDoesNotCreateTextMessagesFromUpdateEventIfThereIsAlreadyAClientMessageWithTheSameNonce

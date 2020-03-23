@@ -21,6 +21,12 @@ import WireCryptobox
 
 private var zmLog = ZMSLog(tag: "message encryption")
 
+public let ZMFailedToCreateEncryptedMessagePayloadString = "💣"
+//// From https://github.com/wearezeta/generic-message-proto:
+//// "If payload is smaller then 256KB then OM can be sent directly"
+//// Just to be sure we set the limit lower, to 128KB (base 10)
+public let ZMClientMessageByteSizeExternalThreshold: UInt = 128000
+
 // MARK: - Encrypted data for recipients
 
 /// Strategy for missing clients.
