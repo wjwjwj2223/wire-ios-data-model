@@ -29,6 +29,7 @@ class ButtonState: ZMManagedObject {
         let buttonState = ButtonState.insertNewObject(in: moc)
         buttonState.remoteIdentifier = id
         buttonState.message = message
+        buttonState.state = .unselected
         return buttonState
     }
     
