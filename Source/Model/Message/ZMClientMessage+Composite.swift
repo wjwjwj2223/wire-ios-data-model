@@ -103,8 +103,9 @@ extension ZMClientMessage {
     }
     
     private func updateButtonStates(withConfirmation confirmation: ZMButtonActionConfirmation) {
+        guard let moc = managedObjectContext else { return }
+
         if !containsButtonState(withId: confirmation.buttonId) {
-            guard let moc = managedObjectContext else { return }
             ButtonState.insert(with: confirmation.buttonId, message: self, inContext: moc)
         }
         buttonStates?.confirmButtonState(withId: confirmation.buttonId)
