@@ -103,10 +103,16 @@ extension ZMClientMessage {
     }
     
     private func updateButtonStates(withConfirmation confirmation: ZMButtonActionConfirmation) {
-        guard let states = buttonStates, states.contains(where: { $0.remoteIdentifier == confirmation.buttonId }) else {
-            return
+        guard let moc = managedObjectContext else { return }
+
+        if !containsButtonState(withId: confirmation.buttonId) {
+            ButtonState.insert(with: confirmation.buttonId, message: self, inContext: moc)
         }
-        states.confirmButtonState(withId: confirmation.buttonId)
+        buttonStates?.confirmButtonState(withId: confirmation.buttonId)
+    }
+    
+    private func containsButtonState(withId buttonId: String) -> Bool {
+        return buttonStates?.contains(where: { $0.remoteIdentifier == buttonId }) ?? false
     }
     
     @objc static func expireButtonState(forButtonAction buttonAction: ZMButtonAction,

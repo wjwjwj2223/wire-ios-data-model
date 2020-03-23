@@ -24,10 +24,12 @@ class ButtonState: ZMManagedObject {
     @NSManaged var remoteIdentifier: String?
     @NSManaged var isExpired: Bool
 
+    @discardableResult
     static func insert(with id: String, message: ZMMessage, inContext moc: NSManagedObjectContext) -> ButtonState {
         let buttonState = ButtonState.insertNewObject(in: moc)
         buttonState.remoteIdentifier = id
         buttonState.message = message
+        buttonState.state = .unselected
         return buttonState
     }
     

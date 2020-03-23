@@ -114,6 +114,29 @@ class ZMClientMessageTests_Composite: BaseZMClientMessageTests {
         XCTAssertEqual(WireDataModel.ButtonState.State.selected, buttonState?.state)
     }
     
+    func testThatItCreatesButtonStateIfNeeded_WhenReceivingButtonActionConfirmation() {
+        // GIVEN
+        let nonce = UUID()
+        let message = compositeMessage(with: compositeProto(items: compositeItemButton()), nonce: nonce)
+        let conversation = ZMConversation.insertNewObject(in: uiMOC)
+        conversation.append(message)
+        
+        let builder = ZMButtonActionConfirmationBuilder()
+        builder.setReferenceMessageId(nonce.transportString())
+        builder.setButtonId("1")
+        let confirmation = builder.build()
+
+        // WHEN
+        uiMOC.performAndWait { [uiMOC] in
+            ZMClientMessage.updateButtonStates(withConfirmation: confirmation!, forConversation: conversation, inContext: uiMOC)
+            uiMOC.saveOrRollback()
+        }
+        
+        // THEN
+        let buttonState = message.buttonStates?.first
+        XCTAssertEqual(buttonState?.remoteIdentifier, "1")
+    }
+    
     func testThatItUpdatesButtonStates_WhenReceivingButtonActionConfirmation() {
         // GIVEN
         let nonce = UUID()
