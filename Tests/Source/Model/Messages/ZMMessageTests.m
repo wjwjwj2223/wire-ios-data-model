@@ -24,7 +24,6 @@
 @import WireImages;
 
 #import "ModelObjectsTests.h"
-#import "ZMClientMessage.h"
 #import "ZMMessage+Internal.h"
 #import "ZMUser+Internal.h"
 #import "NSManagedObjectContext+zmessaging.h"

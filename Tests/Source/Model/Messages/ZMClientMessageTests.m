@@ -21,7 +21,6 @@
 #import "MessagingTest+EventFactory.h"
 #import "ZMMessage+Internal.h"
 #import "ZMUser+Internal.h"
-#import "ZMClientMessage.h"
 #import "NSString+RandomString.h"
 #import "WireDataModelTests-Swift.h"
 #import <WireDataModel/WireDataModel-Swift.h>
