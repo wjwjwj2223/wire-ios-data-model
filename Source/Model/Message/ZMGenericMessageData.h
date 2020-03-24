@@ -17,27 +17,27 @@
 // 
 
 
-@import CoreData;
-#import "ZMManagedObject.h"
-
-@class ZMGenericMessage;
-@class ZMClientMessage;
-@class ZMAssetClientMessage;
-
-NS_ASSUME_NONNULL_BEGIN
-
-extern NSString * const ZMGenericMessageDataMessageKey;
-extern NSString * const ZMGenericMessageDataAssetKey;
-
-NS_ASSUME_NONNULL_END
-
-@interface ZMGenericMessageData: ZMManagedObject
-
-@property (nonatomic, nonnull) NSData *data;
-@property (nonatomic, readonly, nullable) ZMGenericMessage *genericMessage;
-@property (nonatomic, nullable) ZMClientMessage *message;
-@property (nonatomic, nullable) ZMAssetClientMessage *asset;
-
-+ (NSString * _Nonnull)entityName;
-
-@end
+//@import CoreData;
+//#import "ZMManagedObject.h"
+//
+//@class ZMGenericMessage;
+//@class ZMClientMessage;
+//@class ZMAssetClientMessage;
+//
+//NS_ASSUME_NONNULL_BEGIN
+//
+//extern NSString * const ZMGenericMessageDataMessageKey;
+//extern NSString * const ZMGenericMessageDataAssetKey;
+//
+//NS_ASSUME_NONNULL_END
+//
+//@interface ZMGenericMessageData: ZMManagedObject
+//
+//@property (nonatomic, nonnull) NSData *data;
+//@property (nonatomic, readonly, nullable) ZMGenericMessage *genericMessage;
+//@property (nonatomic, nullable) ZMClientMessage *message;
+//@property (nonatomic, nullable) ZMAssetClientMessage *asset;
+//
+////+ (NSString * _Nonnull)entityName;
+//
+//@end

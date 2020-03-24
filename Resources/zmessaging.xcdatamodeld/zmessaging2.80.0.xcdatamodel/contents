@@ -91,7 +91,7 @@
             </compoundIndex>
         </compoundIndexes>
     </entity>
-    <entity name="GenericMessageData" representedClassName="ZMGenericMessageData" syncable="YES">
+    <entity name="GenericMessageData" representedClassName=".ZMGenericMessageData" syncable="YES">
         <attribute name="data" attributeType="Binary" syncable="YES"/>
         <relationship name="asset" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="AssetClientMessage" inverseName="dataSet" inverseEntity="AssetClientMessage" syncable="YES"/>
         <relationship name="message" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ClientMessage" inverseName="dataSet" inverseEntity="ClientMessage" syncable="YES"/>
