@@ -19,7 +19,7 @@
 import Foundation
 
 class ButtonState: ZMManagedObject {
-    @NSManaged private var stateValue: Int16
+    @NSManaged var stateValue: Int16
     @NSManaged var message: ZMMessage?
     @NSManaged var remoteIdentifier: String?
     @NSManaged var isExpired: Bool

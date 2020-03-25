@@ -99,7 +99,8 @@ extension ZMSystemMessage {
     
     static let UserChangeInfoKey = "userChanges"
     static let ReactionChangeInfoKey = "reactionChanges"
-
+    static let ButtonStateChangeInfoKey = "buttonStateChanges"
+    
     static func changeInfo(for message: ZMMessage, changes: Changes) -> MessageChangeInfo? {
         let originalChanges = changes.originalChanges
         
@@ -204,7 +205,7 @@ extension ZMSystemMessage {
     }
     
     public var buttonStatesChanged: Bool {
-        return changedKeysContain(keys: #keyPath(ZMClientMessage.buttonStates))
+        return changedKeysContain(keys: #keyPath(ZMClientMessage.buttonStates)) || changeInfos[MessageChangeInfo.ButtonStateChangeInfoKey] != nil
     }
     
     public var userChangeInfo : UserChangeInfo? {
