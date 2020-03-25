@@ -91,6 +91,8 @@ import MobileCoreServices
     /// Fetch preview image data from disk
     func fetchImagePreviewData(queue: DispatchQueue, completionHandler: @escaping (_ imageData: Data?) -> Void)
     
+    /// Signing a PDF document
+    func signPDFDocument() -> SignatureRequest?
 }
 
 
@@ -290,8 +292,18 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     public func requestImagePreviewDownload() {
         asset?.requestPreviewDownload()
     }
+    
+    public func signPDFDocument() -> SignatureRequest? {
+        //        managedObjectContext?.
+        return nil
+    }
 }
 
+@objc public protocol SignatureRequest: NSObjectProtocol {
+    func addObserver()
+    func downloadSignature()
+}
+    
 extension ZMAssetClientMessage {
     
     public func cancelTransfer() {
