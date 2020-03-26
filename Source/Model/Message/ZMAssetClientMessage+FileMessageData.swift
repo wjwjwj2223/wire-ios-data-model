@@ -85,6 +85,9 @@ import MobileCoreServices
     /// if MIME type is indicating the audio content
     var isAudio: Bool { get }
     
+    /// if MIME type is indicating the pdf content
+    var isPDF: Bool { get }
+    
     /// Whether the file message represents a v3 image
     var v3_isImage: Bool { get }
     
@@ -257,6 +260,10 @@ extension ZMAssetClientMessage: ZMFileMessageData {
         return richAssetType == .audio
     }
     
+    public var isPDF: Bool {
+        return mimeType == "application/pdf"
+    }
+    
     public var v3_isImage: Bool {
         return self.genericAssetMessage?.v3_isImage ?? false
     }
@@ -299,9 +306,14 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     
     public func signPDFDocument() -> SignatureRequest? {
         guard let signatureStatus = managedObjectContext?.signatureStatus else {
+            let status = SignatureStatus(asset: asset,
+                                         managedObjectContext: managedObjectContext)
+            // TODO: Insert the SignatureStatus and save the context
+            status.signDocument()
             return nil
         }
         
+        signatureStatus.signDocument()
         return nil
     }
 }
