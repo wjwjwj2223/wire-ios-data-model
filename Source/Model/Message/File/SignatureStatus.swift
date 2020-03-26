@@ -56,7 +56,6 @@ public final class SignatureStatus : NSObject {
 
     public var state: PDFSigningState = .initial
 
-
     public init(asset: AssetProxyType?,
                 managedObjectContext: NSManagedObjectContext?) {
         self.asset = asset
@@ -68,7 +67,7 @@ public final class SignatureStatus : NSObject {
 
     public func signDocument() {
         state = .waitingForURL
-        NotificationCenter.default.post(name: .willSignDocument, object: nil)
+        NotificationCenter.default.post(name: .willSignDocument, object: self)
     }
     
     func didReceiveURL(_ url: URL) {
