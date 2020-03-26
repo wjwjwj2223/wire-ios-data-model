@@ -23,7 +23,12 @@ private let SignatureStatusKey = "SignatureStatus"
 extension NSManagedObjectContext {
     
     @objc public var signatureStatus: SignatureStatus? {
-        return self.userInfo[SignatureStatusKey] as? SignatureStatus
+        get {
+            return self.userInfo[SignatureStatusKey] as? SignatureStatus
+        }
+        set {
+            self.userInfo[SignatureStatusKey] = newValue
+        }
     }
 }
 
@@ -44,22 +49,19 @@ public enum PDFSigningState: Int {
 
 public final class SignatureStatus : NSObject {
     private(set) var documentHash: String?
-    private(set) var documentID: String?
     private(set) var asset: Asset?
     private(set) var managedObjectContext: NSManagedObjectContext?
 
     public var state: PDFSigningState = .initial
 
-    public init(hash: String, documentID: String, managedObjectContext: NSManagedObjectContext) {
-        self.documentHash = hash
-        self.documentID = documentID
+    public init(managedObjectContext: NSManagedObjectContext) {
         self.managedObjectContext = managedObjectContext
     }
 
-    public func signDocument(asset: Asset) {
+    public func signDocument(asset: Asset?) {
         self.asset = asset
         state = .waitingForURL
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "RequestsAvailableNotification"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: "Test1"), object: nil)//"RequestsAvailableNotification"
     }
     
     func didReceiveURL(_ url: URL) {
