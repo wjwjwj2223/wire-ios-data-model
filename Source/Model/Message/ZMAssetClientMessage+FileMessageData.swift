@@ -95,6 +95,10 @@ import MobileCoreServices
     func signPDFDocument() -> SignatureRequest?
 }
 
+@objc public protocol SignatureRequest: NSObjectProtocol {
+    func addObserver()
+    func downloadSignature()
+}
 
 extension ZMAssetClientMessage: ZMFileMessageData {
     
@@ -294,14 +298,12 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     }
     
     public func signPDFDocument() -> SignatureRequest? {
-        //        managedObjectContext?.
+        guard let signatureStatus = managedObjectContext?.signatureStatus else {
+            return nil
+        }
+        
         return nil
     }
-}
-
-@objc public protocol SignatureRequest: NSObjectProtocol {
-    func addObserver()
-    func downloadSignature()
 }
     
 extension ZMAssetClientMessage {
