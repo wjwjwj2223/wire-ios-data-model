@@ -43,21 +43,22 @@ public enum PDFSigningState: Int {
 }
 
 public final class SignatureStatus : NSObject {
-    private(set) var documentHash: String?
-    private(set) var documentID: String?
-    private(set) var asset: Asset?
+    private(set) var encodedHash: String?
+    private(set) var asset: AssetProxyType?
     private(set) var managedObjectContext: NSManagedObjectContext?
 
     public var state: PDFSigningState = .initial
 
-    public init(hash: String, documentID: String, managedObjectContext: NSManagedObjectContext) {
-        self.documentHash = hash
-        self.documentID = documentID
+    public init(asset: AssetProxyType?,
+                managedObjectContext: NSManagedObjectContext?) {
+        self.asset = asset
         self.managedObjectContext = managedObjectContext
+        encodedHash = asset?.fileData(encrypted: false)?
+            .zmSHA256Digest()
+            .base64String()
     }
 
-    public func signDocument(asset: Asset) {
-        self.asset = asset
+    public func signDocument() {
         state = .waitingForURL
         NotificationCenter.default.post(name: Notification.Name(rawValue: "RequestsAvailableNotification"), object: nil)
     }
