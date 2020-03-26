@@ -36,6 +36,7 @@ public extension NSNotification.Name {
     static let didReceiveURLForSigningDocument = Notification.Name("DidReceiveURLForSigningDocument")
     static let didReceiveDigitalSignature = Notification.Name("DidReceiveDigitalSignature")
     static let didReceiveInvalidDigitalSignature = Notification.Name("DidReceiveInvalidDigitalSignature")
+    static let willSignDocument = Notification.Name("willSignDocument")
 }
 
 public enum PDFSigningState: Int {
@@ -48,20 +49,26 @@ public enum PDFSigningState: Int {
 }
 
 public final class SignatureStatus : NSObject {
-    private(set) var documentHash: String?
-    private(set) var asset: Asset?
+    
+    private(set) var encodedHash: String?
+    private(set) var asset: AssetProxyType?
     private(set) var managedObjectContext: NSManagedObjectContext?
 
     public var state: PDFSigningState = .initial
 
-    public init(managedObjectContext: NSManagedObjectContext) {
+
+    public init(asset: AssetProxyType?,
+                managedObjectContext: NSManagedObjectContext?) {
+        self.asset = asset
         self.managedObjectContext = managedObjectContext
+        encodedHash = asset?.fileData(encrypted: false)?
+            .zmSHA256Digest()
+            .base64String()
     }
 
-    public func signDocument(asset: Asset?) {
-        self.asset = asset
+    public func signDocument() {
         state = .waitingForURL
-        NotificationCenter.default.post(name: Notification.Name(rawValue: "Test1"), object: nil)//"RequestsAvailableNotification"
+        NotificationCenter.default.post(name: .willSignDocument, object: nil)
     }
     
     func didReceiveURL(_ url: URL) {
@@ -71,7 +78,7 @@ public final class SignatureStatus : NSObject {
                               context: moc.notificationContext).post()
     }
     
-    func didReceiveSignature(data: Data?) { //FIX ME: what type of the file?
+    func didReceiveSignature(data: Data?) { //TODO: what type of the file?
         guard let moc = self.managedObjectContext else { return }
         guard let _ = data else {
                 state = .signatureInvalid
