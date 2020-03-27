@@ -37,7 +37,9 @@ private let zmLog = ZMSLog(tag: "AssetV3")
 
     var previewData: Data? { get }
     var imagePreviewDataIdentifier: String? { get }
-
+    
+    @objc(fileDataEncrypted:)
+    func fileData(encrypted: Bool) -> Data?
     @objc(imageDataForFormat:encrypted:)
     func imageData(for: ZMImageFormat, encrypted: Bool) -> Data?
 
@@ -157,6 +159,12 @@ extension V3Asset: AssetProxyType {
     public func imageData(for format: ZMImageFormat, encrypted: Bool) -> Data? {
         guard assetClientMessage.fileMessageData != nil else { return nil }
         return moc.zm_fileAssetCache.assetData(assetClientMessage, format: format, encrypted: encrypted)
+    }
+    
+    public func fileData(encrypted: Bool) -> Data? {
+        guard assetClientMessage.fileMessageData != nil else { return nil }
+        return moc.zm_fileAssetCache.assetData(assetClientMessage,
+                                               encrypted: encrypted)
     }
 
     public func requestFileDownload() {

@@ -42,7 +42,7 @@ public extension ZMConversationMessage {
     }
 
     var isPDF: Bool {
-        return isFile && fileMessageData?.mimeType == "application/pdf"
+        return isFile && fileMessageData?.isPDF ?? false
     }
     
     var isPass: Bool {

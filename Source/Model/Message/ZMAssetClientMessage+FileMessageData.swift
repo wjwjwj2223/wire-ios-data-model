@@ -85,14 +85,23 @@ import MobileCoreServices
     /// if MIME type is indicating the audio content
     var isAudio: Bool { get }
     
+    /// if MIME type is indicating the pdf content
+    var isPDF: Bool { get }
+    
     /// Whether the file message represents a v3 image
     var v3_isImage: Bool { get }
     
     /// Fetch preview image data from disk
     func fetchImagePreviewData(queue: DispatchQueue, completionHandler: @escaping (_ imageData: Data?) -> Void)
     
+    /// Signing a PDF document
+    func signPDFDocument()
 }
 
+//@objc public protocol SignatureRequest: NSObjectProtocol {
+//    func addObserver()
+//    func downloadSignature()
+//}
 
 extension ZMAssetClientMessage: ZMFileMessageData {
     
@@ -251,6 +260,10 @@ extension ZMAssetClientMessage: ZMFileMessageData {
         return richAssetType == .audio
     }
     
+    public var isPDF: Bool {
+        return mimeType == "application/pdf"
+    }
+    
     public var v3_isImage: Bool {
         return self.genericAssetMessage?.v3_isImage ?? false
     }
@@ -290,8 +303,20 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     public func requestImagePreviewDownload() {
         asset?.requestPreviewDownload()
     }
+    
+    public func signPDFDocument() {
+        guard let signatureStatus = managedObjectContext?.signatureStatus else {
+            let status = SignatureStatus(asset: asset,
+                                         managedObjectContext: managedObjectContext)
+            managedObjectContext?.signatureStatus = status
+            status.signDocument()
+            return
+        }
+        
+        signatureStatus.signDocument()
+    }
 }
-
+    
 extension ZMAssetClientMessage {
     
     public func cancelTransfer() {
