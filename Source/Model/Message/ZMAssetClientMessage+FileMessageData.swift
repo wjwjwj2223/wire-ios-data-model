@@ -305,15 +305,9 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     }
     
     public func signPDFDocument() {
-        guard let signatureStatus = managedObjectContext?.signatureStatus else {
-            let status = SignatureStatus(asset: asset,
-                                         managedObjectContext: managedObjectContext)
-            managedObjectContext?.signatureStatus = status
-            status.signDocument()
-            return
-        }
-        
-        signatureStatus.signDocument()
+        let status = SignatureStatus(asset: genericMessage?.assetData,
+                                     managedObjectContext: managedObjectContext)
+        status.signDocument()
     }
 }
     

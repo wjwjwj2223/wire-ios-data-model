@@ -41,8 +41,8 @@ public extension NSNotification.Name {
 
 public enum PDFSigningState: Int {
     case initial
-//    case hashing
     case waitingForURL
+    case pendingURL
     case waitingForSignature
     case signatureInvalid
     case finished
@@ -50,22 +50,28 @@ public enum PDFSigningState: Int {
 
 public final class SignatureStatus : NSObject {
     
-    private(set) var encodedHash: String?
-    private(set) var asset: AssetProxyType?
+    private(set) var asset: ZMAsset?
     private(set) var managedObjectContext: NSManagedObjectContext?
 
     public var state: PDFSigningState = .initial
+    public var documentID: String?
+    public var fileName: String?
+    public var encodedHash: String?
 
-    public init(asset: AssetProxyType?,
+    public init(asset: ZMAsset?,
                 managedObjectContext: NSManagedObjectContext?) {
         self.asset = asset
         self.managedObjectContext = managedObjectContext
-        encodedHash = asset?.fileData(encrypted: false)?
+        
+        documentID = asset?.preview.remote.assetId
+        fileName = asset?.original.name.removingExtremeCombiningCharacters
+        encodedHash = asset?.data()
             .zmSHA256Digest()
             .base64String()
     }
 
     public func signDocument() {
+        guard encodedHash != nil else { return }
         state = .waitingForURL
         NotificationCenter.default.post(name: .willSignDocument, object: self)
     }
