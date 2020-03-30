@@ -18,20 +18,6 @@
 
 import Foundation
 
-private let SignatureStatusKey = "SignatureStatus"
-
-extension NSManagedObjectContext {
-    
-    @objc public var signatureStatus: SignatureStatus? {
-        get {
-            return self.userInfo[SignatureStatusKey] as? SignatureStatus
-        }
-        set {
-            self.userInfo[SignatureStatusKey] = newValue
-        }
-    }
-}
-
 public extension NSNotification.Name {
     static let didReceiveURLForSigningDocument = Notification.Name("DidReceiveURLForSigningDocument")
     static let didReceiveDigitalSignature = Notification.Name("DidReceiveDigitalSignature")
@@ -42,7 +28,6 @@ public extension NSNotification.Name {
 public enum PDFSigningState: Int {
     case initial
     case waitingForURL
-    case pendingURL
     case waitingForSignature
     case signatureInvalid
     case finished
