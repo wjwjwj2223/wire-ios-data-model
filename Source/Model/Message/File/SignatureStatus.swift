@@ -116,8 +116,8 @@ public final class SignatureStatus : NSObject {
 // MARK: - DigitalSignatureNotification
 public class DigitalSignatureNotification: NSObject  {
     
-    // MARK: - DigitalSignatureNotificationState
-    public enum DigitalSignatureNotificationState {
+    // MARK: - State
+    public enum State {
         case consentURLPending
         case consentURLReceived(_ consentURL: URL)
     }
@@ -126,10 +126,10 @@ public class DigitalSignatureNotification: NSObject  {
     public static let notificationName = Notification.Name("DigitalSignatureNotification")
     public static let userInfoKey = notificationName.rawValue
     
-    public let state: DigitalSignatureNotificationState
+    public let state: State
     
     // MARK: - Init
-    public init(state: DigitalSignatureNotificationState) {
+    public init(state: State) {
         self.state = state
         super.init()
     }
