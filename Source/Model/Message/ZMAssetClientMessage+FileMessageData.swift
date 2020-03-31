@@ -95,13 +95,8 @@ import MobileCoreServices
     func fetchImagePreviewData(queue: DispatchQueue, completionHandler: @escaping (_ imageData: Data?) -> Void)
     
     /// Signing a PDF document
-    func signPDFDocument()
+    func signPDFDocument(observer: SignatureObserver) -> Any?
 }
-
-//@objc public protocol SignatureRequest: NSObjectProtocol {
-//    func addObserver()
-//    func downloadSignature()
-//}
 
 extension ZMAssetClientMessage: ZMFileMessageData {
     
@@ -304,10 +299,15 @@ extension ZMAssetClientMessage: ZMFileMessageData {
         asset?.requestPreviewDownload()
     }
     
-    public func signPDFDocument() {
+    public func signPDFDocument(observer: SignatureObserver) -> Any? {
+        guard let managedObjectContext = managedObjectContext else {
+            return nil
+        }
         let status = SignatureStatus(asset: genericMessage?.assetData,
                                      managedObjectContext: managedObjectContext)
+        let token = status.addObserver(observer)
         status.signDocument()
+        return token
     }
 }
     
