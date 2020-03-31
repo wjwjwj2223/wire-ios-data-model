@@ -99,7 +99,8 @@ public final class SignatureStatus : NSObject {
     // MARK: - Observable
     public func addObserver(_ observer: SignatureObserver) -> Any {
         return NotificationInContext.addObserver(name: DigitalSignatureNotification.notificationName,
-                                                 context: managedObjectContext.notificationContext) { [weak observer] note in
+                                                 context: managedObjectContext.notificationContext,
+                                                 queue: .main) { [weak observer] note in
             if let note = note.userInfo[DigitalSignatureNotification.userInfoKey] as? DigitalSignatureNotification  {
                 switch note.state {
                     case .consentURLPending:
