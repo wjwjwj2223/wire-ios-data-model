@@ -23,7 +23,7 @@ import Foundation
 public protocol SignatureObserver: NSObjectProtocol {
     func willReceiveSignatureURL()
     func didReceiveSignatureURL(_ url: URL)
-    func signatureAvailable(_ signature: Data) //FIX ME: type of the file
+    func signatureAvailable(_ signature: Data)
     func signatureInvalid(_ error: Error)
 }
 
@@ -48,7 +48,7 @@ public final class SignatureStatus : NSObject {
     private(set) var asset: ZMAsset?
     private(set) var managedObjectContext: NSManagedObjectContext
 
-    // MARK: - Private Property
+    // MARK: - Public Property
     public var state: PDFSigningState = .initial
     public var documentID: String?
     public var fileName: String?
@@ -74,13 +74,13 @@ public final class SignatureStatus : NSObject {
         }
         state = .waitingForURL
         NotificationCenter.default.post(name: .willSignDocument, object: self)
-        DigitallySignatureNotification(state: .consentURLPending)
+        DigitalSignatureNotification(state: .consentURLPending)
             .post(in: managedObjectContext.notificationContext)
     }
     
     public func didReceiveURL(_ url: URL) {
         state = .waitingForSignature
-        DigitallySignatureNotification(state: .consentURLReceived(url))
+        DigitalSignatureNotification(state: .consentURLReceived(url))
             .post(in: managedObjectContext.notificationContext)
     }
     
@@ -98,9 +98,9 @@ public final class SignatureStatus : NSObject {
     
     // MARK: - Observable
     public func addObserver(_ observer: SignatureObserver) -> Any {
-        return NotificationInContext.addObserver(name: DigitallySignatureNotification.notificationName,
+        return NotificationInContext.addObserver(name: DigitalSignatureNotification.notificationName,
                                                  context: managedObjectContext.notificationContext) { [weak observer] note in
-            if let note = note.userInfo[DigitallySignatureNotification.userInfoKey] as? DigitallySignatureNotification  {
+            if let note = note.userInfo[DigitalSignatureNotification.userInfoKey] as? DigitalSignatureNotification  {
                 switch note.state {
                     case .consentURLPending:
                         observer?.willReceiveSignatureURL()
@@ -112,27 +112,31 @@ public final class SignatureStatus : NSObject {
     }
 }
 
-// MARK: - DigitallySignatureNotification
-public enum DigitallySignatureNotificationState {
-    case consentURLPending
-    case consentURLReceived(_ consentURL: URL)
-}
-
-public class DigitallySignatureNotification: NSObject  {
+// MARK: - DigitalSignatureNotification
+public class DigitalSignatureNotification: NSObject  {
     
-    public static let notificationName = Notification.Name("DigitallySignatureNotification")
+    // MARK: - DigitalSignatureNotificationState
+    public enum DigitalSignatureNotificationState {
+        case consentURLPending
+        case consentURLReceived(_ consentURL: URL)
+    }
+    
+    // MARK: - Public Property
+    public static let notificationName = Notification.Name("DigitalSignatureNotification")
     public static let userInfoKey = notificationName.rawValue
     
-    public let state: DigitallySignatureNotificationState
+    public let state: DigitalSignatureNotificationState
     
-    public init(state: DigitallySignatureNotificationState) {
+    // MARK: - Init
+    public init(state: DigitalSignatureNotificationState) {
         self.state = state
         super.init()
     }
     
+    // MARK: - Public Method
     public func post(in context: NotificationContext) {
-        NotificationInContext(name: DigitallySignatureNotification.notificationName,
+        NotificationInContext(name: DigitalSignatureNotification.notificationName,
                               context: context,
-                              userInfo: [DigitallySignatureNotification.userInfoKey: self]).post()
+                              userInfo: [DigitalSignatureNotification.userInfoKey: self]).post()
     }
 }
