@@ -164,14 +164,15 @@ public class DigitalSignatureNotification: NSObject  {
 }
 
 // MARK: - NSManagedObjectContext
-private let SignatureStatusKey = "SignatureStatus"
 extension NSManagedObjectContext {
+    private static let signatureStatusKey = "SignatureStatus"
+    
     @objc public var signatureStatus: SignatureStatus? {
         get {
-            return self.userInfo[SignatureStatusKey] as? SignatureStatus
+            return self.userInfo[NSManagedObjectContext.signatureStatusKey] as? SignatureStatus
         }
         set {
-            self.userInfo[SignatureStatusKey] = newValue
+            self.userInfo[NSManagedObjectContext.signatureStatusKey] = newValue
         }
     }
 }
