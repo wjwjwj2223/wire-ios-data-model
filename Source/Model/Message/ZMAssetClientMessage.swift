@@ -160,8 +160,6 @@ import Foundation
             self.didChangeValue(forKey: key)
         }
     }
-    
-    public var signatureStatus: SignatureStatus?
 
     static func keyPathsForValuesAffectingAssociatedTaskIdentifier() -> Set<String> {
         return Set(arrayLiteral: #keyPath(ZMAssetClientMessage.associatedTaskIdentifier_data))

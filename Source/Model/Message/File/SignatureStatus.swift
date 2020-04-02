@@ -29,7 +29,7 @@ public protocol SignatureObserver: NSObjectProtocol {
 
 public extension NSNotification.Name {
     static let willSignDocument = Notification.Name("willSignDocument")
-    static let willRetriveSignature = Notification.Name("willRetriveSignature")
+    static let willRetrieveSignature = Notification.Name("willRetrieveSignature")
 }
 
 // MARK: - SignatureStatus
@@ -78,9 +78,9 @@ public final class SignatureStatus : NSObject {
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func retriveSignature() {
+    public func retrieveSignature() {
         state = .waitingForSignature
-        NotificationCenter.default.post(name: .willRetriveSignature, object: nil)
+        NotificationCenter.default.post(name: .willRetrieveSignature, object: nil)
     }
     
     public func didReceiveConsentURL(_ url: URL) {
@@ -105,6 +105,10 @@ public final class SignatureStatus : NSObject {
         state = .signatureInvalid
         DigitalSignatureNotification(state: .signatureInvalid)
             .post(in: managedObjectContext.notificationContext)
+    }
+    
+    public func store() {
+        managedObjectContext.signatureStatus = self
     }
     
     // MARK: - Observable
@@ -156,5 +160,18 @@ public class DigitalSignatureNotification: NSObject  {
         NotificationInContext(name: DigitalSignatureNotification.notificationName,
                               context: context,
                               userInfo: [DigitalSignatureNotification.userInfoKey: self]).post()
+    }
+}
+
+// MARK: - NSManagedObjectContext
+private let SignatureStatusKey = "SignatureStatus"
+extension NSManagedObjectContext {
+    @objc public var signatureStatus: SignatureStatus? {
+        get {
+            return self.userInfo[SignatureStatusKey] as? SignatureStatus
+        }
+        set {
+            self.userInfo[SignatureStatusKey] = newValue
+        }
     }
 }

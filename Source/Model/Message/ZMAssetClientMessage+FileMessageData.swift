@@ -97,8 +97,8 @@ import MobileCoreServices
     /// Signing a PDF document
     func signPDFDocument(observer: SignatureObserver) -> Any?
     
-    /// retrive a PDF signature
-    func retrivePDFSignature()
+    /// retrieve a PDF signature
+    func retrievePDFSignature()
 }
 
 extension ZMAssetClientMessage: ZMFileMessageData {
@@ -306,15 +306,23 @@ extension ZMAssetClientMessage: ZMFileMessageData {
         guard let managedObjectContext = managedObjectContext else {
             return nil
         }
-        signatureStatus = SignatureStatus(asset: genericMessage?.assetData,
+        let status = SignatureStatus(asset: genericMessage?.assetData,
                                      managedObjectContext: managedObjectContext)
-        let token = signatureStatus?.addObserver(observer)
-        signatureStatus?.signDocument()
+        let token = status.addObserver(observer)
+        status.signDocument()
+        status.store()
         return token
     }
     
-    public func retrivePDFSignature() {
-        signatureStatus?.retriveSignature()
+    public func retrievePDFSignature() {
+        guard
+            let managedObjectContext = managedObjectContext,
+            let status = managedObjectContext.signatureStatus
+        else {
+            return
+        }
+        
+        status.retrieveSignature()
     }
 }
     
