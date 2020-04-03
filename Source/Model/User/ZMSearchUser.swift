@@ -410,9 +410,7 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
         guard let uuidString = payload["id"] as? String,
             let remoteIdentifier = UUID(uuidString: uuidString),
             let managedObjectContext = contextProvider.managedObjectContext else { return nil }
-        
-        print("search user from payload:", payload)
-        
+                
         let localUser = ZMUser(remoteID: remoteIdentifier, createIfNeeded: false, in: managedObjectContext)
         
         if let searchUser = managedObjectContext.zm_searchUserCache?.object(forKey: remoteIdentifier as NSUUID) {
