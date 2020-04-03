@@ -23,7 +23,7 @@ import Foundation
 public protocol SignatureObserver: NSObjectProtocol {
     func willReceiveSignatureURL()
     func didReceiveSignatureURL(_ url: URL)
-    func signatureAvailable(_ signature: Data)
+    func didReceiveDigitalSignature(_ cmsData: Data)
     func didFailSignature()
 }
 
@@ -90,14 +90,14 @@ public final class SignatureStatus : NSObject {
     }
     
     public func didReceiveSignature(data: Data?) { //TODO: what type of the file?
-        guard let _ = data else {
+        guard let cmsData = data else {
                 state = .signatureInvalid
                 DigitalSignatureNotification(state: .signatureInvalid)
                     .post(in: managedObjectContext.notificationContext)
                 return
         }
         state = .finished
-        DigitalSignatureNotification(state: .digitalSignatureReceived)
+        DigitalSignatureNotification(state: .digitalSignatureReceived(cmsData))
             .post(in: managedObjectContext.notificationContext)
     }
     
@@ -125,8 +125,8 @@ public final class SignatureStatus : NSObject {
                         observer?.didReceiveSignatureURL(consentURL)
                     case .signatureInvalid:
                         observer?.didFailSignature()
-                    case .digitalSignatureReceived: // TO DO: Managege when we got the real data
-                        break
+                    case let .digitalSignatureReceived(cmsData):
+                        observer?.didReceiveDigitalSignature(cmsData)
                 }
             }
         }
@@ -141,7 +141,7 @@ public class DigitalSignatureNotification: NSObject  {
         case consentURLPending
         case consentURLReceived(_ consentURL: URL)
         case signatureInvalid
-        case digitalSignatureReceived
+        case digitalSignatureReceived(_ cmsData: Data)
     }
     
     // MARK: - Public Property
