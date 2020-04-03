@@ -66,7 +66,7 @@ extension ZMConversation {
                                        participantsRole: participantsRole,
                                        type: .group)
     }
-    
+        
     /// insert a conversation with group type
     ///
     /// - Parameters:
@@ -88,9 +88,8 @@ extension ZMConversation {
                                                readReceipts: Bool = false,
                                                participantsRole: Role? = nil,
                                                type: ZMConversationType = .group) -> ZMConversation?
-    {
-        guard let participants = participants as? [ZMUser] else { return nil }
-
+    {        
+        let participants = participants.materialize(in: moc)
         let selfUser = ZMUser.selfUser(in: moc)
 
         if (team != nil && !selfUser.canCreateConversation(type: type)) {
