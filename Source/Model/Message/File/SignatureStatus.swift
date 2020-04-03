@@ -23,20 +23,20 @@ import Foundation
 public protocol SignatureObserver: NSObjectProtocol {
     func willReceiveSignatureURL()
     func didReceiveSignatureURL(_ url: URL)
-    func signatureAvailable(_ signature: Data)
-    func signatureInvalid(_ error: Error)
+    func didReceiveDigitalSignature(_ cmsData: Data)
+    func didFailSignature()
 }
 
 public extension NSNotification.Name {
-    static let didReceiveDigitalSignature = Notification.Name("didReceiveDigitalSignature")
-    static let didReceiveInvalidDigitalSignature = Notification.Name("didReceiveInvalidDigitalSignature")
     static let willSignDocument = Notification.Name("willSignDocument")
+    static let willRetrieveSignature = Notification.Name("willRetrieveSignature")
 }
 
 // MARK: - SignatureStatus
 public enum PDFSigningState: Int {
     case initial
-    case waitingForURL
+    case waitingForConsentURL
+    case waitingForCodeVerification
     case waitingForSignature
     case signatureInvalid
     case finished
@@ -72,34 +72,50 @@ public final class SignatureStatus : NSObject {
         guard encodedHash != nil else {
             return
         }
-        state = .waitingForURL
+        state = .waitingForConsentURL
         NotificationCenter.default.post(name: .willSignDocument, object: self)
         DigitalSignatureNotification(state: .consentURLPending)
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func didReceiveURL(_ url: URL) {
+    public func retrieveSignature() {
         state = .waitingForSignature
+        NotificationCenter.default.post(name: .willRetrieveSignature, object: nil)
+    }
+    
+    public func didReceiveConsentURL(_ url: URL) {
+        state = .waitingForCodeVerification
         DigitalSignatureNotification(state: .consentURLReceived(url))
             .post(in: managedObjectContext.notificationContext)
     }
     
     public func didReceiveSignature(data: Data?) { //TODO: what type of the file?
-        guard let _ = data else {
+        guard let cmsData = data else {
                 state = .signatureInvalid
-                NotificationInContext(name: .didReceiveInvalidDigitalSignature,
-                                      context: managedObjectContext.notificationContext).post()
+                DigitalSignatureNotification(state: .signatureInvalid)
+                    .post(in: managedObjectContext.notificationContext)
                 return
         }
         state = .finished
-        NotificationInContext(name: .didReceiveDigitalSignature,
-                              context: managedObjectContext.notificationContext).post()
+        DigitalSignatureNotification(state: .digitalSignatureReceived(cmsData))
+            .post(in: managedObjectContext.notificationContext)
+    }
+    
+    public func didReceiveError() {
+        state = .signatureInvalid
+        DigitalSignatureNotification(state: .signatureInvalid)
+            .post(in: managedObjectContext.notificationContext)
+    }
+    
+    public func store() {
+        managedObjectContext.signatureStatus = self
     }
     
     // MARK: - Observable
-    public func addObserver(_ observer: SignatureObserver) -> Any {
+    public static func addObserver(_ observer: SignatureObserver,
+                                   context: NSManagedObjectContext) -> Any {
         return NotificationInContext.addObserver(name: DigitalSignatureNotification.notificationName,
-                                                 context: managedObjectContext.notificationContext,
+                                                 context: context.notificationContext,
                                                  queue: .main) { [weak observer] note in
             if let note = note.userInfo[DigitalSignatureNotification.userInfoKey] as? DigitalSignatureNotification  {
                 switch note.state {
@@ -107,6 +123,10 @@ public final class SignatureStatus : NSObject {
                         observer?.willReceiveSignatureURL()
                     case let .consentURLReceived(consentURL):
                         observer?.didReceiveSignatureURL(consentURL)
+                    case .signatureInvalid:
+                        observer?.didFailSignature()
+                    case let .digitalSignatureReceived(cmsData):
+                        observer?.didReceiveDigitalSignature(cmsData)
                 }
             }
         }
@@ -120,6 +140,8 @@ public class DigitalSignatureNotification: NSObject  {
     public enum State {
         case consentURLPending
         case consentURLReceived(_ consentURL: URL)
+        case signatureInvalid
+        case digitalSignatureReceived(_ cmsData: Data)
     }
     
     // MARK: - Public Property
@@ -139,5 +161,21 @@ public class DigitalSignatureNotification: NSObject  {
         NotificationInContext(name: DigitalSignatureNotification.notificationName,
                               context: context,
                               userInfo: [DigitalSignatureNotification.userInfoKey: self]).post()
+    }
+}
+
+// MARK: - NSManagedObjectContext
+extension NSManagedObjectContext {
+    private static let signatureStatusKey = "SignatureStatus"
+    
+    @objc public var signatureStatus: SignatureStatus? {
+        get {
+            precondition(zm_isSyncContext, "signatureStatus can only be accessed on the sync context")
+            return self.userInfo[NSManagedObjectContext.signatureStatusKey] as? SignatureStatus
+        }
+        set {
+            precondition(zm_isSyncContext, "signatureStatus can only be accessed on the sync context")
+            self.userInfo[NSManagedObjectContext.signatureStatusKey] = newValue
+        }
     }
 }
