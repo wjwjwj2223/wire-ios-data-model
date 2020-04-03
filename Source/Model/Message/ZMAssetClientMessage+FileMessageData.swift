@@ -303,26 +303,38 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     }
     
     public func signPDFDocument(observer: SignatureObserver) -> Any? {
-        guard let managedObjectContext = managedObjectContext else {
+        guard
+            let managedObjectContext = managedObjectContext,
+            let syncContext = managedObjectContext.zm_sync
+        else {
             return nil
         }
-        let status = SignatureStatus(asset: genericMessage?.assetData,
-                                     managedObjectContext: managedObjectContext)
-        let token = status.addObserver(observer)
-        status.signDocument()
-        status.store()
+        
+        let token = SignatureStatus.addObserver(observer,
+                                    context: managedObjectContext)
+        let data = genericMessage?.assetData
+        
+        syncContext.performGroupedBlock {
+            let status = SignatureStatus(asset: data,
+                                         managedObjectContext: syncContext)
+            status.signDocument()
+            status.store()
+        }
+        
         return token
     }
     
     public func retrievePDFSignature() {
         guard
             let managedObjectContext = managedObjectContext,
-            let status = managedObjectContext.signatureStatus
+            let syncContext = managedObjectContext.zm_sync
         else {
             return
         }
         
-        status.retrieveSignature()
+        syncContext.performGroupedBlock {
+            syncContext.signatureStatus?.retrieveSignature()
+        }
     }
 }
     

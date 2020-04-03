@@ -112,9 +112,10 @@ public final class SignatureStatus : NSObject {
     }
     
     // MARK: - Observable
-    public func addObserver(_ observer: SignatureObserver) -> Any {
+    public static func addObserver(_ observer: SignatureObserver,
+                                   context: NSManagedObjectContext) -> Any {
         return NotificationInContext.addObserver(name: DigitalSignatureNotification.notificationName,
-                                                 context: managedObjectContext.notificationContext,
+                                                 context: context.notificationContext,
                                                  queue: .main) { [weak observer] note in
             if let note = note.userInfo[DigitalSignatureNotification.userInfoKey] as? DigitalSignatureNotification  {
                 switch note.state {
@@ -169,9 +170,11 @@ extension NSManagedObjectContext {
     
     @objc public var signatureStatus: SignatureStatus? {
         get {
+            precondition(zm_isSyncContext, "signatureStatus can only be accessed on the sync context")
             return self.userInfo[NSManagedObjectContext.signatureStatusKey] as? SignatureStatus
         }
         set {
+            precondition(zm_isSyncContext, "signatureStatus can only be accessed on the sync context")
             self.userInfo[NSManagedObjectContext.signatureStatusKey] = newValue
         }
     }
