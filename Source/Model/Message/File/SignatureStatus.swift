@@ -89,7 +89,7 @@ public final class SignatureStatus : NSObject {
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func didReceiveSignature(at url: URL?, fileName: String?) { //TODO: what type of the file?
+    public func didReceiveSignature(at url: URL?, fileName: String?) {
         guard
             let cmsURL = url,
             let cmsFileName = fileName
