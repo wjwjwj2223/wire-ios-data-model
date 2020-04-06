@@ -94,10 +94,10 @@ public final class SignatureStatus : NSObject {
             let cmsURL = url,
             let cmsFileName = fileName
         else {
-                state = .signatureInvalid
-                DigitalSignatureNotification(state: .signatureInvalid)
-                    .post(in: managedObjectContext.notificationContext)
-                return
+            state = .signatureInvalid
+            DigitalSignatureNotification(state: .signatureInvalid)
+                .post(in: managedObjectContext.notificationContext)
+            return
         }
         state = .finished
         let fileMetaData = ZMFileMetadata(fileURL: cmsURL, name: cmsFileName)
