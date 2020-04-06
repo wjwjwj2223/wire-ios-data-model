@@ -35,7 +35,7 @@ public struct ConversationCreationOptions {
 public extension ZMManagedObjectContextProvider {
     func insertGroup(with options: ConversationCreationOptions) -> ZMConversation {
         return ZMConversation.insertGroupConversation(session: self,
-                                               participants: options.participants,
+                                               participants: options.participants.materialize(in: managedObjectContext),
                                                name: options.name,
                                                team: options.team,
                                                allowGuests: options.allowGuests,

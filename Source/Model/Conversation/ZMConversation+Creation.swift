@@ -23,7 +23,7 @@ extension ZMConversation {
     
     @objc(insertGroupConversationIntoManagedObjectContext:withParticipants:)
     static public func insertGroupConversation(moc: NSManagedObjectContext,
-                                               participants: [UserType]) -> ZMConversation?
+                                               participants: [ZMUser]) -> ZMConversation?
     {
         return self.insertGroupConversation(moc: moc, participants: participants, name: nil)
     }
@@ -32,7 +32,7 @@ extension ZMConversation {
 
     @objc
     static public func insertGroupConversation(session: ZMManagedObjectContextProvider,
-                                               participants: [UserType],
+                                               participants: [ZMUser],
                                                name: String? = nil,
                                                team: Team? = nil,
                                                allowGuests: Bool = true,
@@ -50,7 +50,7 @@ extension ZMConversation {
     
     @objc
     static public func insertGroupConversation(moc: NSManagedObjectContext,
-                                               participants: [UserType],
+                                               participants: [ZMUser],
                                                name: String? = nil,
                                                team: Team? = nil,
                                                allowGuests: Bool = true,
@@ -81,7 +81,7 @@ extension ZMConversation {
     /// - Returns: the created conversation, nullable
 
     static public func insertGroupConversation(moc: NSManagedObjectContext,
-                                               participants: [UserType],
+                                               participants: [ZMUser],
                                                name: String? = nil,
                                                team: Team? = nil,
                                                allowGuests: Bool = true,
@@ -89,7 +89,6 @@ extension ZMConversation {
                                                participantsRole: Role? = nil,
                                                type: ZMConversationType = .group) -> ZMConversation?
     {        
-        let participants = participants.materialize(in: moc)
         let selfUser = ZMUser.selfUser(in: moc)
 
         if (team != nil && !selfUser.canCreateConversation(type: type)) {
