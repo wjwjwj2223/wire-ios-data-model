@@ -23,7 +23,7 @@ import Foundation
 public protocol SignatureObserver: NSObjectProtocol {
     func willReceiveSignatureURL()
     func didReceiveSignatureURL(_ url: URL)
-    func didReceiveDigitalSignature(_ cmsData: Data)
+    func didReceiveDigitalSignature(_ cmsFileMetadata: ZMFileMetadata)
     func didFailSignature()
 }
 
@@ -89,15 +89,19 @@ public final class SignatureStatus : NSObject {
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func didReceiveSignature(data: Data?) { //TODO: what type of the file?
-        guard let cmsData = data else {
+    public func didReceiveSignature(at url: URL?, fileName: String?) { //TODO: what type of the file?
+        guard
+            let cmsURL = url,
+            let cmsFileName = fileName
+        else {
                 state = .signatureInvalid
                 DigitalSignatureNotification(state: .signatureInvalid)
                     .post(in: managedObjectContext.notificationContext)
                 return
         }
         state = .finished
-        DigitalSignatureNotification(state: .digitalSignatureReceived(cmsData))
+        let fileMetaData = ZMFileMetadata(fileURL: cmsURL, name: cmsFileName)
+        DigitalSignatureNotification(state: .digitalSignatureReceived(fileMetaData))
             .post(in: managedObjectContext.notificationContext)
     }
     
@@ -141,7 +145,7 @@ public class DigitalSignatureNotification: NSObject  {
         case consentURLPending
         case consentURLReceived(_ consentURL: URL)
         case signatureInvalid
-        case digitalSignatureReceived(_ cmsData: Data)
+        case digitalSignatureReceived(_ cmsFileMetaData: ZMFileMetadata)
     }
     
     // MARK: - Public Property
