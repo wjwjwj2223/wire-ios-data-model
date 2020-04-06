@@ -42,6 +42,8 @@ public enum PDFSigningState: Int {
     case finished
 }
 
+private let log = ZMSLog(tag: "Conversations")
+
 public final class SignatureStatus : NSObject {
     
     // MARK: - Private Property
@@ -89,18 +91,20 @@ public final class SignatureStatus : NSObject {
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func didReceiveSignature(at url: URL?, fileName: String?) {
+    public func didReceiveSignature(with data: Data?) {
         guard
-            let cmsURL = url,
-            let cmsFileName = fileName
+            let cmsData = data,
+            let fileMetaDataInfo = writeCMSSignatureFile(for: cmsData)
         else {
             state = .signatureInvalid
             DigitalSignatureNotification(state: .signatureInvalid)
                 .post(in: managedObjectContext.notificationContext)
             return
         }
+        
         state = .finished
-        let fileMetaData = ZMFileMetadata(fileURL: cmsURL, name: cmsFileName)
+        let fileMetaData = ZMFileMetadata(fileURL: fileMetaDataInfo.url,
+                                          name: fileMetaDataInfo.fileName)
         DigitalSignatureNotification(state: .digitalSignatureReceived(fileMetaData))
             .post(in: managedObjectContext.notificationContext)
     }
@@ -115,22 +119,46 @@ public final class SignatureStatus : NSObject {
         managedObjectContext.signatureStatus = self
     }
     
-    // MARK: - Observable
-    public static func addObserver(_ observer: SignatureObserver,
-                                   context: NSManagedObjectContext) -> Any {
+    // MARK: - Private Method
+    private func writeCMSSignatureFile(for data: Data) -> CMSFileMetadataInfo? {
+        guard
+            let fileName = fileName?.replacingOccurrences(of: ".pdf", with: ""),
+            let assetID = documentID
+        else {
+            return nil
+        }
+        
+        let temporaryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        let cmsFileName = "\(fileName)(\(assetID))"
+        let cmsFileNameAndExtention = "\(cmsFileName).cms"
+        let cmsURL = temporaryURL.appendingPathComponent(cmsFileNameAndExtention)
+        do {
+            try data.write(to: cmsURL)
+        } catch {
+            log.error("Failed to decode SignatureRetrieveResponse with \(error)")
+        }
+        
+        return CMSFileMetadataInfo(url: cmsURL, fileName: cmsFileName)
+    }
+}
+
+// MARK: - Observable
+public extension SignatureStatus {
+    static func addObserver(_ observer: SignatureObserver,
+                            context: NSManagedObjectContext) -> Any {
         return NotificationInContext.addObserver(name: DigitalSignatureNotification.notificationName,
                                                  context: context.notificationContext,
                                                  queue: .main) { [weak observer] note in
             if let note = note.userInfo[DigitalSignatureNotification.userInfoKey] as? DigitalSignatureNotification  {
                 switch note.state {
-                    case .consentURLPending:
-                        observer?.willReceiveSignatureURL()
-                    case let .consentURLReceived(consentURL):
-                        observer?.didReceiveSignatureURL(consentURL)
-                    case .signatureInvalid:
-                        observer?.didFailSignature()
-                    case let .digitalSignatureReceived(cmsData):
-                        observer?.didReceiveDigitalSignature(cmsData)
+                case .consentURLPending:
+                    observer?.willReceiveSignatureURL()
+                case let .consentURLReceived(consentURL):
+                    observer?.didReceiveSignatureURL(consentURL)
+                case .signatureInvalid:
+                    observer?.didFailSignature()
+                case let .digitalSignatureReceived(cmsData):
+                    observer?.didReceiveDigitalSignature(cmsData)
                 }
             }
         }
@@ -165,6 +193,17 @@ public class DigitalSignatureNotification: NSObject  {
         NotificationInContext(name: DigitalSignatureNotification.notificationName,
                               context: context,
                               userInfo: [DigitalSignatureNotification.userInfoKey: self]).post()
+    }
+}
+
+// MARK: - CMSFileMetadataInfo
+private struct CMSFileMetadataInfo {
+    let url: URL
+    let fileName: String
+    
+    public init(url: URL, fileName: String) {
+        self.url = url
+        self.fileName = fileName
     }
 }
 
