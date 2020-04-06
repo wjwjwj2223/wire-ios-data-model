@@ -427,7 +427,7 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
                 handle: String?,
                 accentColor: ZMAccentColor,
                 remoteIdentifier: UUID?,
-                teamIdentifier: UUID?,
+                teamIdentifier: UUID? = nil,
                 user existingUser: ZMUser? = nil,
                 contact: ZMAddressBookContact? = nil) {
                 
