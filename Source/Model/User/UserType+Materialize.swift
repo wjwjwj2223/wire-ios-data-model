@@ -45,13 +45,18 @@ extension Sequence where Element: UserType {
     /// - Returns: List of concrete users which could be materialized.
     
     func materialize(in context: NSManagedObjectContext) -> [ZMUser] {
+        precondition(context.zm_isUserInterfaceContext, "You can only materialize users on the UI context")
+        
         let nonExistingUsers = self.compactMap({ $0 as? ZMSearchUser }).filter({ $0.user == nil })
         let syncContext = context.zm_sync!
         
         syncContext.performGroupedBlockAndWait {
-            nonExistingUsers.forEach { _ = ZMUser(remoteID: $0.remoteIdentifier!, // TODO jacob make remoteIdentifier non optional
-                                                  createIfNeeded: true,
-                                                  in: syncContext)
+            nonExistingUsers.forEach {
+                guard let remoteIdentifier = $0.remoteIdentifier else { return }
+                
+                _ = ZMUser(remoteID: remoteIdentifier,
+                    createIfNeeded: true,
+                    in: syncContext)
             }
             syncContext.saveOrRollback()
         }
