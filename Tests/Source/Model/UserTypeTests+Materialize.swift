@@ -56,6 +56,7 @@ class UserTypeTests_Materialize: ModelObjectsTests {
                                                 accentColor: .brightOrange,
                                                 remoteIdentifier: UUID(),
                                                 teamIdentifier: team.remoteIdentifier)
+        uiMOC.saveOrRollback()
         
         // when
         let materializedUser = teamSearchUser.materialize(in: uiMOC)!
