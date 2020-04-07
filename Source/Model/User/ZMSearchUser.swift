@@ -243,7 +243,11 @@ public class ZMSearchUser: NSObject, UserType, UserConnectionType {
     }
 
     public var oneToOneConversation: ZMConversation? {
-        return user?.oneToOneConversation
+        if isTeamMember, let uiContext = contextProvider?.managedObjectContext {
+            return materialize(in: uiContext)?.oneToOneConversation
+        } else {
+            return user?.oneToOneConversation
+        }
     }
 
     public var isBlocked: Bool {
