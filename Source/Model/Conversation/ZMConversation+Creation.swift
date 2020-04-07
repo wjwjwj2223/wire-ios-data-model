@@ -32,7 +32,7 @@ extension ZMConversation {
 
     @objc
     static public func insertGroupConversation(session: ZMManagedObjectContextProvider,
-                                               participants: [ZMUser],
+                                               participants: [UserType],
                                                name: String? = nil,
                                                team: Team? = nil,
                                                allowGuests: Bool = true,
@@ -40,7 +40,7 @@ extension ZMConversation {
                                                participantsRole: Role? = nil) -> ZMConversation?
     {
         return self.insertGroupConversation(moc: session.managedObjectContext!,
-                                            participants: participants,
+                                            participants: participants.materialize(in: session.managedObjectContext),
                                             name: name,
                                             team: team,
                                             allowGuests: allowGuests,
