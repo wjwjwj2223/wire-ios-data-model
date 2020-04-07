@@ -46,6 +46,24 @@ class UserTypeTests_Materialize: ModelObjectsTests {
         XCTAssertEqual(materializedUsers.map(\.remoteIdentifier), userIDs)
     }
     
+    func testThatMaterializedTeamUserHasMembership_WhenBelongingToTheSameTeam() {
+        // given
+        let team = createTeam(in: uiMOC)
+        _ = createMembership(in: uiMOC, user: selfUser, team: team)
+        let teamSearchUser = ZMSearchUser(contextProvider: self,
+                                                name: "Team",
+                                                handle: "team",
+                                                accentColor: .brightOrange,
+                                                remoteIdentifier: UUID(),
+                                                teamIdentifier: team.remoteIdentifier)
+        
+        // when
+        let materializedUser = teamSearchUser.materialize(in: uiMOC)!
+        
+        // then
+        XCTAssertTrue(materializedUser.isTeamMember)
+    }
+    
     func testThatSearchUserWithoutRemoteIdentifierIsIgnored() {
         // given
         let userIDs = [UUID(), UUID(), UUID()]
