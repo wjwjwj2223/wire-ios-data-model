@@ -75,7 +75,7 @@ public final class SignatureStatus : NSObject {
             return
         }
         state = .waitingForConsentURL
-        NotificationCenter.default.post(name: .willSignDocument, object: self)
+        NotificationCenter.default.post(name: .willSignDocument, object: nil)
         DigitalSignatureNotification(state: .consentURLPending)
             .post(in: managedObjectContext.notificationContext)
     }
