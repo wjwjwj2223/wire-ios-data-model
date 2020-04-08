@@ -27,11 +27,6 @@ public protocol SignatureObserver: NSObjectProtocol {
     func didFailSignature()
 }
 
-public extension NSNotification.Name {
-    static let willSignDocument = Notification.Name("willSignDocument")
-    static let willRetrieveSignature = Notification.Name("willRetrieveSignature")
-}
-
 // MARK: - SignatureStatus
 public enum PDFSigningState: Int {
     case initial
@@ -75,14 +70,14 @@ public final class SignatureStatus : NSObject {
             return
         }
         state = .waitingForConsentURL
-        NotificationCenter.default.post(name: .willSignDocument, object: nil)
+        RequestAvailableNotification.notifyNewRequestsAvailable(nil)
         DigitalSignatureNotification(state: .consentURLPending)
             .post(in: managedObjectContext.notificationContext)
     }
     
     public func retrieveSignature() {
         state = .waitingForSignature
-        NotificationCenter.default.post(name: .willRetrieveSignature, object: nil)
+        RequestAvailableNotification.notifyNewRequestsAvailable(nil)
     }
     
     public func didReceiveConsentURL(_ url: URL) {
