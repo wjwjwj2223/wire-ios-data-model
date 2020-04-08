@@ -317,8 +317,8 @@ extension ZMAssetClientMessage: ZMFileMessageData {
         syncContext.performGroupedBlock {
             let status = SignatureStatus(asset: data,
                                          managedObjectContext: syncContext)
-            status.signDocument()
             status.store()
+            status.signDocument()
         }
         
         return token
