@@ -80,9 +80,15 @@ public final class SignatureStatus : NSObject {
         RequestAvailableNotification.notifyNewRequestsAvailable(nil)
     }
     
-    public func didReceiveConsentURL(_ url: URL) {
+    public func didReceiveConsentURL(_ url: URL?) {
+        guard let consentURL = url else {
+            state = .signatureInvalid
+            DigitalSignatureNotification(state: .signatureInvalid)
+                .post(in: managedObjectContext.notificationContext)
+            return
+        }
         state = .waitingForCodeVerification
-        DigitalSignatureNotification(state: .consentURLReceived(url))
+        DigitalSignatureNotification(state: .consentURLReceived(consentURL))
             .post(in: managedObjectContext.notificationContext)
     }
     
