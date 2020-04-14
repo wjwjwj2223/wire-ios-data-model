@@ -53,17 +53,19 @@ public final class SignatureStatus : NSObject {
 
     // MARK: - Init
     public init(asset: ZMAsset?,
+                data: Data?,
                 managedObjectContext: NSManagedObjectContext) {
         self.asset = asset
         self.managedObjectContext = managedObjectContext
         
         documentID = asset?.preview.remote.assetId
         fileName = asset?.original.name.removingExtremeCombiningCharacters
-        encodedHash = asset?.data()
+        
+        encodedHash = data?
             .zmSHA256Digest()
             .base64String()
     }
-
+    
     // MARK: - Public Method
     public func signDocument() {
         guard encodedHash != nil else {
@@ -124,15 +126,15 @@ public final class SignatureStatus : NSObject {
     private func writeCMSSignatureFile(for data: Data) -> CMSFileMetadataInfo? {
         guard
             let fileName = fileName?.replacingOccurrences(of: ".pdf", with: ""),
-            let assetID = documentID
+            let assetID = documentID,
+            !assetID.isEmpty
         else {
             return nil
         }
         
         let temporaryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-        let cmsFileName = "\(fileName)(\(assetID))"
-        let cmsFileNameAndExtention = "\(cmsFileName).cms"
-        let cmsURL = temporaryURL.appendingPathComponent(cmsFileNameAndExtention)
+        let cmsFileName = "\(fileName)(\(assetID)).cms"
+        let cmsURL = temporaryURL.appendingPathComponent(cmsFileName)
         do {
             try data.write(to: cmsURL)
         } catch {
