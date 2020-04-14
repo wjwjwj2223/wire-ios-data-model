@@ -26,7 +26,9 @@ final class SignatureStatusTests: ZMBaseManagedObjectTest {
     override func setUp() {
         super.setUp()
         asset = createAsset()
-        status = SignatureStatus(asset: asset, managedObjectContext: syncMOC)
+        status = SignatureStatus(asset: asset,
+                                 data: Data(),
+                                 managedObjectContext: syncMOC)
     }
     
     override func tearDown() {
