@@ -305,17 +305,20 @@ extension ZMAssetClientMessage: ZMFileMessageData {
     public func signPDFDocument(observer: SignatureObserver) -> Any? {
         guard
             let managedObjectContext = managedObjectContext,
-            let syncContext = managedObjectContext.zm_sync
+            let syncContext = managedObjectContext.zm_sync,
+            let fileURL = fileURL,
+            let PDFData = try? Data(contentsOf: fileURL)
         else {
             return nil
         }
         
         let token = SignatureStatus.addObserver(observer,
                                     context: managedObjectContext)
-        let data = genericMessage?.assetData
         
+        let asset = genericMessage?.assetData
         syncContext.performGroupedBlock {
-            let status = SignatureStatus(asset: data,
+            let status = SignatureStatus(asset: asset,
+                                         data: PDFData,
                                          managedObjectContext: syncContext)
             status.store()
             status.signDocument()
