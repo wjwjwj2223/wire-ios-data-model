@@ -58,7 +58,7 @@ public final class SignatureStatus : NSObject {
         self.asset = asset
         self.managedObjectContext = managedObjectContext
         
-        documentID = asset?.preview.remote.assetId
+        documentID = asset?.uploaded.assetId
         fileName = asset?.original.name.removingExtremeCombiningCharacters
         
         encodedHash = data?
