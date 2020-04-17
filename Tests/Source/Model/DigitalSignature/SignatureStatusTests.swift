@@ -54,7 +54,7 @@ final class SignatureStatusTests: ZMBaseManagedObjectTest {
         XCTAssertEqual(status.state, .waitingForSignature)
     }
     
-    func testThatItTakesRequiredAssetAtributesForTheRequest() {
+    func testThatItTakesRequiredAssetAttributesForTheRequest() {
         XCTAssertEqual(asset?.uploaded.assetId, "id")
         XCTAssertEqual(asset?.preview.remote.assetId, "")
         
@@ -82,4 +82,3 @@ final class SignatureStatusTests: ZMBaseManagedObjectTest {
         return sut.asset
     }
 }
-
