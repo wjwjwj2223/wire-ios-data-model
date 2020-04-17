@@ -54,31 +54,13 @@ final class SignatureStatusTests: ZMBaseManagedObjectTest {
         XCTAssertEqual(status.state, .waitingForSignature)
     }
     
-    func testThatItTakesRequiredAssetAtributesForTheRequest() {
-        XCTAssertEqual(asset?.uploaded.assetId, "id")
-        XCTAssertEqual(asset?.preview.remote.assetId, "")
-        
-        XCTAssertEqual(status.documentID, asset?.uploaded.assetId)
-        XCTAssertEqual(status.fileName, asset?.original.name)
-    }
-    
-    private func createAsset() -> ZMAsset {
-        let (otrKey, sha) = (Data.randomEncryptionKey(), Data.zmRandomSHA256Key())
-        let (assetId, token) = ("id", "token")
-        let original = ZMAssetOriginal.original(withSize: 200, mimeType: "application/pdf", name: "PDF test")
-        
-        let assetBuilder = ZMAsset.builder()!
-        let remoteBuilder = ZMAssetRemoteData.builder()!
-        
-        _ = remoteBuilder.setOtrKey(otrKey)
-        _ = remoteBuilder.setSha256(sha)
-        _ = remoteBuilder.setAssetId(assetId)
-        _ = remoteBuilder.setAssetToken(token)
-        
-        assetBuilder.setUploaded(remoteBuilder)
-        assetBuilder.setOriginal(original)
-        let sut =  ZMGenericMessage.message(content: assetBuilder.build(), nonce: UUID.create())
-        
-        return sut.asset
+    private func createAsset() -> ZMAsset? {
+        let imageMetaData = ZMAssetImageMetaData.imageMetaData(withWidth: 30, height: 40)
+        let imageMetaDataBuilder = imageMetaData.toBuilder()!
+        let original  = ZMAssetOriginal.original(withSize: 200, mimeType: "application/pdf", name: "PDF test", imageMetaData: imageMetaData)
+        let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data(), sha256: Data(), assetId: "id", assetToken: "token")
+        let preview = ZMAssetPreview.preview(withSize: 200, mimeType: "application/pdf", remoteData: remoteData, imageMetadata: imageMetaDataBuilder.build())
+        return ZMAsset.asset(withOriginal: original, preview: preview)
     }
 }
+
