@@ -21,7 +21,6 @@
 #import "ZMGenericMessage+UpdateEvent.h"
 #import "ZMConversation+Internal.h"
 #import <WireDataModel/WireDataModel-Swift.h>
-#import "ZMGenericMessageData.h"
 
 
 @import WireTransport;
