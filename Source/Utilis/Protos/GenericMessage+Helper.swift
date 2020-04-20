@@ -774,3 +774,9 @@ extension GenericMessage {
         }
     }
 }
+
+extension ImageAsset {
+    public func imageFormat() -> ZMImageFormat {
+        return ImageFormatFromString(self.tag)
+    }
+}

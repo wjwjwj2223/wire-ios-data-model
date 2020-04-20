@@ -81,7 +81,7 @@ extension ZMClientMessage {
         let messageData = mergeWithExistingData(data)
         
         if (nonce == nil) {
-            nonce = UUID(uuidString: messageData?.genericMessage?.messageId ?? "")
+            nonce = UUID(uuidString: messageData?.underlyingMessage?.messageID ?? "")
         }
         updateCategoryCache()
         setLocallyModifiedKeys([#keyPath(ZMClientMessage.dataSet)])

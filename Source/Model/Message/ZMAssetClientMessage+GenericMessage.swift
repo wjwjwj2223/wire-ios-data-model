@@ -21,10 +21,9 @@ import Foundation
 extension ZMAssetClientMessage {
     
     func genericMessageDataFromDataSet(for format: ZMImageFormat) -> ZMGenericMessageData? {
-        return self.dataSet.array
+        return self.dataSet.lazy
             .compactMap { $0 as? ZMGenericMessageData }
-            .filter { $0.genericMessage?.imageAssetData?.imageFormat() == format }
-            .first
+            .first(where: {$0.underlyingMessage?.imageAssetData?.imageFormat() == format} )
     }
     
     public var mediumGenericMessage: GenericMessage? {
