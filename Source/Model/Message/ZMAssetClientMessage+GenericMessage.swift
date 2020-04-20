@@ -52,9 +52,7 @@ extension ZMAssetClientMessage {
         guard !isZombieObject else { return nil }
         
         if self.cachedGenericAssetMessage == nil {
-            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet(filter: {
-                $0.assetData != nil
-            })
+            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet()
         }
         return self.cachedGenericAssetMessage
     }
@@ -112,11 +110,12 @@ extension ZMAssetClientMessage {
     }
     
     /// Merge all generic messages in the dataset that pass the filter
-    func genericMessageMergedFromDataSet(filter: (ZMGenericMessage)->Bool) -> ZMGenericMessage? {
+    func genericMessageMergedFromDataSet() -> ZMGenericMessage? {
         
-        let filteredMessages = self.dataSet.array
-            .compactMap { ($0 as? ZMGenericMessageData)?.genericMessage }
-            .filter(filter)
+        let filteredMessages = dataSet.array
+            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
+            .filter { $0.assetData != nil }
+            .compactMap { try? $0.serializedData() }
         
         guard !filteredMessages.isEmpty else {
             return nil

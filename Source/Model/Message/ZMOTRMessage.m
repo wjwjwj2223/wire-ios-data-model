@@ -99,13 +99,6 @@ NSString * const DeliveredKey = @"delivered";
     return [[ZMMessage keyPathsForValuesAffectingValueForKey:ZMMessageDeliveryStateKey] setByAddingObject:DeliveredKey];
 }
 
-- (NSString *)dataSetDebugInformation
-{
-    return [[self.dataSet mapWithBlock:^NSString *(ZMGenericMessageData *msg) {
-        return [NSString stringWithFormat:@"<%@>: %@", NSStringFromClass(ZMGenericMessageData.class), msg.genericMessage];
-    }].array componentsJoinedByString:@"\n"];
-}
-
 - (void)markAsSent
 {
     self.delivered = YES;

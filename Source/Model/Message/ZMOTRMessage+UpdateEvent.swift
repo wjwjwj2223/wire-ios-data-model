@@ -142,3 +142,12 @@ extension ZMOTRMessage {
         conversation.appendInvalidSystemMessage(at: event.timeStamp() ?? Date(), sender: sender)
     }
 }
+
+extension ZMOTRMessage {
+    public var dataSetDebugInformation: String {
+        let debugDescription = dataSet.lazy
+            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage.debugDescription }
+            .joined(separator: "\n")
+        return String.init(format: "<%@>: %@", NSStringFromClass(ZMGenericMessageData.self), debugDescription)
+    }
+}

@@ -32,13 +32,6 @@ import Foundation
     override open class func entityName() -> String {
         return "GenericMessageData"
     }
-
-    @objc public var genericMessage: ZMGenericMessage? {
-        let builder = ZMGenericMessageBuilder()
-        builder.merge(from: data)
-
-        return builder.build()
-    }
     
     public override var modifiedKeys: Set<AnyHashable>? {
         get {
