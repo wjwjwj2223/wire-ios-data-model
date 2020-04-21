@@ -45,7 +45,9 @@ import Foundation
     }
     
     public override var hashOfContent: Data? {
-        guard let serverTimestamp = serverTimestamp else { return nil }
+        guard let serverTimestamp = serverTimestamp else {
+            return nil
+        }
         
         return underlyingMessage?.hashOfContent(with: serverTimestamp)
     }

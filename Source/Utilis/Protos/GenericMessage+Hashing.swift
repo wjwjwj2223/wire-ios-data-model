@@ -26,7 +26,9 @@ extension GenericMessage {
     
     func hashOfContent(with timestamp: Date) -> Data? {
         
-        guard let content = content else { return nil }
+        guard let content = content else {
+            return nil
+        }
         switch content {
         case .location(let data):
             return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
