@@ -24,11 +24,11 @@ public protocol SignatureObserver: NSObjectProtocol {
     func willReceiveSignatureURL()
     func didReceiveSignatureURL(_ url: URL)
     func didReceiveDigitalSignature(_ cmsFileMetadata: ZMFileMetadata)
-    func didFailSignature()
+    func didFailSignature(errorType: SignatureStatus.ErrorYpe)
 }
 
 // MARK: - SignatureStatus
-public enum PDFSigningState: Int {
+public enum PDFSigningState {
     case initial
     case waitingForConsentURL
     case waitingForCodeVerification
@@ -39,7 +39,14 @@ public enum PDFSigningState: Int {
 
 private let log = ZMSLog(tag: "Conversations")
 
+@objc
 public final class SignatureStatus : NSObject {
+    
+    @objc
+    public enum ErrorYpe: Int {
+        case noConsentURL
+        case retrieveFailed
+    }
     
     // MARK: - Private Property
     private(set) var asset: ZMAsset?
@@ -85,7 +92,7 @@ public final class SignatureStatus : NSObject {
     public func didReceiveConsentURL(_ url: URL?) {
         guard let consentURL = url else {
             state = .signatureInvalid
-            DigitalSignatureNotification(state: .signatureInvalid)
+            DigitalSignatureNotification(state: .signatureInvalid(errorType: .noConsentURL))
                 .post(in: managedObjectContext.notificationContext)
             return
         }
@@ -100,7 +107,7 @@ public final class SignatureStatus : NSObject {
             let fileMetaDataInfo = writeCMSSignatureFile(for: cmsData)
         else {
             state = .signatureInvalid
-            DigitalSignatureNotification(state: .signatureInvalid)
+            DigitalSignatureNotification(state: .signatureInvalid(errorType: .retrieveFailed))
                 .post(in: managedObjectContext.notificationContext)
             return
         }
@@ -112,9 +119,9 @@ public final class SignatureStatus : NSObject {
             .post(in: managedObjectContext.notificationContext)
     }
     
-    public func didReceiveError() {
+    public func didReceiveError(_ errorType: ErrorYpe) {
         state = .signatureInvalid
-        DigitalSignatureNotification(state: .signatureInvalid)
+        DigitalSignatureNotification(state: .signatureInvalid(errorType: errorType))
             .post(in: managedObjectContext.notificationContext)
     }
     
@@ -158,8 +165,8 @@ public extension SignatureStatus {
                     observer?.willReceiveSignatureURL()
                 case let .consentURLReceived(consentURL):
                     observer?.didReceiveSignatureURL(consentURL)
-                case .signatureInvalid:
-                    observer?.didFailSignature()
+                case let .signatureInvalid(errorType):
+                    observer?.didFailSignature(errorType: errorType)
                 case let .digitalSignatureReceived(cmsData):
                     observer?.didReceiveDigitalSignature(cmsData)
                 }
@@ -175,7 +182,7 @@ public class DigitalSignatureNotification: NSObject  {
     public enum State {
         case consentURLPending
         case consentURLReceived(_ consentURL: URL)
-        case signatureInvalid
+        case signatureInvalid(errorType: SignatureStatus.ErrorYpe)
         case digitalSignatureReceived(_ cmsFileMetaData: ZMFileMetadata)
     }
     
