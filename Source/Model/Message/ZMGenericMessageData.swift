@@ -21,9 +21,9 @@ import Foundation
 @objc(ZMGenericMessageData)
 @objcMembers public class ZMGenericMessageData: ZMManagedObject {
     
-    @objc public static let dataKey = "data"
-    @objc public static let messageKey = "message"
-    @objc public static let assetKey = "asset"
+    public static let dataKey = "data"
+    public static let messageKey = "message"
+    public static let assetKey = "asset"
 
     @NSManaged public var data: Data
     @NSManaged public var message: ZMClientMessage?
