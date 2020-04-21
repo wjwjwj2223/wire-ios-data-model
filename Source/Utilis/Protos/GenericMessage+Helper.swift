@@ -667,7 +667,7 @@ public extension LinkPreview {
 
 extension GenericMessage {
     
-    public mutating func updatedPreview(withAssetId assetId: String, token: String?) {
+    public mutating func updatePreview(assetId: String, token: String?) {
         guard let content = content else { return }
         switch content {
         case .asset:
@@ -690,7 +690,7 @@ extension GenericMessage {
         }
     }
     
-    public mutating func updatedUploaded(withAssetId assetId: String, token: String?) {
+    public mutating func updateUploaded(assetId: String, token: String?) {
         guard let content = content else { return }
         switch content {
         case .asset:
