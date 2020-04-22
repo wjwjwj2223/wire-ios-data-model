@@ -23,28 +23,24 @@ protocol BigEndianDataConvertible {
 }
 
 extension GenericMessage {
-    
     func hashOfContent(with timestamp: Date) -> Data? {
-        
         guard let content = content else {
             return nil
         }
         switch content {
-        case .location(let data):
-            return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
-        case .text(let data):
-            return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
-        case .edited(let data):
-            return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
-        case .asset(let data):
+        case .location(let data as BigEndianDataConvertible),
+             .text(let data as BigEndianDataConvertible),
+             .edited(let data as BigEndianDataConvertible),
+             .asset(let data as BigEndianDataConvertible):
             return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
         case .ephemeral(let data):
-            switch data.content {
-            case .location(let data)?:
-                return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
-            case .text(let data)?:
-                return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
-            case .asset(let data)?:
+            guard let content = data.content else {
+                return nil
+            }
+            switch content {
+            case .location(let data as BigEndianDataConvertible),
+                 .text(let data as BigEndianDataConvertible),
+                 .asset(let data as BigEndianDataConvertible):
                 return data.hashWithTimestamp(timestamp: timestamp.timeIntervalSince1970)
             default:
                 return nil

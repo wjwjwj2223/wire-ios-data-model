@@ -20,7 +20,7 @@ import XCTest
 
 @testable import WireDataModel
 
-class ZMGenericMessageTests_Hashing: XCTestCase {
+class GenericMessageTests_Hashing: XCTestCase {
 
     // MARK: - Text
 
