@@ -65,6 +65,25 @@ extension ZMConversation {
         return clientMessage
     }
     
+    @nonobjc
+    public static func appendSelfConversation(genericMessage: GenericMessage, managedObjectContext: NSManagedObjectContext) -> ZMClientMessage? {
+        let selfConversation = ZMConversation.selfConversation(in: managedObjectContext)
+        let clientMessage = selfConversation.appendClientMessage(with: genericMessage, expires: false, hidden: false)
+        return clientMessage
+    }
+    
+    @nonobjc
+    public static func appendSelfConversation(withClearedOf conversation: ZMConversation) -> ZMClientMessage? {
+        guard let convID = conversation.remoteIdentifier,
+            let cleared = conversation.clearedTimeStamp,
+            let managedObjectContext = conversation.managedObjectContext,
+            convID != ZMConversation.selfConversationIdentifier(in: managedObjectContext) else {
+                return nil
+        }
+        let message = GenericMessage(content: Cleared(timeStamp: cleared, conversationID: convID), nonce: UUID())
+        return appendSelfConversation(genericMessage: message, managedObjectContext: managedObjectContext)
+    }
+    
     @discardableResult @objc(appendText:mentions:fetchLinkPreview:nonce:)
     public func append(text: String,
                        mentions: [Mention] = [],
@@ -206,9 +225,9 @@ extension ZMConversation {
     
     // MARK: - Helper methods
     
-    func append(message: MessageContentType, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
-        return appendClientMessage(with: ZMGenericMessage.message(content: message, nonce: nonce), expires: expires, hidden: hidden)
-    }
+//    func append(message: MessageContentType, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
+//        return appendClientMessage(with: ZMGenericMessage.message(content: message, nonce: nonce), expires: expires, hidden: hidden)
+//    }
     
     @nonobjc
     func append(message: MessageCapable, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
