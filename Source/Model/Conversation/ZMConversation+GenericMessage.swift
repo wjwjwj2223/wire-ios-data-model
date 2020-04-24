@@ -37,6 +37,8 @@ extension ZMConversation {
         }
     }
     
+    /// Appends a new message to the conversation.
+    /// @param client message that should be appended
     public func append(_ message: ZMClientMessage, expires: Bool, hidden: Bool) -> ZMClientMessage? {
         guard let moc = self.managedObjectContext else {
             return nil

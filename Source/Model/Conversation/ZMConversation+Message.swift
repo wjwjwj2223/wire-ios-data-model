@@ -65,6 +65,7 @@ extension ZMConversation {
         return clientMessage
     }
     
+    /// Create and append to self conversation a ClientMessage that has generic message data built with the given data
     @nonobjc
     public static func appendSelfConversation(genericMessage: GenericMessage, managedObjectContext: NSManagedObjectContext) -> ZMClientMessage? {
         let selfConversation = ZMConversation.selfConversation(in: managedObjectContext)
