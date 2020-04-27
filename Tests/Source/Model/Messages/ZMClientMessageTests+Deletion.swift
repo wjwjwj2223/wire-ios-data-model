@@ -78,7 +78,7 @@ class ZMClientMessageTests_Deletion: BaseZMClientMessageTests {
         let assetId = "asset-id"
         let asset = WireProtos.Asset(withUploadedOTRKey: .zmRandomSHA256Key(), sha256: .zmRandomSHA256Key())
         var message = GenericMessage(content: asset, nonce: sut.nonce!)
-        message.updatedUploaded(withAssetId: assetId, token: nil)
+        message.updateUploaded(assetId: assetId, token: nil)
         let updateEvent = createUpdateEvent(sut.nonce!, conversationID: UUID.create(), genericMessage: message)
         
         sut.update(with: updateEvent, initialUpdate: true)
@@ -123,7 +123,7 @@ class ZMClientMessageTests_Deletion: BaseZMClientMessageTests {
         let assetId = UUID.create().transportString()
         let asset1 = WireProtos.Asset(withUploadedOTRKey: .zmRandomSHA256Key(), sha256: .zmRandomSHA256Key())
         var message = GenericMessage(content: asset1, nonce: sut.nonce!)
-        message.updatedUploaded(withAssetId: assetId, token: nil)
+        message.updateUploaded(assetId: assetId, token: nil)
         let updateEvent1 = createUpdateEvent(sut.nonce!, conversationID: UUID.create(), genericMessage: message)
         sut.update(with: updateEvent1, initialUpdate: true)
         
