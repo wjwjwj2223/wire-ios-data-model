@@ -81,7 +81,7 @@ extension ZMConversation {
             convID != ZMConversation.selfConversationIdentifier(in: managedObjectContext) else {
                 return nil
         }
-        let message = GenericMessage(content: Cleared(timeStamp: cleared, conversationID: convID), nonce: UUID())
+        let message = GenericMessage(content: Cleared(timestamp: cleared, conversationID: convID), nonce: UUID())
         return appendSelfConversation(genericMessage: message, managedObjectContext: managedObjectContext)
     }
     
@@ -225,10 +225,6 @@ extension ZMConversation {
     }
     
     // MARK: - Helper methods
-    
-//    func append(message: MessageContentType, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
-//        return appendClientMessage(with: ZMGenericMessage.message(content: message, nonce: nonce), expires: expires, hidden: hidden)
-//    }
     
     @nonobjc
     func append(message: MessageCapable, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
