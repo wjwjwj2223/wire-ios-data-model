@@ -504,6 +504,13 @@ extension WireProtos.MessageEdit: MessageCapable {
 }
 
 extension Cleared: MessageCapable {
+    public init(timestamp: Date, conversationID: UUID) {
+        self = Cleared.with {
+            $0.clearedTimestamp = Int64(timestamp.timeIntervalSince1970 * 1000)
+            $0.conversationID = conversationID.transportString()
+        }
+    }
+    
     public func setContent(on message: inout GenericMessage) {
         message.cleared = self
     }
@@ -519,6 +526,13 @@ extension Cleared: MessageCapable {
 }
 
 extension MessageHide: MessageCapable {
+    public init(conversationId: UUID, messageId: UUID) {
+        self = MessageHide.with {
+            $0.conversationID = conversationId.transportString()
+            $0.messageID = messageId.transportString()
+        }
+    }
+    
     public func setContent(on message: inout GenericMessage) {
         message.hidden = self
     }
@@ -534,6 +548,12 @@ extension MessageHide: MessageCapable {
 }
 
 extension MessageDelete: MessageCapable {
+    public init(messageId: UUID) {
+        self = MessageDelete.with {
+         $0.messageID = messageId.transportString()
+        }
+    }
+    
     public func setContent(on message: inout GenericMessage) {
         message.deleted = self
     }
@@ -570,6 +590,13 @@ extension WireProtos.Confirmation: MessageCapable {
             $0.moreMessageIds = moreMessageIds.map { $0.transportString() }
             $0.type = type
         })
+    }
+    
+    public init(messageId: UUID, type: Confirmation.TypeEnum) {
+        self = WireProtos.Confirmation.with {
+            $0.firstMessageID = messageId.transportString()
+            $0.type = type
+        }
     }
     
     public func setContent(on message: inout GenericMessage) {

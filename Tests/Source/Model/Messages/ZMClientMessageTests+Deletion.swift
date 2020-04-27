@@ -268,7 +268,7 @@ class ZMClientMessageTests_Deletion: BaseZMClientMessageTests {
         // given
         let conversation = ZMConversation.insertNewObject(in:uiMOC)
         let nonce = UUID.create()
-        let deletedMessage = ZMGenericMessage.message(content: ZMMessageDelete(messageID: nonce))
+        let deletedMessage = GenericMessage(content: MessageDelete(messageId: nonce))
         
         // when
         let sut = conversation.appendClientMessage(with: deletedMessage, expires: false, hidden: true)!
