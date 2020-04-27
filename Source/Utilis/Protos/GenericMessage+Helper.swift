@@ -708,8 +708,10 @@ public extension LinkPreview {
 
 extension GenericMessage {
     
-    public mutating func updatedPreview(withAssetId assetId: String, token: String?) {
-        guard let content = content else { return }
+    public mutating func updatePreview(assetId: String, token: String?) {
+        guard let content = content else {
+            return
+        }
         switch content {
         case .asset:
             self.asset.preview.remote.assetID = assetId
@@ -731,8 +733,10 @@ extension GenericMessage {
         }
     }
     
-    public mutating func updatedUploaded(withAssetId assetId: String, token: String?) {
-        guard let content = content else { return }
+    public mutating func updateUploaded(assetId: String, token: String?) {
+        guard let content = content else {
+            return
+        }
         switch content {
         case .asset:
             self.asset.uploaded.assetID = assetId
