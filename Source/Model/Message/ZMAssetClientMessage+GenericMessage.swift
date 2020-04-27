@@ -21,10 +21,9 @@ import Foundation
 extension ZMAssetClientMessage {
     
     func genericMessageDataFromDataSet(for format: ZMImageFormat) -> ZMGenericMessageData? {
-        return self.dataSet.array
+        return self.dataSet.lazy
             .compactMap { $0 as? ZMGenericMessageData }
-            .filter { $0.genericMessage?.imageAssetData?.imageFormat() == format }
-            .first
+            .first(where: {$0.underlyingMessage?.imageAssetData?.imageFormat() == format} )
     }
     
     public var mediumGenericMessage: GenericMessage? {
@@ -53,9 +52,7 @@ extension ZMAssetClientMessage {
         guard !isZombieObject else { return nil }
         
         if self.cachedGenericAssetMessage == nil {
-            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet(filter: {
-                $0.assetData != nil
-            })
+            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet()
         }
         return self.cachedGenericAssetMessage
     }
@@ -113,11 +110,12 @@ extension ZMAssetClientMessage {
     }
     
     /// Merge all generic messages in the dataset that pass the filter
-    func genericMessageMergedFromDataSet(filter: (ZMGenericMessage)->Bool) -> ZMGenericMessage? {
+    func genericMessageMergedFromDataSet() -> ZMGenericMessage? {
         
-        let filteredMessages = self.dataSet.array
-            .compactMap { ($0 as? ZMGenericMessageData)?.genericMessage }
-            .filter(filter)
+        let filteredMessages = dataSet.array
+            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
+            .filter { $0.assetData != nil }
+            .compactMap { try? $0.serializedData() }
         
         guard !filteredMessages.isEmpty else {
             return nil
@@ -198,28 +196,5 @@ extension ZMAssetClientMessage {
     override public var fileMessageData: ZMFileMessageData? {
         let isFileMessage = self.genericAssetMessage?.assetData != nil
         return isFileMessage ? self : nil
-    }
-    
-    public override func update(with message: ZMGenericMessage, updateEvent: ZMUpdateEvent, initialUpdate: Bool) {
-        self.add(message)
-        self.version = 3 // We assume received assets are V3 since backend no longer supports sending V2 assets.
-
-        if let assetData = message.assetData, assetData.hasUploaded() {
-            if assetData.uploaded.hasAssetId() {
-                self.updateTransferState(.uploaded, synchronize: false)
-            }
-        }
-
-        if let assetData = message.assetData, assetData.hasNotUploaded(), self.transferState != .uploaded {
-            ///TODO: change ZMAssetNotUploaded to NS_CLOSED_ENUM
-            switch assetData.notUploaded {
-            case .CANCELLED:
-                self.managedObjectContext?.delete(self)
-            case .FAILED:
-                self.updateTransferState(.uploadingFailed, synchronize: false)
-            @unknown default:
-                fatalError()
-            }
-        }
     }
 }
