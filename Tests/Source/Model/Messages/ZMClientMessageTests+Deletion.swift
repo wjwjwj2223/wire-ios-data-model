@@ -506,7 +506,10 @@ extension ZMClientMessageTests_Deletion {
             XCTAssertNotNil(sut.destructionDate)
             
             // when self deletes the ephemeral
-            let deletedMessage = ZMGenericMessage.message(content: ZMMessageDelete(messageID: sut.nonce!))
+            let messageDelete = MessageDelete.with {
+                $0.messageID = sut.nonce!.transportString()
+            }
+            let deletedMessage = GenericMessage(content: messageDelete)
             let recipients = deletedMessage.recipientUsersForMessage(in: self.syncConversation, selfUser: self.syncSelfUser).users
             
             // then all users receive delete message
@@ -532,7 +535,10 @@ extension ZMClientMessageTests_Deletion {
         XCTAssertNotNil(sut.destructionDate)
         
         // when self deletes the ephemeral
-        let deletedMessage = ZMGenericMessage.message(content: ZMMessageDelete(messageID: sut.nonce!))
+        let messageDelete = MessageDelete.with {
+            $0.messageID = sut.nonce!.transportString()
+        }
+        let deletedMessage = GenericMessage(content: messageDelete)
         let recipients = deletedMessage.recipientUsersForMessage(in: conversation, selfUser: selfUser).users
         
         // then only sender & self recieve the delete message
