@@ -490,7 +490,7 @@ extension WireProtos.MessageEdit: MessageCapable {
 }
 
 extension Cleared: MessageCapable {
-    public init(timeStamp: Date, conversationID: UUID) {
+    public init(timestamp: Date, conversationID: UUID) {
         self = Cleared.with {
             $0.clearedTimestamp = Int64(timeStamp.timeIntervalSince1970 * 1000)
             $0.conversationID = conversationID.transportString()
