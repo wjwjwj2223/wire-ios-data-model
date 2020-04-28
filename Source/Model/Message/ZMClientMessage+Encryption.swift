@@ -360,7 +360,7 @@ extension GenericMessage {
     }
 }
 
-// MARK: - Session identifier {
+// MARK: - Session identifier 
 extension UserClient {
     
     /// Session identifier of the local cryptobox session with this client
