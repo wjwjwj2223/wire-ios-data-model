@@ -168,7 +168,8 @@ extension GenericMessage {
         let (services, otherUsers) = conversation.localParticipants.categorizeServicesAndUser()
 
         func recipientForButtonActionMessage() -> Set<ZMUser> {
-            guard case .buttonAction? = content,
+            guard
+                case .buttonAction? = content,
                 let message = ZMMessage.fetch(withNonce: UUID(uuidString: self.buttonAction.referenceMessageID), for: conversation, in: conversation.managedObjectContext!),
                 let sender = message.sender else {
                     fatal("buttonAction needs a recipient")
@@ -177,12 +178,19 @@ extension GenericMessage {
         }
         
         func recipientForConfirmationMessage() -> Set<ZMUser>? {
-            guard case .confirmation? = content,
+            guard
+                hasConfirmation(),
                 confirmation.firstMessageID != "" else {
                     return nil
             }
-            guard let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageID), for:conversation, in:conversation.managedObjectContext!) else { return nil }
-            guard let sender = message.sender else { return nil }
+            guard
+                let managedObjectContext = conversation.managedObjectContext,
+                let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageID), for:conversation, in:managedObjectContext) else {
+                return nil
+            }
+            guard let sender = message.sender else {
+                return nil
+            }
             return Set(arrayLiteral: sender)
         }
         
@@ -193,7 +201,8 @@ extension GenericMessage {
         }
         
         func recipientsForDeletedEphemeral() -> Set<ZMUser>? {
-            guard case .deleted? = content,
+            guard
+                case .deleted? = content,
                 conversation.conversationType == .group else {
                 return nil
             }
@@ -266,10 +275,7 @@ extension GenericMessage {
                                 sessionDirectory: EncryptionSessionsDirectory) -> NewOtrMessage {
         
         let userEntries = recipientsWithEncryptedData(selfClient, recipients: recipients, sessionDirectory: sessionDirectory)
-        var nativePush = true // We do not want to send pushes for delivery receipts
-        if case .confirmation? = content {
-            nativePush = false
-        }
+        let nativePush = !hasConfirmation() // We do not want to send pushes for delivery receipts
         
         var message = NewOtrMessage(withSender: selfClient, nativePush: nativePush, recipients: userEntries, blob: externalData)
         
