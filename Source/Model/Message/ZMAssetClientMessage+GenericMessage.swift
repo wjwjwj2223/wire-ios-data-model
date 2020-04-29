@@ -42,20 +42,20 @@ extension ZMAssetClientMessage {
         return Set([#keyPath(ZMOTRMessage.dataSet), #keyPath(ZMOTRMessage.dataSet)+".data"])
     }
     
-    public override var genericMessage: ZMGenericMessage? {
-        return genericAssetMessage
-    }
-    
-    /// The generic asset message that is constructed by merging
-    /// all generic messages from the dataset that contain an asset
-    public var genericAssetMessage: ZMGenericMessage? {
-        guard !isZombieObject else { return nil }
-        
-        if self.cachedGenericAssetMessage == nil {
-            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet()
-        }
-        return self.cachedGenericAssetMessage
-    }
+//    public override var genericMessage: ZMGenericMessage? {
+//        return genericAssetMessage
+//    }
+//
+//    /// The generic asset message that is constructed by merging
+//    /// all generic messages from the dataset that contain an asset
+//    public var genericAssetMessage: ZMGenericMessage? {
+//        guard !isZombieObject else { return nil }
+//
+//        if self.cachedGenericAssetMessage == nil {
+//            self.cachedGenericAssetMessage = self.genericMessageMergedFromDataSet()
+//        }
+//        return self.cachedGenericAssetMessage
+//    }
     
     public var underlyingMessage: GenericMessage? {
         guard !isZombieObject else { return nil }
@@ -68,10 +68,10 @@ extension ZMAssetClientMessage {
         return self.cachedUnderlyingAssetMessage
     }
     
-    @available(*, deprecated)
-    public func add(_ genericMessage: ZMGenericMessage) {
-        _ = self.mergeWithExistingData(data: genericMessage.data())
-    }
+//    @available(*, deprecated)
+//    public func add(_ genericMessage: ZMGenericMessage) {
+//        _ = self.mergeWithExistingData(data: genericMessage.data())
+//    }
     
     public func add(_ genericMessage: GenericMessage) {
         do {
@@ -109,22 +109,22 @@ extension ZMAssetClientMessage {
         return messageData
     }
     
-    /// Merge all generic messages in the dataset that pass the filter
-    func genericMessageMergedFromDataSet() -> ZMGenericMessage? {
-        
-        let filteredMessages = dataSet.array
-            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
-            .filter { $0.assetData != nil }
-            .compactMap { try? $0.serializedData() }
-        
-        guard !filteredMessages.isEmpty else {
-            return nil
-        }
-        
-        let builder = ZMGenericMessage.builder()!
-        filteredMessages.forEach { builder.merge(from: $0) }
-        return builder.build()
-    }
+//    /// Merge all generic messages in the dataset that pass the filter
+//    func genericMessageMergedFromDataSet() -> ZMGenericMessage? {
+//        
+//        let filteredMessages = dataSet.array
+//            .compactMap { ($0 as? ZMGenericMessageData)?.underlyingMessage }
+//            .filter { $0.assetData != nil }
+//            .compactMap { try? $0.serializedData() }
+//        
+//        guard !filteredMessages.isEmpty else {
+//            return nil
+//        }
+//        
+//        let builder = ZMGenericMessage.builder()!
+//        filteredMessages.forEach { builder.merge(from: $0) }
+//        return builder.build()
+//    }
     
     func underlyingMessageMergedFromDataSet(filter: (GenericMessage)->Bool) -> GenericMessage? {
         let filteredData = self.dataSet
@@ -194,7 +194,7 @@ extension ZMAssetClientMessage {
     }
     
     override public var fileMessageData: ZMFileMessageData? {
-        let isFileMessage = self.genericAssetMessage?.assetData != nil
+        let isFileMessage = underlyingMessage?.assetData != nil
         return isFileMessage ? self : nil
     }
 }

@@ -166,6 +166,35 @@ extension GenericMessage {
     }
 }
 
+
+extension GenericMessage {
+    var v3_isImage: Bool {
+        return assetData?.original.hasRasterImage ?? false
+    }
+    
+    var v3_uploadedAssetId: String? {
+        guard
+            let assetData = assetData,
+            case .uploaded? = assetData.status
+        else {
+            return nil
+        }
+        return assetData.uploaded.assetID
+    }
+    
+    var previewAssetId: String? {
+        guard
+            let assetData = assetData,
+            assetData.hasPreview,
+            assetData.preview.hasRemote,
+            assetData.preview.remote.hasAssetID
+        else {
+            return nil
+        }
+        return assetData.preview.remote.assetID
+    }
+}
+
 extension GenericMessage {
     var linkPreviews: [LinkPreview] {
         guard let content = content else { return [] }

@@ -59,12 +59,12 @@ extension ZMAssetClientMessage {
         }
         
         // Request the asset to be deleted
-        if let identifier = genericAssetMessage?.v3_uploadedAssetId {
+        if let identifier = underlyingMessage?.v3_uploadedAssetId {
             NotificationCenter.default.post(name: .deleteAssetNotification, object: identifier)
         }
         
         // Request the preview asset to be deleted
-        if let previewIdentifier = genericAssetMessage?.previewAssetId {
+        if let previewIdentifier = underlyingMessage?.previewAssetId {
             NotificationCenter.default.post(name: .deleteAssetNotification, object: previewIdentifier)
         }
     }

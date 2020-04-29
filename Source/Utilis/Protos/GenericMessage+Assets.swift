@@ -96,6 +96,13 @@ extension WireProtos.Asset {
             $0.notUploaded = notUploaded
         }
     }
+    
+    func has(status: OneOf_Status?) -> Bool {
+        guard case status = self.status else {
+            return false
+        }
+        return true
+    }
 }
 
 extension WireProtos.Asset.Original {
@@ -111,6 +118,25 @@ extension WireProtos.Asset.Original {
                 $0.image = imageMeta
             }
         }
+    }
+    
+    /// Returns the normalized loudness as floats between 0 and 1
+    var normalizedLoudnessLevels : [Float] {
+        
+        guard audio.hasNormalizedLoudness else { return [] }
+        guard audio.normalizedLoudness.count > 0 else { return [] }
+        
+        let data = audio.normalizedLoudness
+        let offsets = 0..<data.count
+        return offsets
+            .map { offset -> UInt8 in
+                var number : UInt8 = 0
+                data.copyBytes(to: &number, from: (0 + offset)..<(MemoryLayout<UInt8>.size+offset))
+                return number
+            }
+            .map {
+                Float(Float($0)/255.0)
+            }
     }
 }
 
