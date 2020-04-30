@@ -180,16 +180,10 @@ extension GenericMessage {
         func recipientForConfirmationMessage() -> Set<ZMUser>? {
             guard
                 hasConfirmation(),
-                confirmation.firstMessageID != "" else {
-                    return nil
-            }
-            guard
                 let managedObjectContext = conversation.managedObjectContext,
-                let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageID), for:conversation, in:managedObjectContext) else {
-                return nil
-            }
-            guard let sender = message.sender else {
-                return nil
+                let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageID), for:conversation, in:managedObjectContext),
+                let sender = message.sender else {
+                    return nil
             }
             return Set(arrayLiteral: sender)
         }
@@ -261,7 +255,8 @@ extension GenericMessage {
             return recipientUsers.count != conversation.localParticipants.count
         }()
         
-        let strategy : MissingClientsStrategy = hasRestrictions ? .ignoreAllMissingClientsNotFromUsers(users: recipientUsers)
+        let strategy: MissingClientsStrategy = hasRestrictions
+            ? .ignoreAllMissingClientsNotFromUsers(users: recipientUsers)
             : .doNotIgnoreAnyMissingClient
         
         return (recipientUsers, strategy)
