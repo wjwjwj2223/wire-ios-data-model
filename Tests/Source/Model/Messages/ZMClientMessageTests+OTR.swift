@@ -26,7 +26,7 @@ final class ClientMessageTests_OTR: BaseZMClientMessageTests {}
 extension ClientMessageTests_OTR {
 
     func testThatCreatesEncryptedDataAndAddsItToGenericMessageAsBlob() {
-        self.syncMOC.performGroupedBlockAndWait { 
+        self.syncMOC.performGroupedBlockAndWait {
             let otherUser = ZMUser.insertNewObject(in:self.syncMOC)
             otherUser.remoteIdentifier = UUID.create()
             let firstClient = self.createClient(for: otherUser, createSessionWithSelfUser: true, onMOC: self.syncMOC)

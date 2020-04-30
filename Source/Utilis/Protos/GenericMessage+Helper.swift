@@ -82,6 +82,18 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
+    func hasConfirmation() -> Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .confirmation:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+extension GenericMessage {
     var locationData: Location? {
         guard let content = content else { return nil }
         switch content {
@@ -393,6 +405,18 @@ extension Text: EphemeralMessageCapable {
         message.text = self
     }
     
+    public func applyEdit(from text: Text) -> Text {
+        // Transfer read receipt expectation
+        var editText = text
+        editText.expectsReadConfirmation = expectsReadConfirmation
+        
+        // We always keep the quote from the original message
+        hasQuote
+            ? editText.quote = quote
+            : editText.clearQuote()
+        return editText
+    }
+    
     public func updateLinkPreview(from text: Text) -> Text {
         guard !text.linkPreview.isEmpty else {
             return self
@@ -700,6 +724,13 @@ public extension LinkPreview {
                 $0.author = author
                 $0.username = username
             })
+        }
+    }
+    
+    mutating func update(withOtrKey otrKey: Data, sha256: Data, original: WireProtos.Asset.Original?) {
+        image.uploaded = WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256)
+        if let original = original {
+            image.original = original
         }
     }
 }

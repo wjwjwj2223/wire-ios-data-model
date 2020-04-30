@@ -69,7 +69,9 @@ extension ZMOTRMessage {
         } else if message.hasButtonActionConfirmation() {
             ZMClientMessage.updateButtonStates(withConfirmation: message.buttonActionConfirmation, forConversation: conversation, inContext: moc)
         } else if message.hasEdited() {
-            return ZMClientMessage.editMessage(withEdit: message.edited, forConversation: conversation, updateEvent: updateEvent, inContext: moc, prefetchResult: prefetchResult)
+            //TODO Temp
+            return nil
+//            return ZMClientMessage.editMessage(withEdit: message.edited, forConversation: conversation, updateEvent: updateEvent, inContext: moc, prefetchResult: prefetchResult)
         } else if conversation.shouldAdd(event: updateEvent) && !(message.hasClientAction() || message.hasCalling() || message.hasAvailability()) {
             guard let nonce = UUID(uuidString: message.messageId) else { return nil }
             let messageClass: AnyClass = ZMGenericMessage.entityClass(for: message)

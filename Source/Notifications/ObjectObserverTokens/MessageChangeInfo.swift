@@ -63,7 +63,7 @@ extension ZMClientMessage {
         let keys = super.observableKeys
         let additionalKeys = [#keyPath(ZMAssetClientMessage.hasDownloadedPreview),
                               #keyPath(ZMClientMessage.linkPreviewState),
-                              #keyPath(ZMClientMessage.genericMessage),
+                             // #keyPath(ZMClientMessage.genericMessage), //TODO
                               #keyPath(ZMMessage.reactions),
                               #keyPath(ZMMessage.confirmations),
                               #keyPath(ZMClientMessage.quote),

@@ -640,7 +640,7 @@
 
     // then
     XCTAssertNotNil(sut);
-    XCTAssertNotNil(existingMessage.firstZMLinkPreview);
+//    XCTAssertNotNil(existingMessage.firstZMLinkPreview);
     XCTAssertNil(existingMessage.linkPreview); // do not return a link preview even if it's included in the protobuf
     XCTAssertFalse(existingMessage.genericMessage.textData.hasQuote);
     XCTAssertEqualObjects(existingMessage.textMessageData.messageText, initialText);
