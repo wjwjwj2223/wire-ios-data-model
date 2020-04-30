@@ -35,13 +35,8 @@ extension ClientMessageTests_OTR {
             let selfClient = ZMUser.selfUser(in: self.syncMOC).selfClient()
             let notSelfClients = selfClients.filter { $0 != selfClient }
             
-            let nonce = UUID.create()
-            let builder = ZMGenericMessage.builder()!
-            let textBuilder = ZMText.builder()!
-            textBuilder.setContent(self.textMessageRequiringExternalMessage(2))
-            builder.setText(textBuilder.build()!)
-            builder.setMessageId(nonce.transportString())
-            let textMessage = builder.build()!
+            let nonce = UUID.create()            
+            let textMessage = GenericMessage(content: Text(content: self.textMessageRequiringExternalMessage(2)), nonce: nonce)
             
             let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
             conversation.conversationType = .group
