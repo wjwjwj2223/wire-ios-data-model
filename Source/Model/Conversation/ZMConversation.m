@@ -730,41 +730,6 @@ const NSUInteger ZMConversationMaxTextMessageLength = ZMConversationMaxEncodedTe
 @end
 
 
-
-
-@implementation ZMConversation (SelfConversation)
-
-+ (void)updateConversationWithZMLastReadFromSelfConversation:(ZMLastRead *)lastRead inContext:(NSManagedObjectContext *)context
-{
-    double newTimeStamp = lastRead.lastReadTimestamp;
-    NSDate *timestamp = [NSDate dateWithTimeIntervalSince1970:(newTimeStamp/1000)];
-    NSUUID *conversationID = [NSUUID uuidWithTransportString:lastRead.conversationId];
-    if (conversationID == nil || timestamp == nil) {
-        return;
-    }
-    
-    ZMConversation *conversationToUpdate = [ZMConversation conversationWithRemoteID:conversationID createIfNeeded:YES inContext:context];
-    [conversationToUpdate updateLastRead:timestamp synchronize:NO];
-}
-
-+ (void)updateConversationWithZMClearedFromSelfConversation:(ZMCleared *)cleared inContext:(NSManagedObjectContext *)context
-{
-    double newTimeStamp = cleared.clearedTimestamp;
-    NSDate *timestamp = [NSDate dateWithTimeIntervalSince1970:(newTimeStamp/1000)];
-    NSUUID *conversationID = [NSUUID uuidWithTransportString:cleared.conversationId];
-    
-    if (conversationID == nil || timestamp == nil) {
-        return;
-    }
-    
-    ZMConversation *conversation = [ZMConversation conversationWithRemoteID:conversationID createIfNeeded:YES inContext:context];
-    [conversation updateCleared:timestamp synchronize:NO];
-}
-
-
-@end
-
-
 @implementation ZMConversation (KeyValueValidation)
 
 - (BOOL)validateUserDefinedName:(NSString **)ioName error:(NSError **)outError
