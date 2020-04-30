@@ -1,6 +1,6 @@
 //
 // Wire
-// Copyright (C) 2018 Wire Swiss GmbH
+// Copyright (C) 2020 Wire Swiss GmbH
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,13 +18,17 @@
 
 import Foundation
 
-final class InvalidGenericMessageDataRemoval {
-    static func removeInvalid(in moc: NSManagedObjectContext) {
-        do {
-            try moc.batchDeleteEntities(named: ZMGenericMessageData.entityName(),
-                                        matching: NSPredicate(format: "\(ZMGenericMessageData.assetKey) == nil AND \(ZMGenericMessageData.messageKey) == nil"))
-        } catch {
-            fatalError("Failed to perform batch update: \(error)")
+extension ZMMessage {
+    static func add(reaction: WireProtos.Reaction, senderID: UUID, conversation: ZMConversation, inContext moc: NSManagedObjectContext) {
+        guard
+            let user = ZMUser.fetch(withRemoteIdentifier: senderID, in: moc),
+            let nonce = UUID(uuidString: reaction.messageID),
+            let localMessage = ZMMessage.fetch(withNonce: nonce, for: conversation, in: moc)
+        else {
+            return
         }
+        
+        localMessage.addReaction(reaction.emoji, forUser: user)
+        localMessage.updateCategoryCache()
     }
 }
