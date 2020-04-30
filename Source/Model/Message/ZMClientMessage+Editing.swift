@@ -55,11 +55,10 @@ extension ZMClientMessage {
             return false
         }
         updateNormalizedText()
-        
         self.nonce = nonce
-        self.updatedTimestamp = updateEvent.timeStamp()
-        self.reactions.removeAll()
-        self.linkAttachments = nil
+        updatedTimestamp = updateEvent.timeStamp()
+        reactions.removeAll()
+        linkAttachments = nil
         
         return true
     }
