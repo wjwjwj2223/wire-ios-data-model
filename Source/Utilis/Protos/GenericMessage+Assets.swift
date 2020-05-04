@@ -97,8 +97,15 @@ extension WireProtos.Asset {
         }
     }
     
-    func has(status: OneOf_Status?) -> Bool {
-        guard case status = self.status else {
+    var hasUploaded: Bool {
+        guard case .uploaded? = status else {
+            return false
+        }
+        return true
+    }
+    
+    var hasNotUploaded: Bool {
+        guard case .notUploaded? = status else {
             return false
         }
         return true
@@ -175,5 +182,43 @@ extension WireProtos.Asset.RemoteData {
                 $0.assetToken = token
             }
         }
+    }
+}
+
+extension GenericMessage {
+    func updatedAssetOriginal(withImageProperties imageProperties: ZMIImageProperties) -> GenericMessage? {
+        let asset = WireProtos.Asset(imageSize: imageProperties.size, mimeType: imageProperties.mimeType, size: UInt64(imageProperties.length))
+        return updatedAsset(withAsset: asset)
+    }
+    
+    func updatedAssetPreview(withUploadedOTRKey otrKey: Data, sha256: Data) -> GenericMessage? {
+        guard var preview = assetData?.preview else { return nil }
+        
+        preview.remote = WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256)
+        let asset = WireProtos.Asset(original: nil, preview: preview)
+        
+        return updatedAsset(withAsset: asset)
+    }
+    
+    func updatedAssetPreview(withImageProperties imageProperties: ZMIImageProperties) -> GenericMessage? {
+        let imageMetaData = WireProtos.Asset.ImageMetaData(width: Int32(imageProperties.size.width), height: Int32(imageProperties.size.height))
+        let preview = WireProtos.Asset.Preview(size: UInt64(imageProperties.length), mimeType: imageProperties.mimeType, remoteData: nil, imageMetadata: imageMetaData)
+        let asset = WireProtos.Asset(original: nil, preview: preview)
+        return updatedAsset(withAsset: asset)
+    }
+    
+    func updatedAsset(withUploadedOTRKey otrKey: Data, sha256: Data) -> GenericMessage? {
+        let asset = WireProtos.Asset(withUploadedOTRKey: otrKey, sha256: sha256)
+        return updatedAsset(withAsset: asset)
+    }
+    
+    func updatedAsset(withAsset asset: WireProtos.Asset) -> GenericMessage? {
+        var genericMessage = self
+        if case .ephemeral? = content {
+            asset.setEphemeralContent(on: &genericMessage.ephemeral)
+        } else {
+            asset.setContent(on: &genericMessage)
+        }
+        return genericMessage.validatingFields()
     }
 }
