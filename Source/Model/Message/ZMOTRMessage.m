@@ -115,6 +115,11 @@ NSString * const DeliveredKey = @"delivered";
     [super resend];
 }
 
+- (BOOL)isUpdatingExistingMessage
+{
+    return NO;
+}
+
 - (ZMGenericMessage *)genericMessage
 {
     NSAssert(FALSE, @"Subclasses should override this method: [%@ %@]", NSStringFromClass([self class]), NSStringFromSelector(_cmd));

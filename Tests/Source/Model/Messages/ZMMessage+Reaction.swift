@@ -19,7 +19,7 @@
 import XCTest
 @testable import WireDataModel
 
-class ZMMessage_Reaction: BaseZMMessageTests {
+class ZMMessage_Reaction: BaseZMClientMessageTests {
     
     func testThatAddingAReactionAddsAReactionGenericMessage_fromUI() {
         let conversation = ZMConversation.insertNewObject(in: self.uiMOC)

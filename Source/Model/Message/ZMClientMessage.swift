@@ -72,7 +72,20 @@ import Foundation
         cachedUnderlyingMessage = nil
     }
     
-    public static func keyPathsForValuesAffectingGenericMessage() -> Set<String> {
+    public override var isUpdatingExistingMessage: Bool {
+        guard let genericMessage = underlyingMessage,
+            let content = genericMessage.content else {
+                return false
+        }
+        switch content {
+        case .edited, .reaction:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public static func keyPathsForValuesAffectingUnderlyingMessage() -> Set<String> {
         return Set([#keyPath(ZMClientMessage.dataSet),
                     #keyPath(ZMClientMessage.dataSet) + ".data"])
     }

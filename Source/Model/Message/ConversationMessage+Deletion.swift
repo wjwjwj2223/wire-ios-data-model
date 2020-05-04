@@ -83,7 +83,9 @@ extension ZMClientMessage {
                 return false
         }
         switch content {
-        case .edited, .text:
+        case .edited:
+            return true
+        case .text:
             return !isEphemeral && isSent
         default:
             return false

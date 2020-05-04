@@ -713,15 +713,6 @@ extension ZMSystemMessage {
     }
 }
 
-extension ZMOTRMessage {
-    
-    fileprivate var isUpdatingExistingMessage: Bool {
-        guard let genericMessage = genericMessage else { return false }
-        
-        return genericMessage.hasEdited() || genericMessage.hasReaction()
-    }
-}
-
 extension ZMMessage {
     
     /// True if the message is a "conversation degraded because of new client"

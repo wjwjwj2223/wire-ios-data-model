@@ -80,6 +80,7 @@ class MessageObserverTests : NotificationDispatcherTestBase {
                 #keyPath(MessageChangeInfo.transferStateChanged),
                 #keyPath(MessageChangeInfo.confirmationsChanged),
                 #keyPath(MessageChangeInfo.genericMessageChanged),
+                #keyPath(MessageChangeInfo.underlyingMessageChanged),
                 #keyPath(MessageChangeInfo.linkAttachmentsChanged)
             ]
 
@@ -159,7 +160,7 @@ class MessageObserverTests : NotificationDispatcherTestBase {
             $0.summary = "summary"
         }
         let text = Text.with {
-            $0.content = name
+            $0.content = "test"
             $0.linkPreview = [preview]
         }
         let updateGenericMessage = GenericMessage(content: text, nonce: nonce)
@@ -170,7 +171,7 @@ class MessageObserverTests : NotificationDispatcherTestBase {
         checkThatItNotifiesTheObserverOfAChange(
             clientMessage,
             modifier: { $0.add(genericMessageData) },
-            expectedChangedFields: [#keyPath(MessageChangeInfo.linkPreviewChanged), #keyPath(MessageChangeInfo.genericMessageChanged)]
+            expectedChangedFields: [#keyPath(MessageChangeInfo.linkPreviewChanged), #keyPath(MessageChangeInfo.underlyingMessageChanged)]
         )
     }
     
@@ -346,7 +347,7 @@ class MessageObserverTests : NotificationDispatcherTestBase {
         self.checkThatItNotifiesTheObserverOfAChange(
             clientMessage,
             modifier: { $0.add(genericMessageData) },
-            expectedChangedFields: [ #keyPath(MessageChangeInfo.genericMessageChanged), #keyPath(MessageChangeInfo.linkPreviewChanged)]
+            expectedChangedFields: [ #keyPath(MessageChangeInfo.underlyingMessageChanged), #keyPath(MessageChangeInfo.linkPreviewChanged)]
         )
 
     }
