@@ -154,11 +154,11 @@
     XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
 }
 
-@end
+//@end
 
 
 
-@implementation ZMClientMessageTests (CreateClientMessageFromUpdateEvent)
+//@implementation ZMClientMessageTests (CreateClientMessageFromUpdateEvent)
 
 - (void)testThatItCreatesClientMessagesFromUpdateEvent
 {
@@ -696,10 +696,10 @@
     
 }
 
-@end
+//@end
 
 
-@implementation ZMClientMessageTests (ExternalMessage)
+//@implementation ZMClientMessageTests (ExternalMessage)
 
 
 - (void)testThatItDecryptsMessageWithExternalBlobCorrectly
@@ -728,10 +728,10 @@
 }
 
 
-@end
+//@end
 
 
-@implementation ZMClientMessageTests (DataSet)
+//@implementation ZMClientMessageTests (DataSet)
 
 - (void)testThatItCanUpdateAnExistingLinkPreviewInTheDataSetWithoutCreatingMultipleOnes
 {

@@ -26,243 +26,243 @@
 
 @implementation ZMClientMessageTests_Editing
 
-- (void)checkThatItCanEditAMessageFromSameSender:(BOOL)sameSender shouldEdit:(BOOL)shouldEdit
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    ZMUser *sender;
-    if (sameSender) {
-        sender = self.selfUser;
-    } else {
-        sender =[ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-        sender.remoteIdentifier = [NSUUID createUUID];
-    }
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMClientMessage *message = (id)[conversation appendMessageWithText:oldText];
-    message.sender = sender;
-    [message markAsSent];
-    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
-    NSUUID *originalNonce = message.nonce;
-    
-    XCTAssertEqual(message.visibleInConversation, conversation);
-    XCTAssertEqual(conversation.allMessages.count, 1u);
-    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
-    
-    // when
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqual(conversation.allMessages.count, 1u);
-    
-    if (shouldEdit) {
-        XCTAssertEqualObjects(message.textMessageData.messageText, newText);
-        XCTAssertEqualObjects(message.normalizedText, newText.lowercaseString);
-        XCTAssertEqualObjects(message.genericMessage.edited.replacingMessageId, originalNonce.transportString);
-        XCTAssertNotEqualObjects(message.nonce, originalNonce);
-    } else {
-        XCTAssertEqualObjects(message.textMessageData.messageText, oldText);
-    }
-}
+//- (void)checkThatItCanEditAMessageFromSameSender:(BOOL)sameSender shouldEdit:(BOOL)shouldEdit
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    ZMUser *sender;
+//    if (sameSender) {
+//        sender = self.selfUser;
+//    } else {
+//        sender =[ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
+//        sender.remoteIdentifier = [NSUUID createUUID];
+//    }
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMClientMessage *message = (id)[conversation appendMessageWithText:oldText];
+//    message.sender = sender;
+//    [message markAsSent];
+//    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
+//    NSUUID *originalNonce = message.nonce;
+//
+//    XCTAssertEqual(message.visibleInConversation, conversation);
+//    XCTAssertEqual(conversation.allMessages.count, 1u);
+//    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
+//
+//    // when
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqual(conversation.allMessages.count, 1u);
+//
+//    if (shouldEdit) {
+//        XCTAssertEqualObjects(message.textMessageData.messageText, newText);
+//        XCTAssertEqualObjects(message.normalizedText, newText.lowercaseString);
+//        XCTAssertEqualObjects(message.genericMessage.edited.replacingMessageId, originalNonce.transportString);
+//        XCTAssertNotEqualObjects(message.nonce, originalNonce);
+//    } else {
+//        XCTAssertEqualObjects(message.textMessageData.messageText, oldText);
+//    }
+//}
+//
+//- (void)testThatItCanEditAMessage_SameSender
+//{
+//    [self checkThatItCanEditAMessageFromSameSender:YES shouldEdit:YES];
+//}
 
-- (void)testThatItCanEditAMessage_SameSender
-{
-    [self checkThatItCanEditAMessageFromSameSender:YES shouldEdit:YES];
-}
+//- (void)testThatItCanNotEditAMessage_DifferentSender
+//{
+//    [self checkThatItCanEditAMessageFromSameSender:NO shouldEdit:NO];
+//}
 
-- (void)testThatItCanNotEditAMessage_DifferentSender
-{
-    [self checkThatItCanEditAMessageFromSameSender:NO shouldEdit:NO];
-}
+//- (void)testThatExtremeCombiningCharactersAreRemovedFromTheMessage
+//{
+//    // GIVEN
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//
+//    // WHEN
+//    ZMMessage *message = (id)[conversation appendMessageWithText:@"ť̹̱͉̥̬̪̝ͭ͗͊̕e͇̺̳̦̫̣͕ͫͤ̅s͇͎̟͈̮͎̊̾̌͛ͭ́͜t̗̻̟̙͑ͮ͊ͫ̂"];
+//
+//
+//    // THEN
+//    XCTAssertEqualObjects(message.textMessageData.messageText, @"test̻̟̙");
+//}
 
-- (void)testThatExtremeCombiningCharactersAreRemovedFromTheMessage
-{
-    // GIVEN
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    // WHEN
-    ZMMessage *message = (id)[conversation appendMessageWithText:@"ť̹̱͉̥̬̪̝ͭ͗͊̕e͇̺̳̦̫̣͕ͫͤ̅s͇͎̟͈̮͎̊̾̌͛ͭ́͜t̗̻̟̙͑ͮ͊ͫ̂"];
-    
-    
-    // THEN
-    XCTAssertEqualObjects(message.textMessageData.messageText, @"test̻̟̙");
-}
+//- (void)testThatItResetsTheLinkPreviewState
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMClientMessage *message = (ZMClientMessage *)[conversation appendMessageWithText:oldText];
+//    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
+//    message.linkPreviewState = ZMLinkPreviewStateDone;
+//    [message markAsSent];
+//
+//    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
+//
+//    // when
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateWaitingToBeProcessed);
+//}
+//
+//- (void)testThatItDoesNotFetchLinkPreviewIfExplicitlyToldNotTo
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//
+//    BOOL fetchLinkPreview = NO;
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMClientMessage *message = (ZMClientMessage *)[conversation appendMessageWithText:oldText fetchLinkPreview:fetchLinkPreview];
+//    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
+//    [message markAsSent];
+//
+//    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
+//
+//    // when
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:fetchLinkPreview];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
+//}
 
-- (void)testThatItResetsTheLinkPreviewState
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMClientMessage *message = (ZMClientMessage *)[conversation appendMessageWithText:oldText];
-    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
-    message.linkPreviewState = ZMLinkPreviewStateDone;
-    [message markAsSent];
+//- (void)testThatItDoesNotEditAMessageThatFailedToSend
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
+//    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
+//    [message expire];
+//    XCTAssertEqual(message.deliveryState, ZMDeliveryStateFailedToSend);
+//
+//    // when
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqualObjects(message.textMessageData.messageText, oldText);
+//}
 
-    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
-    
-    // when
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateWaitingToBeProcessed);
-}
+//- (void)testThatItUpdatesTheUpdatedTimestampAfterSuccessfulUpdate
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
+//    NSDate *updateDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-20].transportString];
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
+//    message.serverTimestamp = originalDate;
+//    [message markAsSent];
+//
+//    conversation.lastModifiedDate = originalDate;
+//    conversation.lastServerTimeStamp = originalDate;
+//
+//    XCTAssertEqual(message.visibleInConversation, conversation);
+//    XCTAssertEqual(conversation.allMessages.count, 1u);
+//    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
+//
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // when
+//    [message updateWithPostPayload:@{@"time" : updateDate.transportString } updatedKeys:nil];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqualObjects(message.serverTimestamp, originalDate);
+//    XCTAssertEqualObjects(message.updatedAt, updateDate);
+//    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
+//}
+//
+//- (void)testThatItDoesNotOverwritesEditedTextWhenMessageExpiresButReplacesNonce
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
+//    message.serverTimestamp = originalDate;
+//    [message markAsSent];
+//
+//    conversation.lastModifiedDate = originalDate;
+//    conversation.lastServerTimeStamp = originalDate;
+//    NSUUID *originalNonce = message.nonce;
+//
+//    XCTAssertEqual(message.visibleInConversation, conversation);
+//    XCTAssertEqual(conversation.allMessages.count, 1u);
+//    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
+//
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // when
+//    [message expire];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqualObjects(message.nonce, originalNonce);
+//}
 
-- (void)testThatItDoesNotFetchLinkPreviewIfExplicitlyToldNotTo
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    
-    BOOL fetchLinkPreview = NO;
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMClientMessage *message = (ZMClientMessage *)[conversation appendMessageWithText:oldText fetchLinkPreview:fetchLinkPreview];
-    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
-    [message markAsSent];
-    
-    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
-    
-    // when
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:fetchLinkPreview];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
-}
-
-- (void)testThatItDoesNotEditAMessageThatFailedToSend
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-    message.serverTimestamp = [NSDate dateWithTimeIntervalSinceNow:-20];
-    [message expire];
-    XCTAssertEqual(message.deliveryState, ZMDeliveryStateFailedToSend);
-    
-    // when
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:YES];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqualObjects(message.textMessageData.messageText, oldText);
-}
-
-- (void)testThatItUpdatesTheUpdatedTimestampAfterSuccessfulUpdate
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
-    NSDate *updateDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-20].transportString];
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-    message.serverTimestamp = originalDate;
-    [message markAsSent];
-
-    conversation.lastModifiedDate = originalDate;
-    conversation.lastServerTimeStamp = originalDate;
-
-    XCTAssertEqual(message.visibleInConversation, conversation);
-    XCTAssertEqual(conversation.allMessages.count, 1u);
-    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
-    
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // when
-    [message updateWithPostPayload:@{@"time" : updateDate.transportString } updatedKeys:nil];
-    WaitForAllGroupsToBeEmpty(0.5);
-
-    // then
-    XCTAssertEqualObjects(message.serverTimestamp, originalDate);
-    XCTAssertEqualObjects(message.updatedAt, updateDate);
-    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
-}
-
-- (void)testThatItDoesNotOverwritesEditedTextWhenMessageExpiresButReplacesNonce
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-    message.serverTimestamp = originalDate;
-    [message markAsSent];
-
-    conversation.lastModifiedDate = originalDate;
-    conversation.lastServerTimeStamp = originalDate;
-    NSUUID *originalNonce = message.nonce;
-
-    XCTAssertEqual(message.visibleInConversation, conversation);
-    XCTAssertEqual(conversation.allMessages.count, 1u);
-    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
-    
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // when
-    [message expire];
-    WaitForAllGroupsToBeEmpty(0.5);
-
-    // then
-    XCTAssertEqualObjects(message.nonce, originalNonce);
-}
-
-- (void)testThatWhenResendingAFailedEditItReappliesTheEdit
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMClientMessage *message = (id) [conversation appendMessageWithText:oldText];
-    message.serverTimestamp = originalDate;
-    [message markAsSent];
-
-    conversation.lastModifiedDate = originalDate;
-    conversation.lastServerTimeStamp = originalDate;
-    NSUUID *originalNonce = message.nonce;
-
-    XCTAssertEqual(message.visibleInConversation, conversation);
-    XCTAssertEqual(conversation.allMessages.count, 1u);
-    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
-    
-    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
-    NSUUID *editNonce1 = message.nonce;
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    [message expire];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // when
-    [message resend];
-    NSUUID *editNonce2 = message.nonce;
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertFalse(message.isExpired);
-    XCTAssertNotEqualObjects(editNonce2, editNonce1);
-    XCTAssertEqualObjects(message.genericMessage.edited.replacingMessageId, originalNonce.transportString);
-}
+//- (void)testThatWhenResendingAFailedEditItReappliesTheEdit
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSDate *originalDate = [NSDate dateWithTransportString:[NSDate dateWithTimeIntervalSinceNow:-50].transportString];
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMClientMessage *message = (id) [conversation appendMessageWithText:oldText];
+//    message.serverTimestamp = originalDate;
+//    [message markAsSent];
+//
+//    conversation.lastModifiedDate = originalDate;
+//    conversation.lastServerTimeStamp = originalDate;
+//    NSUUID *originalNonce = message.nonce;
+//
+//    XCTAssertEqual(message.visibleInConversation, conversation);
+//    XCTAssertEqual(conversation.allMessages.count, 1u);
+//    XCTAssertEqual(conversation.hiddenMessages.count, 0u);
+//
+//    [message.textMessageData editText:newText mentions:@[] fetchLinkPreview:NO];
+//    NSUUID *editNonce1 = message.nonce;
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    [message expire];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // when
+//    [message resend];
+//    NSUUID *editNonce2 = message.nonce;
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertFalse(message.isExpired);
+//    XCTAssertNotEqualObjects(editNonce2, editNonce1);
+//    XCTAssertEqualObjects(message.genericMessage.edited.replacingMessageId, originalNonce.transportString);
+//}
 
 - (ZMUpdateEvent *)createMessageEditUpdateEventWithOldNonce:(NSUUID *)oldNonce newNonce:(NSUUID *)newNonce conversationID:(NSUUID*)conversationID senderID:(NSUUID *)senderID newText:(NSString *)newText
 {
@@ -298,66 +298,66 @@
     return [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:[NSUUID createUUID]];
 }
 
-- (void)testThatItEditsMessageWithQuote
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSUUID *senderID = self.selfUser.remoteIdentifier;
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    ZMMessage *quotedMessage = (id) [conversation appendMessageWithText:@"Quote"];
-    ZMMessage *message = (id) [conversation appendText:oldText mentions:@[] replyingToMessage:quotedMessage fetchLinkPreview:NO nonce:NSUUID.createUUID];
-    [self.uiMOC saveOrRollback];
-    
-    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:senderID newText:newText];
-    NSUUID *oldNonce = message.nonce;
-    
-    // when
-    [self performPretendingUiMocIsSyncMoc:^{
-        [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
-    XCTAssertTrue(message.textMessageData.hasQuote);
-    XCTAssertNotEqualObjects(message.nonce, oldNonce);
-    XCTAssertEqualObjects(message.textMessageData.quote, quotedMessage);
-}
+//- (void)testThatItEditsMessageWithQuote
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSUUID *senderID = self.selfUser.remoteIdentifier;
+//    
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    ZMMessage *quotedMessage = (id) [conversation appendMessageWithText:@"Quote"];
+//    ZMMessage *message = (id) [conversation appendText:oldText mentions:@[] replyingToMessage:quotedMessage fetchLinkPreview:NO nonce:NSUUID.createUUID];
+//    [self.uiMOC saveOrRollback];
+//    
+//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:senderID newText:newText];
+//    NSUUID *oldNonce = message.nonce;
+//    
+//    // when
+//    [self performPretendingUiMocIsSyncMoc:^{
+//        [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
+//    }];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//    
+//    // then
+//    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
+//    XCTAssertTrue(message.textMessageData.hasQuote);
+//    XCTAssertNotEqualObjects(message.nonce, oldNonce);
+//    XCTAssertEqualObjects(message.textMessageData.quote, quotedMessage);
+//}
 
-- (void)testThatReadExpectationIsKeptAfterEdit
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSUUID *senderID = self.selfUser.remoteIdentifier;
-    
-    self.selfUser.readReceiptsEnabled = YES;
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    conversation.conversationType = ZMConversationTypeOneOnOne;
-    
-    ZMClientMessage *message = (id) [conversation appendText:oldText mentions:@[] replyingToMessage:nil fetchLinkPreview:NO nonce:NSUUID.createUUID];
-    [message addData:[message.genericMessage setExpectsReadConfirmation:YES].data];
-    [self.uiMOC saveOrRollback];
-    
-    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:senderID newText:newText];
-    NSUUID *oldNonce = message.nonce;
-    
-    // when
-    [self performPretendingUiMocIsSyncMoc:^{
-        [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
-    XCTAssertNotEqualObjects(message.nonce, oldNonce);
-    XCTAssertTrue(message.needsReadConfirmation);
-}
+//- (void)testThatReadExpectationIsKeptAfterEdit
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSUUID *senderID = self.selfUser.remoteIdentifier;
+//
+//    self.selfUser.readReceiptsEnabled = YES;
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//    conversation.conversationType = ZMConversationTypeOneOnOne;
+//
+//    ZMClientMessage *message = (id) [conversation appendText:oldText mentions:@[] replyingToMessage:nil fetchLinkPreview:NO nonce:NSUUID.createUUID];
+//    [message addData:[message.genericMessage setExpectsReadConfirmation:YES].data];
+//    [self.uiMOC saveOrRollback];
+//
+//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:senderID newText:newText];
+//    NSUUID *oldNonce = message.nonce;
+//
+//    // when
+//    [self performPretendingUiMocIsSyncMoc:^{
+//        [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
+//    }];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
+//    XCTAssertNotEqualObjects(message.nonce, oldNonce);
+//    XCTAssertTrue(message.needsReadConfirmation);
+//}
 
 - (void)checkThatItEditsMessageForSameSender:(BOOL)sameSender shouldEdit:(BOOL)shouldEdit
 {
@@ -471,50 +471,50 @@
     XCTAssertEqual(conversation.estimatedUnreadCount, 0u);
 }
 
-- (void)testThatItDoesNotReinsertAMessageThatHasBeenPreviouslyHiddenLocally
-{
-    // given
-    NSString *oldText = @"Hallo";
-    NSString *newText = @"Hello";
-    NSDate *oldDate = [NSDate dateWithTimeIntervalSinceNow:-20];
-    ZMUser *sender = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-    sender.remoteIdentifier = [NSUUID createUUID];
-    
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    // insert message locally
-    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-    message.sender = sender;
-    message.serverTimestamp = oldDate;
-    
-    // hide message locally
-    [ZMMessage hideMessage:message];
-    XCTAssertTrue(message.isZombieObject);
-    
-    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:sender.remoteIdentifier newText:newText];
-    
-    // when
-    __block ZMClientMessage *newMessage;
-    
-    [self performPretendingUiMocIsSyncMoc:^{
-        newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertNil(newMessage);
-    XCTAssertNil(message.visibleInConversation);
-    XCTAssertTrue(message.isZombieObject);
-    XCTAssertTrue(message.hasBeenDeleted);
-    XCTAssertNil(message.textMessageData);
-    XCTAssertNil(message.sender);
-    XCTAssertNil(message.senderClientID);
-    
-    ZMClientMessage *clientMessage = (ZMClientMessage *)message;
-    XCTAssertNil(clientMessage.genericMessage);
-    XCTAssertEqual(clientMessage.dataSet.count, 0lu);
-}
+//- (void)testThatItDoesNotReinsertAMessageThatHasBeenPreviouslyHiddenLocally
+//{
+//    // given
+//    NSString *oldText = @"Hallo";
+//    NSString *newText = @"Hello";
+//    NSDate *oldDate = [NSDate dateWithTimeIntervalSinceNow:-20];
+//    ZMUser *sender = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
+//    sender.remoteIdentifier = [NSUUID createUUID];
+//
+//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
+//    conversation.remoteIdentifier = [NSUUID createUUID];
+//
+//    // insert message locally
+//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
+//    message.sender = sender;
+//    message.serverTimestamp = oldDate;
+//
+//    // hide message locally
+//    [ZMMessage hideMessage:message];
+//    XCTAssertTrue(message.isZombieObject);
+//
+//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:sender.remoteIdentifier newText:newText];
+//
+//    // when
+//    __block ZMClientMessage *newMessage;
+//
+//    [self performPretendingUiMocIsSyncMoc:^{
+//        newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
+//    }];
+//    WaitForAllGroupsToBeEmpty(0.5);
+//
+//    // then
+//    XCTAssertNil(newMessage);
+//    XCTAssertNil(message.visibleInConversation);
+//    XCTAssertTrue(message.isZombieObject);
+//    XCTAssertTrue(message.hasBeenDeleted);
+//    XCTAssertNil(message.textMessageData);
+//    XCTAssertNil(message.sender);
+//    XCTAssertNil(message.senderClientID);
+//
+//    ZMClientMessage *clientMessage = (ZMClientMessage *)message;
+//    XCTAssertNil(clientMessage.genericMessage);
+//    XCTAssertEqual(clientMessage.dataSet.count, 0lu);
+//}
 
 - (void)testThatItClearsReactionsWhenAMessageIsEdited
 {

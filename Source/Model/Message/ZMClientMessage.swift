@@ -101,7 +101,7 @@ import Foundation
                                               forConversation: conversation,
                                               inContext: managedObjectContext)
         default:
-            return
+            break
         }
         super.expire()
     }
