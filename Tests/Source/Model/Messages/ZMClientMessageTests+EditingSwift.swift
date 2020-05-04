@@ -264,8 +264,8 @@ extension ClientMessageTests_EditingSwift {
         
         let data = try? genericMessage.serializedData().base64String()
         let payload: NSMutableDictionary = [
-            "conversation": conversationID.transportString,
-            "from": senderID.transportString,
+            "conversation": conversationID.transportString(),
+            "from": senderID.transportString(),
             "time": Date().transportString(),
             "data": [
                 "text": data ?? ""
@@ -344,117 +344,110 @@ extension ClientMessageTests_EditingSwift {
         XCTAssertTrue(message.needsReadConfirmation)
     }
     
-//    - (void)checkThatItEditsMessageForSameSender:(BOOL)sameSender shouldEdit:(BOOL)shouldEdit
-//    {
-//    // given
-//    NSString *oldText = @"Hallo";
-//    NSString *newText = @"Hello";
-//    NSUUID *senderID = sameSender ? self.selfUser.remoteIdentifier : [NSUUID createUUID];
-//
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-//
-//    [message addReaction:@"👻" forUser:self.selfUser];
-//    [self.uiMOC saveOrRollback];
-//
-//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:senderID newText:newText];
-//    NSUUID *oldNonce = message.nonce;
-//
-//    // when
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    if (shouldEdit) {
-//    XCTAssertEqualObjects(message.textMessageData.messageText, newText);
-//    XCTAssertNotEqualObjects(message.nonce, oldNonce);
-//    XCTAssertTrue(message.reactions.isEmpty);
-//    XCTAssertEqual(message.visibleInConversation, conversation);
-//    XCTAssertNil(message.hiddenInConversation);
-//    } else {
-//    XCTAssertEqualObjects(message.textMessageData.messageText, oldText);
-//    XCTAssertEqualObjects(message.nonce, oldNonce);
-//    XCTAssertEqual(message.visibleInConversation, conversation);
-//    XCTAssertNil(message.hiddenInConversation);
-//    }
-//    }
-//
-//    - (void)testThatEditsMessageWhenSameSender
-//    {
-//    [self checkThatItEditsMessageForSameSender:YES shouldEdit:YES];
-//    }
-//
-//    - (void)testThatDoesntEditMessageWhenSenderIsDifferent
-//    {
-//    [self checkThatItEditsMessageForSameSender:NO shouldEdit:NO];
-//    }
-//
-//    - (void)testThatItDoesNotInsertAMessageWithANonceBelongingToAHiddenMessage
-//    {
-//    // given
-//    NSString *oldText = @"Hallo";
-//    NSUUID *senderID = self.selfUser.remoteIdentifier;
-//
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-//    message.visibleInConversation = nil;
-//    message.hiddenInConversation = conversation;
-//
-//    ZMUpdateEvent *updateEvent = [self createTextAddedEventWithNonce:message.nonce conversationID:conversation.remoteIdentifier senderID:senderID];
-//
-//    // when
-//    __block ZMClientMessage *newMessage;
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    XCTAssertNil(newMessage);
-//    }
-//
-//    - (void)testThatItSetsTheTimestampsOfTheOriginalMessage
-//    {
-//    // given
-//    NSString *oldText = @"Hallo";
-//    NSString *newText = @"Hello";
-//    NSDate *oldDate = [NSDate dateWithTimeIntervalSinceNow:-20];
-//    ZMUser *sender = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-//    sender.remoteIdentifier = [NSUUID createUUID];
-//
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-//    message.sender = sender;
-//    message.serverTimestamp = oldDate;
-//
-//    conversation.lastModifiedDate = oldDate;
-//    conversation.lastServerTimeStamp = oldDate;
-//    conversation.lastReadServerTimeStamp = oldDate;
-//    XCTAssertEqual(conversation.estimatedUnreadCount, 0u);
-//
-//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:sender.remoteIdentifier newText:newText];
-//
-//    // when
-//    __block ZMClientMessage *newMessage;
-//
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    XCTAssertEqualObjects(conversation.lastModifiedDate, oldDate);
-//    XCTAssertEqualObjects(conversation.lastServerTimeStamp, oldDate);
-//    XCTAssertEqualObjects(newMessage.serverTimestamp, oldDate);
-//    XCTAssertEqualObjects(newMessage.updatedAt, updateEvent.timeStamp);
-//
-//    XCTAssertEqual(conversation.estimatedUnreadCount, 0u);
-//    }
+    func checkThatItEditsMessageFor(sameSender: Bool, shouldEdit: Bool) {
+        // given
+        let oldText = "Hallo"
+        let newText = "Hello"
+        let senderID = sameSender
+            ? self.selfUser.remoteIdentifier
+            : UUID.create()
+        
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message = conversation.append(text: oldText) as! ZMMessage
+        
+        message.addReaction("👻", forUser: self.selfUser)
+        self.uiMOC.saveOrRollback()
+        
+        let updateEvent = createMessageEditUpdateEvent(oldNonce: message.nonce!, newNonce: UUID.create(), conversationID: conversation.remoteIdentifier!, senderID: senderID!, newText: newText)
+        let oldNonce = message.nonce
+        
+        // when
+        self.performPretendingUiMocIsSyncMoc {
+            ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        if shouldEdit {
+            XCTAssertEqual(message.textMessageData?.messageText, newText)
+            XCTAssertNotEqual(message.nonce, oldNonce)
+            XCTAssertTrue(message.reactions.isEmpty)
+            XCTAssertEqual(message.visibleInConversation, conversation)
+            XCTAssertNil(message.hiddenInConversation)
+        } else {
+            XCTAssertEqual(message.textMessageData?.messageText, oldText)
+            XCTAssertEqual(message.nonce, oldNonce)
+            XCTAssertEqual(message.visibleInConversation, conversation)
+            XCTAssertNil(message.hiddenInConversation)
+        }
+    }
+
+    func testThatEditsMessageWhenSameSender() {
+        checkThatItEditsMessageFor(sameSender: true, shouldEdit: true)
+    }
+    
+    func testThatDoesntEditMessageWhenSenderIsDifferent() {
+        checkThatItEditsMessageFor(sameSender: false, shouldEdit: false)
+    }
+
+    func testThatItDoesNotInsertAMessageWithANonceBelongingToAHiddenMessage() {
+        // given
+        let oldText = "Hallo"
+        let senderID = self.selfUser.remoteIdentifier
+        
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message = conversation.append(text: oldText) as! ZMMessage
+        message.visibleInConversation = nil
+        message.hiddenInConversation = conversation
+        
+        let updateEvent = createTextAddedEvent(nonce: message.nonce!, conversationID: conversation.remoteIdentifier!, senderID: senderID!)
+        
+        // when
+        var newMessage: ZMClientMessage?
+        self.performPretendingUiMocIsSyncMoc {
+            newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        XCTAssertNil(newMessage)
+    }
+
+    func testThatItSetsTheTimestampsOfTheOriginalMessage() {
+        // given
+        let oldText = "Hallo"
+        let newText = "Hello"
+        let oldDate = Date.init(timeIntervalSinceNow: -20)
+        let sender = ZMUser.insertNewObject(in: self.uiMOC)
+        sender.remoteIdentifier = UUID.create()
+        
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message = conversation.append(text: oldText) as! ZMMessage
+        message.sender = sender
+        message.serverTimestamp = oldDate
+        
+        conversation.lastModifiedDate = oldDate
+        conversation.lastServerTimeStamp = oldDate
+        conversation.lastReadServerTimeStamp = oldDate
+        XCTAssertEqual(conversation.estimatedUnreadCount, 0)
+        
+        let updateEvent = createMessageEditUpdateEvent(oldNonce: message.nonce!, newNonce: UUID.create(), conversationID: conversation.remoteIdentifier!, senderID: sender.remoteIdentifier, newText: newText)
+        
+        // when
+        var newMessage: ZMClientMessage?
+        self.performPretendingUiMocIsSyncMoc {
+            newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        XCTAssertEqual(conversation.lastModifiedDate, oldDate)
+        XCTAssertEqual(conversation.lastServerTimeStamp, oldDate)
+        XCTAssertEqual(newMessage?.serverTimestamp, oldDate)
+        XCTAssertEqual(newMessage?.updatedAt, updateEvent!.timeStamp())
+        
+        XCTAssertEqual(conversation.estimatedUnreadCount, 0)
+    }
     
     func testThatItDoesNotReinsertAMessageThatHasBeenPreviouslyHiddenLocally() {
         // given
@@ -480,7 +473,6 @@ extension ClientMessageTests_EditingSwift {
         
         // when
         var newMessage: ZMClientMessage?
-        
         self.performPretendingUiMocIsSyncMoc {
             newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
         }
@@ -499,109 +491,104 @@ extension ClientMessageTests_EditingSwift {
         XCTAssertEqual(clientMessage.dataSet.count, 0)
     }
     
-//    - (void)testThatItClearsReactionsWhenAMessageIsEdited
-//    {
-//    // given
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:@"Hallo"];
-//
-//    ZMUser *otherUser = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-//    otherUser.remoteIdentifier = NSUUID.createUUID;
-//
-//    [message addReaction:@"😱" forUser:self.selfUser];
-//    [message addReaction:@"🤗" forUser:otherUser];
-//
-//    [self.uiMOC saveOrRollback];
-//    XCTAssertFalse(message.reactions.isEmpty);
-//
-//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce
-//    newNonce:NSUUID.createUUID
-//    conversationID:conversation.remoteIdentifier
-//    senderID:message.sender.remoteIdentifier
-//    newText:@"Hello"];
-//    // when
-//    __block ZMClientMessage *newMessage;
-//
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    XCTAssertTrue(message.reactions.isEmpty);
-//    XCTAssertEqual(conversation.allMessages.count, 1lu);
-//
-//    ZMMessage *editedMessage = conversation.lastMessage;
-//    XCTAssertTrue(editedMessage.reactions.isEmpty);
-//    XCTAssertEqualObjects(editedMessage.textMessageData.messageText, @"Hello");
-//    }
-//
-//    - (void)testThatItClearsReactionsWhenAMessageIsEditedRemotely
-//    {
-//    // given
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:@"Hallo"];
-//
-//    ZMUser *otherUser = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-//    otherUser.remoteIdentifier = NSUUID.createUUID;
-//
-//    [message addReaction:@"😱" forUser:self.selfUser];
-//    [message addReaction:@"🤗" forUser:otherUser];
-//
-//    [self.uiMOC saveOrRollback];
-//    XCTAssertFalse(message.reactions.isEmpty);
-//
-//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce
-//    newNonce:NSUUID.createUUID
-//    conversationID:conversation.remoteIdentifier
-//    senderID:message.sender.remoteIdentifier
-//    newText:@"Hello"];
-//    // when
-//    __block ZMClientMessage *newMessage;
-//
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    XCTAssertTrue(message.reactions.isEmpty);
-//    ZMMessage *editedMessage = conversation.lastMessage;
-//    XCTAssertTrue(editedMessage.reactions.isEmpty);
-//    XCTAssertEqualObjects(editedMessage.textMessageData.messageText, @"Hello");
-//    }
-//
-//    - (void)testThatMessageNonPersistedIdentifierDoesNotChangeAfterEdit
-//    {
-//    // given
-//    NSString *oldText = @"Mamma mia";
-//    NSString *newText = @"here we go again";
-//    NSUUID *oldNonce = [NSUUID createUUID];
-//
-//    ZMUser *sender = [ZMUser insertNewObjectInManagedObjectContext:self.uiMOC];
-//    sender.remoteIdentifier = [NSUUID createUUID];
-//
-//    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-//    conversation.remoteIdentifier = [NSUUID createUUID];
-//    ZMMessage *message = (id) [conversation appendMessageWithText:oldText];
-//    message.sender = sender;
-//    message.nonce = oldNonce;
-//
-//    NSString *oldIdentifier = message.nonpersistedObjectIdentifer;
-//    ZMUpdateEvent *updateEvent = [self createMessageEditUpdateEventWithOldNonce:message.nonce newNonce:[NSUUID createUUID] conversationID:conversation.remoteIdentifier senderID:sender.remoteIdentifier newText:newText];
-//
-//    // when
-//    __block ZMClientMessage *newMessage;
-//
-//    [self performPretendingUiMocIsSyncMoc:^{
-//    newMessage = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:updateEvent inManagedObjectContext:self.uiMOC prefetchResult:nil];
-//    }];
-//    WaitForAllGroupsToBeEmpty(0.5);
-//
-//    // then
-//    XCTAssertNotEqualObjects(oldNonce, newMessage.nonce);
-//    XCTAssertEqualObjects(oldIdentifier, newMessage.nonpersistedObjectIdentifer);
-//    }
+    func testThatItClearsReactionsWhenAMessageIsEdited() {
+        // given
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message: ZMMessage = conversation.append(text: "Hallo") as! ZMMessage
+        
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
+        otherUser.remoteIdentifier = UUID.create()
+        
+        message.addReaction("😱", forUser:self.selfUser)
+        message.addReaction("🤗", forUser:otherUser)
+        
+        XCTAssertFalse(message.reactions.isEmpty);
+        
+        let updateEvent = createMessageEditUpdateEvent(oldNonce: message.nonce!,
+                                                       newNonce: UUID.create(),
+                                                       conversationID: conversation.remoteIdentifier!,
+                                                       senderID: message.sender!.remoteIdentifier!,
+                                                       newText: "Hello")
+
+        // when
+        var newMessage: ZMClientMessage?
+        self.performPretendingUiMocIsSyncMoc {
+            newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        XCTAssertTrue(message.reactions.isEmpty)
+        XCTAssertEqual(conversation.allMessages.count, 1)
+        
+        let editedMessage = conversation.lastMessage
+        XCTAssertTrue(editedMessage!.reactions.isEmpty)
+        XCTAssertEqual(editedMessage!.textMessageData?.messageText, "Hello")
+    }
+
+    func testThatItClearsReactionsWhenAMessageIsEditedRemotely() {
+        // given
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message: ZMMessage = conversation.append(text: "Hallo") as! ZMMessage
+        
+        let otherUser = ZMUser.insertNewObject(in:self.uiMOC)
+        otherUser.remoteIdentifier = UUID.create()
+        
+        message.addReaction("😱", forUser:self.selfUser)
+        message.addReaction("🤗", forUser:otherUser)
+        
+        XCTAssertFalse(message.reactions.isEmpty);
+        
+        let updateEvent = createMessageEditUpdateEvent(oldNonce: message.nonce!,
+                                                       newNonce: UUID.create(),
+                                                       conversationID: conversation.remoteIdentifier!,
+                                                       senderID: message.sender!.remoteIdentifier,
+                                                       newText: "Hello")
+
+        // when
+        var newMessage: ZMClientMessage?
+        self.performPretendingUiMocIsSyncMoc {
+            newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        XCTAssertTrue(message.reactions.isEmpty)
+        let editedMessage = conversation.lastMessage
+        XCTAssertTrue(editedMessage!.reactions.isEmpty)
+        XCTAssertEqual(editedMessage!.textMessageData?.messageText, "Hello")
+    }
+
+    func testThatMessageNonPersistedIdentifierDoesNotChangeAfterEdit() {
+        // given
+        let oldText = "Mamma mia"
+        let newText = "here we go again"
+        let oldNonce = UUID.create()
+        
+        let sender = ZMUser.insertNewObject(in:self.uiMOC)
+        sender.remoteIdentifier = UUID.create()
+        
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        let message: ZMMessage = conversation.append(text: oldText) as! ZMMessage
+        message.sender = sender
+        message.nonce = oldNonce
+        
+        let oldIdentifier = message.nonpersistedObjectIdentifer
+        let updateEvent = createMessageEditUpdateEvent(oldNonce: message.nonce!,
+                                                       newNonce: UUID.create(),
+                                                       conversationID: conversation.remoteIdentifier!,
+                                                       senderID: message.sender!.remoteIdentifier!,
+                                                       newText: newText)
+        
+        // when
+        var newMessage: ZMClientMessage?
+        self.performPretendingUiMocIsSyncMoc {
+            newMessage = ZMClientMessage.createOrUpdate(from: updateEvent!, in: self.uiMOC, prefetchResult: nil)
+        }
+        
+        // then
+        XCTAssertNotEqual(oldNonce, newMessage!.nonce)
+        XCTAssertEqual(oldIdentifier, newMessage!.nonpersistedObjectIdentifer)
+    }
 }
