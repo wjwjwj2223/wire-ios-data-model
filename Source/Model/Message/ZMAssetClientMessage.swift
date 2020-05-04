@@ -375,13 +375,13 @@ struct CacheAsset: Asset {
     }
     
     var isUploaded: Bool {
-        guard let genericMessage = owner.genericMessage else { return false }
+        guard let genericMessage = owner.underlyingMessage else { return false }
         
         switch type {
         case .thumbnail:
-            return genericMessage.assetData?.preview.remote.hasAssetId() ?? false
+            return genericMessage.assetData?.preview.remote.hasAssetID ?? false
         case .file, .image:
-            return genericMessage.assetData?.uploaded.hasAssetId() ?? false
+            return genericMessage.assetData?.uploaded.hasAssetID ?? false
         }
         
     }
