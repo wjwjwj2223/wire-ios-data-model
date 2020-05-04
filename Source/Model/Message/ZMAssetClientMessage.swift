@@ -23,7 +23,6 @@ import Foundation
 @objcMembers public class ZMAssetClientMessage: ZMOTRMessage {
 
     /// In memory cache
-    var cachedGenericAssetMessage: ZMGenericMessage? = nil
     var cachedUnderlyingAssetMessage: GenericMessage? = nil
     
     internal convenience init?(asset: WireProtos.Asset,
@@ -54,8 +53,8 @@ import Foundation
     
     /// Remote asset ID
     @objc public var assetId: UUID? {
-        get { return self.transientUUID(forKey: #keyPath(ZMAssetClientMessage.assetId)) }
-        set { self.setTransientUUID(newValue, forKey: #keyPath(ZMAssetClientMessage.assetId)) }
+        get { return transientUUID(forKey: #keyPath(ZMAssetClientMessage.assetId)) }
+        set { setTransientUUID(newValue, forKey: #keyPath(ZMAssetClientMessage.assetId)) }
     }
     
     public static func keyPathsForValuesAffectingAssetID() -> Set<String> {
@@ -64,8 +63,8 @@ import Foundation
     
     /// Preprocessed size of image
     public var preprocessedSize: CGSize {
-        get { return self.transientCGSize(forKey: #keyPath(ZMAssetClientMessage.preprocessedSize)) }
-        set { self.setTransientCGSize(newValue, forKey: #keyPath(ZMAssetClientMessage.preprocessedSize)) }
+        get { return transientCGSize(forKey: #keyPath(ZMAssetClientMessage.preprocessedSize)) }
+        set { setTransientCGSize(newValue, forKey: #keyPath(ZMAssetClientMessage.preprocessedSize)) }
     }
     
     public static func keyPathsForValuesPreprocessedSize() -> Set<String> {
@@ -74,7 +73,7 @@ import Foundation
     
     /// Original file size
     public var size: UInt64 {
-        guard let asset = self.genericAssetMessage?.assetData else { return 0 }
+        guard let asset = underlyingMessage?.assetData else { return 0 }
         let originalSize = asset.original.size
         let previewSize = asset.preview.size
     
@@ -114,23 +113,23 @@ import Foundation
     
     /// Whether the image preview has been downloaded
     @objc public var hasDownloadedPreview: Bool {
-        return self.asset?.hasDownloadedPreview ?? false
+        return asset?.hasDownloadedPreview ?? false
     }
     
     /// Whether the file has been downloaded
     @objc public var hasDownloadedFile: Bool {
-        return self.asset?.hasDownloadedFile ?? false
+        return asset?.hasDownloadedFile ?? false
     }
     
     // Wheather the referenced asset is encrypted
     public var hasEncryptedAsset : Bool {
         var hasEncryptionKeys = false
         
-        if self.fileMessageData != nil {
-            if let remote = self.genericAssetMessage?.assetData?.preview.remote, remote.hasOtrKey() {
+        if fileMessageData != nil {
+            if let remote = underlyingMessage?.assetData?.preview.remote, remote.hasOtrKey {
                 hasEncryptionKeys = true
             }
-        } else if self.imageMessageData != nil {
+        } else if imageMessageData != nil {
             if let imageAsset = mediumGenericMessage?.imageAssetData, imageAsset.hasOtrKey {
                 hasEncryptionKeys = true
             }
@@ -235,25 +234,21 @@ extension ZMAssetClientMessage {
     
     override public func awakeFromInsert() {
         super.awakeFromInsert()
-        self.cachedGenericAssetMessage = nil
         self.cachedUnderlyingAssetMessage = nil
     }
     
     override public func awakeFromFetch() {
         super.awakeFromFetch()
-        self.cachedGenericAssetMessage = nil
         self.cachedUnderlyingAssetMessage = nil
     }
     
     override public func awake(fromSnapshotEvents flags: NSSnapshotEventType) {
         super.awake(fromSnapshotEvents: flags)
-        self.cachedGenericAssetMessage = nil
         self.cachedUnderlyingAssetMessage = nil
     }
     
     override public func didTurnIntoFault() {
         super.didTurnIntoFault()
-        self.cachedGenericAssetMessage = nil
         self.cachedUnderlyingAssetMessage = nil
     }
     
@@ -418,11 +413,11 @@ struct CacheAsset: Asset {
     
     func updateWithPreprocessedData(_ preprocessedImageData: Data, imageProperties: ZMIImageProperties) {
         guard needsPreprocessing else { return }
-        guard let genericMessage = owner.genericMessage else { return }
+        guard let genericMessage = owner.underlyingMessage else { return }
         
         cache.storeAssetData(owner, format: .medium, encrypted: false, data: preprocessedImageData)
         
-        var updatedGenericMessage: ZMGenericMessage
+        var updatedGenericMessage: GenericMessage
         switch (type) {
         case .file:
             return
@@ -431,14 +426,13 @@ struct CacheAsset: Asset {
         case .thumbnail:
             updatedGenericMessage = genericMessage.updatedAssetPreview(withImageProperties: imageProperties)!
         }
-        
         owner.add(updatedGenericMessage)
     }
     
     func encrypt() {
-        guard let genericMessage = owner.genericMessage else { return }
+        guard let genericMessage = owner.underlyingMessage else { return }
         
-        var updatedGenericMessage: ZMGenericMessage?
+        var updatedGenericMessage: GenericMessage?
         switch type {
         case .file:
             if let keys = cache.encryptFileAndComputeSHA256Digest(owner) {

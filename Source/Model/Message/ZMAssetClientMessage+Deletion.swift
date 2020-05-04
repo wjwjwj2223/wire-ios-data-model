@@ -39,7 +39,7 @@ extension ZMAssetClientMessage {
             $0.managedObjectContext?.delete($0)
         }
         dataSet = NSOrderedSet()
-        cachedGenericAssetMessage = nil
+        cachedUnderlyingAssetMessage = nil
         assetId = nil
         associatedTaskIdentifier = nil
         preprocessedSize = CGSize.zero
