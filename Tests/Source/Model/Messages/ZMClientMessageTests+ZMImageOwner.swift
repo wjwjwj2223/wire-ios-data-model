@@ -67,55 +67,55 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
         XCTAssertEqual(clientMessage.mentions.count, 1)
     }
     
-//    func testThatItCachesAndEncryptsTheMediumImage_TextMessage() {
-//        // given
-//        let clientMessage = insertMessageWithLinkPreview(contentType: .textMessage)
-//        let imageData = mediumJPEGData()
-//        
-//        // when
-//        let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
-//        clientMessage.setImageData(imageData, for: .medium, properties: properties)
-//        
-//        // then
-//        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: false))
-//        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: true))
-//        
-//        guard let linkPreview = clientMessage.genericMessage?.linkPreviews.first else { return XCTFail("did not contain linkpreview") }
-//        XCTAssertNotNil(linkPreview.article.image.uploaded.otrKey)
-//        XCTAssertNotNil(linkPreview.article.image.uploaded.sha256)
-//
-//        let original = linkPreview.article.image.original!
-//        XCTAssertEqual(Int(original.size), imageData.count)
-//        XCTAssertEqual(original.mimeType, "image/jpeg")
-//        XCTAssertEqual(original.image.width, 42)
-//        XCTAssertEqual(original.image.height, 12)
-//        XCTAssertFalse(original.hasName())
-//    }
-//    
-//    func testThatItCachesAndEncryptsTheMediumImage_EditMessage() {
-//        // given
-//        let clientMessage = insertMessageWithLinkPreview(contentType: .editMessage)
-//        let imageData = mediumJPEGData()
-//        
-//        // when
-//        let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
-//        clientMessage.setImageData(imageData, for: .medium, properties: properties)
-//        
-//        // then
-//        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: false))
-//        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: true))
-//        
-//        guard let linkPreview = clientMessage.genericMessage?.linkPreviews.first else { return XCTFail("did not contain linkpreview") }
-//        XCTAssertNotNil(linkPreview.article.image.uploaded.otrKey)
-//        XCTAssertNotNil(linkPreview.article.image.uploaded.sha256)
-//        
-//        let original = linkPreview.article.image.original!
-//        XCTAssertEqual(Int(original.size), imageData.count)
-//        XCTAssertEqual(original.mimeType, "image/jpeg")
-//        XCTAssertEqual(original.image.width, 42)
-//        XCTAssertEqual(original.image.height, 12)
-//        XCTAssertFalse(original.hasName())
-//    }
+    func testThatItCachesAndEncryptsTheMediumImage_TextMessage() {
+        // given
+        let clientMessage = insertMessageWithLinkPreview(contentType: .textMessage)
+        let imageData = mediumJPEGData()
+        
+        // when
+        let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
+        clientMessage.setImageData(imageData, for: .medium, properties: properties)
+        
+        // then
+        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: false))
+        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: true))
+        
+        guard let linkPreview = clientMessage.underlyingMessage?.linkPreviews.first else { return XCTFail("did not contain linkpreview") }
+        XCTAssertNotNil(linkPreview.image.uploaded.otrKey)
+        XCTAssertNotNil(linkPreview.image.uploaded.sha256)
+
+        let original = linkPreview.image.original
+        XCTAssertEqual(Int(original.size), imageData.count)
+        XCTAssertEqual(original.mimeType, "image/jpeg")
+        XCTAssertEqual(original.image.width, 42)
+        XCTAssertEqual(original.image.height, 12)
+        XCTAssertFalse(original.hasName)
+    }
+    
+    func testThatItCachesAndEncryptsTheMediumImage_EditMessage() {
+        // given
+        let clientMessage = insertMessageWithLinkPreview(contentType: .editMessage)
+        let imageData = mediumJPEGData()
+        
+        // when
+        let properties = ZMIImageProperties(size: CGSize(width: 42, height: 12), length: UInt(imageData.count), mimeType: "image/jpeg")
+        clientMessage.setImageData(imageData, for: .medium, properties: properties)
+        
+        // then
+        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: false))
+        XCTAssertNotNil(self.uiMOC.zm_fileAssetCache.assetData(clientMessage, format: .medium, encrypted: true))
+        
+        guard let linkPreview = clientMessage.underlyingMessage?.linkPreviews.first else { return XCTFail("did not contain linkpreview") }
+        XCTAssertNotNil(linkPreview.image.uploaded.otrKey)
+        XCTAssertNotNil(linkPreview.image.uploaded.sha256)
+        
+        let original = linkPreview.image.original
+        XCTAssertEqual(Int(original.size), imageData.count)
+        XCTAssertEqual(original.mimeType, "image/jpeg")
+        XCTAssertEqual(original.image.width, 42)
+        XCTAssertEqual(original.image.height, 12)
+        XCTAssertFalse(original.hasName)
+    }
     
     func testThatUpdatesLinkPreviewStateAndDeleteOriginalDataAfterProcessingFinishes() {
         // given
