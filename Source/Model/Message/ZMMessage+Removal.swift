@@ -21,6 +21,34 @@ import Foundation
 private let zmLog = ZMSLog(tag: "ZMMessage")
 
 extension ZMMessage {
+    
+    func removePendingDeliveryReceipts() {
+        // Pending receipt can exist only in new inserted messages since it is deleted locally after it is sent to the backend
+        guard let predicate = ZMClientMessage.predicateForObjectsThatNeedToBeInsertedUpstream() else {
+            return
+        }
+        let requestForInsertedMessages = ZMClientMessage.sortedFetchRequest(with: predicate)
+        
+        let possibleMatches = self.managedObjectContext?.executeFetchRequestOrAssert(requestForInsertedMessages) as? [ZMClientMessage]
+        let confirmationReceipts = possibleMatches?.filter { candidateConfirmationReceipt in
+            guard let genericMessage = candidateConfirmationReceipt.underlyingMessage else {
+                return false
+            }
+            if genericMessage.hasConfirmation() &&
+                genericMessage.confirmation.hasFirstMessageID &&
+                genericMessage.confirmation.firstMessageID == self.nonce?.transportString() {
+                return true
+            }
+            return false
+        }
+        // TODO: Re-enable
+        //            NSAssert(confirmationReceipts.count <= 1, @"More than one confirmation receipt");
+        
+        confirmationReceipts?.compactMap { $0 as ZMClientMessage }.forEach {
+            $0.managedObjectContext?.delete($0)
+        }
+    }
+
     static func remove(remotelyHiddenMessage hiddenMessage: MessageHide, inContext moc: NSManagedObjectContext) {
         guard
             let conversationID = UUID(uuidString: hiddenMessage.conversationID),
