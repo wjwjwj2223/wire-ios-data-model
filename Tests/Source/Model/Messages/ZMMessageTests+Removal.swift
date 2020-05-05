@@ -173,13 +173,13 @@ class ZMMessageTests_Removal: BaseZMClientMessageTests {
         //sanity check
         XCTAssertNotNil(conversation)
         XCTAssertNotNil(testMessage)
-        self.uiMOC.saveOrRollback
+        self.uiMOC.saveOrRollback()
         
         //when
         self.performPretendingUiMocIsSyncMoc {
             testMessage.removeClearingSender(true)
         }
-        self.uiMOC.saveOrRollback
+        self.uiMOC.saveOrRollback()
         
         //then
         let fetchedMessage = ZMMessage.fetch(withNonce: testMessage.nonce, for: conversation, in: self.uiMOC) as! ZMMessage
