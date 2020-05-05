@@ -454,7 +454,10 @@ extension ZMUserTests_Swift {
         XCTAssertEqual(user.availability, .none)
                 
         // when
-        user.updateAvailability(from: ZMGenericMessage.message(content: ZMAvailability.availability(.away)))
+        let availability = WireProtos.Availability.with {
+            $0.type = .away
+        }
+        user.updateAvailability(from: GenericMessage(content: availability))
         
         // then
         XCTAssertEqual(user.availability, .away)
