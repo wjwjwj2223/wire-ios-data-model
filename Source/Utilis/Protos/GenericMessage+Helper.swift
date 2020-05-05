@@ -66,6 +66,18 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
+    func hasConfirmation() -> Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .confirmation:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+extension GenericMessage {
     var locationData: Location? {
         guard let content = content else { return nil }
         switch content {
