@@ -185,40 +185,99 @@ extension WireProtos.Asset.RemoteData {
     }
 }
 
+// MARK:- Update assets
+
 extension GenericMessage {
-    func updatedAssetOriginal(withImageProperties imageProperties: ZMIImageProperties) -> GenericMessage? {
+    mutating func updateAssetOriginal(withImageProperties imageProperties: ZMIImageProperties) {
         let asset = WireProtos.Asset(imageSize: imageProperties.size, mimeType: imageProperties.mimeType, size: UInt64(imageProperties.length))
-        return updatedAsset(withAsset: asset)
+        update(asset: asset)
     }
     
-    func updatedAssetPreview(withUploadedOTRKey otrKey: Data, sha256: Data) -> GenericMessage? {
-        guard var preview = assetData?.preview else { return nil }
+    mutating func updateAssetPreview(withUploadedOTRKey otrKey: Data, sha256: Data) {
+        guard var preview = assetData?.preview else { return }
         
         preview.remote = WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256)
         let asset = WireProtos.Asset(original: nil, preview: preview)
         
-        return updatedAsset(withAsset: asset)
+        update(asset: asset)
     }
     
-    func updatedAssetPreview(withImageProperties imageProperties: ZMIImageProperties) -> GenericMessage? {
+    mutating func updateAssetPreview(withImageProperties imageProperties: ZMIImageProperties) {
         let imageMetaData = WireProtos.Asset.ImageMetaData(width: Int32(imageProperties.size.width), height: Int32(imageProperties.size.height))
         let preview = WireProtos.Asset.Preview(size: UInt64(imageProperties.length), mimeType: imageProperties.mimeType, remoteData: nil, imageMetadata: imageMetaData)
         let asset = WireProtos.Asset(original: nil, preview: preview)
-        return updatedAsset(withAsset: asset)
+        update(asset: asset)
     }
     
-    func updatedAsset(withUploadedOTRKey otrKey: Data, sha256: Data) -> GenericMessage? {
+    mutating func updateAsset(withUploadedOTRKey otrKey: Data, sha256: Data) {
         let asset = WireProtos.Asset(withUploadedOTRKey: otrKey, sha256: sha256)
-        return updatedAsset(withAsset: asset)
+        update(asset: asset)
     }
     
-    func updatedAsset(withAsset asset: WireProtos.Asset) -> GenericMessage? {
-        var genericMessage = self
-        if case .ephemeral? = content {
-            asset.setEphemeralContent(on: &genericMessage.ephemeral)
-        } else {
-            asset.setContent(on: &genericMessage)
+    public mutating func updatePreview(assetId: String, token: String?) {
+        guard let content = content else {
+            return
         }
-        return genericMessage.validatingFields()
+        switch content {
+        case .asset:
+            self.asset.preview.remote.assetID = assetId
+            if let token = token {
+                self.asset.preview.remote.assetToken = token
+            }
+        case .ephemeral(let data):
+            switch data.content {
+            case .asset?:
+                self.ephemeral.asset.preview.remote.assetID = assetId
+                if let token = token {
+                    self.ephemeral.asset.preview.remote.assetToken = token
+                }
+            default:
+                return
+            }
+        default:
+            return
+        }
+    }
+    
+    public mutating func updateUploaded(assetId: String, token: String?) {
+        guard let content = content else {
+            return
+        }
+        switch content {
+        case .asset:
+            self.asset.uploaded.assetID = assetId
+            if let token = token {
+                self.asset.uploaded.assetToken = token
+            }
+        case .ephemeral(let data):
+            switch data.content {
+            case .asset?:
+                self.ephemeral.asset.uploaded.assetID = assetId
+                if let token = token {
+                    self.ephemeral.asset.uploaded.assetToken = token
+                }
+            default:
+                return
+            }
+        default:
+            return
+        }
+    }
+    
+    public mutating func update(asset: WireProtos.Asset) {
+        guard let content = content else { return }
+        switch content {
+        case .asset:
+            asset.setContent(on: &self)
+        case .ephemeral(let data):
+            switch data.content {
+            case .asset?:
+                asset.setEphemeralContent(on: &ephemeral)
+            default:
+                return
+            }
+        default:
+            return
+        }
     }
 }

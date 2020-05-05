@@ -413,30 +413,28 @@ struct CacheAsset: Asset {
     
     func updateWithPreprocessedData(_ preprocessedImageData: Data, imageProperties: ZMIImageProperties) {
         guard needsPreprocessing else { return }
-        guard let genericMessage = owner.underlyingMessage else { return }
+        guard var genericMessage = owner.underlyingMessage else { return }
         
         cache.storeAssetData(owner, format: .medium, encrypted: false, data: preprocessedImageData)
         
-        var updatedGenericMessage: GenericMessage
         switch (type) {
         case .file:
             return
         case .image:
-            updatedGenericMessage = genericMessage.updatedAssetOriginal(withImageProperties: imageProperties)!
+            genericMessage.updateAssetOriginal(withImageProperties: imageProperties)
         case .thumbnail:
-            updatedGenericMessage = genericMessage.updatedAssetPreview(withImageProperties: imageProperties)!
+            genericMessage.updateAssetPreview(withImageProperties: imageProperties)
         }
-        owner.add(updatedGenericMessage)
+        owner.add(genericMessage)
     }
     
     func encrypt() {
-        guard let genericMessage = owner.underlyingMessage else { return }
+        guard var genericMessage = owner.underlyingMessage else { return }
         
-        var updatedGenericMessage: GenericMessage?
         switch type {
         case .file:
             if let keys = cache.encryptFileAndComputeSHA256Digest(owner) {
-                updatedGenericMessage = genericMessage.updatedAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                genericMessage.updateAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)
             }
         case .image:
             if !needsPreprocessing, let original = original {
@@ -445,17 +443,15 @@ struct CacheAsset: Asset {
             }
             
             if let keys = cache.encryptImageAndComputeSHA256Digest(owner, format: .medium) {
-                updatedGenericMessage = genericMessage.updatedAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                genericMessage.updateAsset(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)
             }
         case .thumbnail:
             if let keys = cache.encryptImageAndComputeSHA256Digest(owner, format: .medium) {
-                updatedGenericMessage = genericMessage.updatedAssetPreview(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)!
+                genericMessage.updateAssetPreview(withUploadedOTRKey: keys.otrKey, sha256: keys.sha256!)
             }
         }
         
-        if let updatedGenericMessage = updatedGenericMessage {
-            owner.add(updatedGenericMessage)
-        }
+        owner.add(genericMessage)
     }
     
 }
