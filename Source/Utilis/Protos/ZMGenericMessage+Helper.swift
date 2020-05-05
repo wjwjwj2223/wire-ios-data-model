@@ -38,24 +38,6 @@ extension MessageContentType {
     }
 }
 
-@objc public extension ZMGenericMessage {
-
-    var v3_isImage: Bool {
-        return assetData?.original.hasRasterImage ?? false
-    }
-
-    var v3_uploadedAssetId: String? {
-        guard assetData?.uploaded.hasAssetId() == true else { return nil }
-        return assetData?.uploaded.assetId
-    }
-
-    var previewAssetId: String? {
-        guard assetData?.preview.remote.hasAssetId() == true else { return nil }
-        return assetData?.preview.remote.assetId
-    }
-
-}
-
 public extension ZMGenericMessage {
     
     static func message(fromData data: Data?) -> ZMGenericMessage? {
