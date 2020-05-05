@@ -292,7 +292,7 @@ extension Text {
 
 extension WireProtos.Reaction {
     
-    init(emoji: String, messageID: UUID) {
+    public init(emoji: String, messageID: UUID) {
         self = WireProtos.Reaction.with({
             $0.emoji = emoji
             $0.messageID = messageID.transportString()
@@ -457,6 +457,11 @@ public extension LinkPreview {
         if let original = original {
             image.original = original
         }
+    }
+    
+    mutating func update(withAssetKey assetKey: String, assetToken: String?) {
+        image.uploaded.assetID = assetKey
+        image.uploaded.assetToken = assetToken ?? ""
     }
 }
 
