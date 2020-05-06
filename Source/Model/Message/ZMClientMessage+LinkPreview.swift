@@ -196,7 +196,7 @@ extension ZMClientMessage: ZMImageOwner {
             }
             
             do {
-                self.add(try GenericMessage(content: messageUpdate, nonce: nonce).serializedData())
+                add(try GenericMessage(content: messageUpdate, nonce: nonce).serializedData())
             } catch { return }
         }
         
