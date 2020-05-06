@@ -449,7 +449,7 @@ extension ZMConversation {
         for message in undeliveredMessages {
             if let clientMessage = message as? ZMClientMessage,
                 let genericMessage = clientMessage.underlyingMessage,
-                genericMessage.hasConfirmation() {
+                genericMessage.hasConfirmation {
                 // Delivery receipt: just expire it
                 message.expire()
             } else {

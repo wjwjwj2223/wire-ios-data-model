@@ -34,7 +34,7 @@ extension ZMMessage {
             guard let genericMessage = candidateConfirmationReceipt.underlyingMessage else {
                 return false
             }
-            if genericMessage.hasConfirmation() &&
+            if genericMessage.hasConfirmation &&
                 genericMessage.confirmation.hasFirstMessageID &&
                 genericMessage.confirmation.firstMessageID == self.nonce?.transportString() {
                 return true
@@ -44,7 +44,7 @@ extension ZMMessage {
         // TODO: Re-enable
         //            NSAssert(confirmationReceipts.count <= 1, @"More than one confirmation receipt");
         
-        confirmationReceipts?.compactMap { $0 as ZMClientMessage }.forEach {
+        confirmationReceipts?.map { $0 as ZMClientMessage }.forEach {
             $0.managedObjectContext?.delete($0)
         }
     }
