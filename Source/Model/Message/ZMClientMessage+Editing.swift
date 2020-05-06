@@ -50,7 +50,7 @@ extension ZMClientMessage {
         else { return false }
         
         do {
-            self.add(try GenericMessage(content: originalText.applyEdit(from: messageEdit.text), nonce: nonce).serializedData())
+            add(try GenericMessage(content: originalText.applyEdit(from: messageEdit.text), nonce: nonce).serializedData())
         } catch {
             return false
         }
