@@ -74,7 +74,7 @@ import Foundation
     
     public override var isUpdatingExistingMessage: Bool {
         guard 
-            let content = underlyingMessage.content else {
+            let content = underlyingMessage?.content else {
                 return false
         }
         switch content {
