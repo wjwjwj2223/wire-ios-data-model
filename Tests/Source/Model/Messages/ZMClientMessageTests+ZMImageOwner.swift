@@ -40,15 +40,20 @@ class ClientMessageTests_ZMImageOwner: BaseZMClientMessageTests {
         article.title = "title"
         article.summary = "tile"
         let mention = Mention(range: NSRange(location: 0, length: 4), user: user1)
-        let text = ZMText.text(with: "@joe example.com/article/original", mentions: [mention], linkPreviews: [article.protocolBuffer])
-        var genericMessage : ZMGenericMessage!
+       
+        let text = Text(content: "@joe example.com/article/original", mentions: [mention], linkPreviews: [article], replyingTo: nil)
+        var genericMessage : GenericMessage!
         switch contentType{
         case .textMessage:
-            genericMessage = ZMGenericMessage.message(content: text, nonce: nonce)
+            genericMessage = GenericMessage(content: text, nonce: nonce)
         case .editMessage:
-            genericMessage = ZMGenericMessage.message(content: ZMMessageEdit.edit(with: text, replacingMessageId: UUID.create()), nonce: nonce)
+            genericMessage = GenericMessage(content: MessageEdit(replacingMessageID: UUID.create(), text: text), nonce: nonce)
         }
-        clientMessage.add(genericMessage.data())
+        do {
+            clientMessage.add(try genericMessage.serializedData())
+        } catch {
+            XCTFail()
+        }
         clientMessage.visibleInConversation = conversation
         clientMessage.sender = selfUser
         return clientMessage

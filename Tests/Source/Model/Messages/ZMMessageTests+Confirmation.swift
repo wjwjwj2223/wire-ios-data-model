@@ -513,7 +513,7 @@ extension ZMMessageTests_Confirmation {
     
     func insertMessage(_ conversation: ZMConversation, fromSender: ZMUser? = nil, timestamp: Date = .init(), moc: NSManagedObjectContext? = nil, eventSource: ZMUpdateEventSource = .download) -> ZMMessage {
         let nonce = UUID.create()
-        let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: "foo"), nonce: nonce)
+        let genericMessage = GenericMessage(content: Text(content: "foo"), nonce: nonce)
         let messageEvent = createUpdateEvent(
             nonce,
             conversationID: conversation.remoteIdentifier!,
@@ -541,12 +541,12 @@ extension ZMMessageTests_Confirmation {
     }
     
     func createMessageDeliveryConfirmationUpdateEvent(_ nonce: UUID, conversationID: UUID, senderID: UUID = .create(), timestamp: Date = .init()) -> ZMUpdateEvent {
-        let genericMessage = ZMGenericMessage.message(content: ZMConfirmation.confirm(messageId: nonce, type: .DELIVERED))
+        let genericMessage = GenericMessage(content: Confirmation(messageId: nonce, type: .delivered))
         return createUpdateEvent(UUID(), conversationID: conversationID, timestamp: timestamp,  genericMessage: genericMessage, senderID: senderID)
     }
     
     func createMessageReadConfirmationUpdateEvent(_ nonces: [UUID], conversationID: UUID, senderID: UUID = .create(), timestamp: Date = .init()) -> ZMUpdateEvent {
-        let genericMessage = ZMGenericMessage.message(content: ZMConfirmation.confirm(messages: nonces, type: .READ))
+        let genericMessage = GenericMessage(content: Confirmation(messageIds: nonces, type: .read)!)
         return createUpdateEvent(UUID(), conversationID: conversationID, timestamp: timestamp, genericMessage: genericMessage, senderID: senderID)
     }
     

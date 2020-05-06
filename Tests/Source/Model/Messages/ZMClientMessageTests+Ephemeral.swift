@@ -163,10 +163,10 @@ extension ZMClientMessageTests_Ephemeral {
             message.senderClientID = "other_client"
             
             let imageData = self.verySmallJPEGData()
-            let assetMessage = ZMGenericMessage.message(content: ZMAsset.asset(originalWithImageSize: .zero, mimeType: "", size: UInt64(imageData.count)), nonce: nonce, expiresAfter: 10)
+            let assetMessage = GenericMessage(content: WireProtos.Asset(imageSize: .zero, mimeType: "", size: UInt64(imageData.count)), nonce: nonce, expiresAfter: 10)
             message.add(assetMessage)
             
-            let uploaded = ZMGenericMessage.message(content: ZMAsset.asset(withUploadedOTRKey: .randomEncryptionKey(), sha256: .zmRandomSHA256Key()), nonce: message.nonce!, expiresAfter: self.syncConversation.messageDestructionTimeoutValue)
+            let uploaded = GenericMessage(content: WireProtos.Asset(withUploadedOTRKey: .randomEncryptionKey(), sha256: .zmRandomSHA256Key()), nonce: message.nonce!, expiresAfter: self.syncConversation.messageDestructionTimeoutValue)
             message.add(uploaded)
             
             // when
@@ -283,7 +283,7 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNil(message.destructionDate)
 
             // when
-            let delete = ZMGenericMessage.message(content: ZMMessageDelete.delete(messageId: message.nonce!), nonce: UUID.create())
+            let delete = GenericMessage(content: MessageDelete(messageId: message.nonce!), nonce: UUID.create())
             let event = self.createUpdateEvent(UUID.create(), conversationID: self.syncConversation.remoteIdentifier!, genericMessage: delete, senderID: self.syncUser1.remoteIdentifier!, eventSource: .download)
             _ = ZMOTRMessage.createOrUpdate(from: event, in: self.syncMOC, prefetchResult: nil)
             
@@ -308,7 +308,7 @@ extension ZMClientMessageTests_Ephemeral {
         
         self.syncMOC.performGroupedBlockAndWait {
             // when
-            let delete = ZMGenericMessage.message(content: ZMMessageDelete.delete(messageId: message.nonce!), nonce: UUID.create())
+            let delete = GenericMessage(content: MessageDelete(messageId: message.nonce!), nonce: UUID.create())
             let event = self.createUpdateEvent(UUID.create(), conversationID: self.syncConversation.remoteIdentifier!, genericMessage: delete, senderID: self.selfUser.remoteIdentifier!, eventSource: .download)
             _ = ZMOTRMessage.createOrUpdate(from: event, in: self.syncMOC, prefetchResult: nil)
             
