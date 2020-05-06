@@ -154,5 +154,3 @@
     XCTAssertEqual(message.linkPreviewState, ZMLinkPreviewStateDone);
 }
 @end
-
-

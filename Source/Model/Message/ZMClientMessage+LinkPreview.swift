@@ -150,9 +150,11 @@ extension ZMClientMessage: ZMImageOwner {
     }
 
     @objc public func setImageData(_ imageData: Data, for format: ZMImageFormat, properties: ZMIImageProperties?) {
-        guard format == .medium else { return }
-        guard var linkPreview = self.firstZMLinkPreview else { return }
-        guard let moc = self.managedObjectContext else { return }
+        guard let moc = self.managedObjectContext,
+            var linkPreview = self.firstZMLinkPreview,
+            format == .medium else {
+                return
+        }
         
         moc.zm_fileAssetCache.storeAssetData(self, format: format, encrypted: false, data: imageData)
         guard let keys = moc.zm_fileAssetCache.encryptImageAndComputeSHA256Digest(self, format: format) else { return }
@@ -171,7 +173,8 @@ extension ZMClientMessage: ZMImageOwner {
             }
             
             let messageUpdate: MessageCapable
-            guard let content = genericMessage.content,
+            guard 
+                let content = genericMessage.content,
                 let nonce = nonce else {
                     return
             }
@@ -181,7 +184,7 @@ extension ZMClientMessage: ZMImageOwner {
             case .ephemeral(let data):
                 switch data.content {
                 case .text?:
-                    messageUpdate = Ephemeral.ephemeral(content: text, expiresAfter: deletionTimeout)
+                    messageUpdate = Ephemeral(content: text, expiresAfter: deletionTimeout)
                 default:
                     return
                 }
@@ -195,11 +198,10 @@ extension ZMClientMessage: ZMImageOwner {
             }
             
             do {
-                self.add(try GenericMessage(content: messageUpdate, nonce: nonce).serializedData())
+                add(try GenericMessage(content: messageUpdate, nonce: nonce).serializedData())
             } catch { return }
         }
         
         moc.enqueueDelayedSave()
     }
 }
-

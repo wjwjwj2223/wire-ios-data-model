@@ -53,7 +53,7 @@ class ZMClientMessagesTests_Replies: BaseZMClientMessageTests {
         // given
         let conversation = ZMConversation.insertNewObject(in: uiMOC); conversation.remoteIdentifier = UUID.create()
         let quotedMessage = conversation.append(text: "The sky is blue") as? ZMClientMessage
-        let replyMessage = GenericMessage(content: Ephemeral.ephemeral(content: Text(content: "I agree", replyingTo: quotedMessage), expiresAfter: 1000))
+        let replyMessage = GenericMessage(content: Ephemeral(content: Text(content: "I agree", replyingTo: quotedMessage), expiresAfter: 1000))
         let data = ["sender": NSString.createAlphanumerical(), "text": try? replyMessage.serializedData().base64EncodedString()]
         let payload = payloadForMessage(in: conversation, type: EventConversationAddOTRMessage, data: data)
         let event = ZMUpdateEvent(fromEventStreamPayload: payload, uuid: nil)!

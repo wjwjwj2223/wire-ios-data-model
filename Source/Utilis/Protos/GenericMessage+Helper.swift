@@ -34,7 +34,7 @@ public extension GenericMessage {
             $0.messageID = nonce.transportString()
             let messageContent: MessageCapable
             if let timeout = timeout, timeout > 0 {
-                messageContent = Ephemeral.ephemeral(content: content, expiresAfter: timeout)
+                messageContent = Ephemeral(content: content, expiresAfter: timeout)
             } else {
                 messageContent = content
             }
@@ -66,7 +66,7 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
-    func hasConfirmation() -> Bool {
+    var hasConfirmation: Bool {
         guard let content = content else { return false }
         switch content {
         case .confirmation:
@@ -187,8 +187,8 @@ extension GenericMessage {
 }
 
 extension Ephemeral {
-    public static func ephemeral(content: EphemeralMessageCapable, expiresAfter timeout: TimeInterval) -> Ephemeral {
-        return Ephemeral.with() { 
+    public init(content: EphemeralMessageCapable, expiresAfter timeout: TimeInterval) {
+        self = Ephemeral.with() {
             $0.expireAfterMillis = Int64(timeout * 1000)
             content.setEphemeralContent(on: &$0)
         }
