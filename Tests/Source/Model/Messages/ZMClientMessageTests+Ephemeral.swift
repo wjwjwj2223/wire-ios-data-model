@@ -68,7 +68,17 @@ extension ZMClientMessageTests_Ephemeral {
         
         // then
         XCTAssertTrue(message.isEphemeral)
-        XCTAssertTrue(message.genericMessage!.ephemeral.hasText())
+        switch message.underlyingMessage!.content {
+        case .ephemeral(let data)?:
+            switch data.content {
+            case .text(let text)?:
+                XCTAssertNotNil(text)
+            default:
+                XCTFail()
+            }
+        default:
+            XCTFail()
+        }
         XCTAssertEqual(message.deletionTimeout, timeout)
     }
     
@@ -236,8 +246,8 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNotNil(message.sender)
             XCTAssertNotEqual(message.hiddenInConversation, self.syncConversation)
             XCTAssertEqual(message.visibleInConversation, self.syncConversation)
-            XCTAssertNotNil(message.genericMessage)
-            XCTAssertNotEqual(message.genericMessage?.textData?.content, "foo")
+            XCTAssertNotNil(message.underlyingMessage)
+            XCTAssertNotEqual(message.underlyingMessage?.textData?.content, "foo")
             XCTAssertEqual(self.obfuscationTimer?.runningTimersCount, 0)
         }
     }
@@ -277,7 +287,7 @@ extension ZMClientMessageTests_Ephemeral {
             XCTAssertNil(message.destructionDate)
 
             // when
-            let delete = ZMGenericMessage.message(content: ZMMessageDelete.delete(messageId: message.nonce!), nonce: UUID.create())
+            let delete = GenericMessage(content: MessageDelete(messageId: message.nonce!), nonce: UUID.create())
             let event = self.createUpdateEvent(UUID.create(), conversationID: self.syncConversation.remoteIdentifier!, genericMessage: delete, senderID: self.syncUser1.remoteIdentifier!, eventSource: .download)
             _ = ZMOTRMessage.createOrUpdate(from: event, in: self.syncMOC, prefetchResult: nil)
             
@@ -302,7 +312,7 @@ extension ZMClientMessageTests_Ephemeral {
         
         self.syncMOC.performGroupedBlockAndWait {
             // when
-            let delete = ZMGenericMessage.message(content: ZMMessageDelete.delete(messageId: message.nonce!), nonce: UUID.create())
+            let delete = GenericMessage(content: MessageDelete(messageId: message.nonce!), nonce: UUID.create())
             let event = self.createUpdateEvent(UUID.create(), conversationID: self.syncConversation.remoteIdentifier!, genericMessage: delete, senderID: self.selfUser.remoteIdentifier!, eventSource: .download)
             _ = ZMOTRMessage.createOrUpdate(from: event, in: self.syncMOC, prefetchResult: nil)
             
@@ -391,19 +401,19 @@ extension ZMClientMessageTests_Ephemeral {
         // then
         guard let clientMessage = conversation.hiddenMessages.first(where: {
             if let clientMessage = $0 as? ZMClientMessage,
-            let genericMessage = clientMessage.genericMessage,
-                genericMessage.hasDeleted() {
+                let genericMessage = clientMessage.underlyingMessage,
+                case .deleted? = genericMessage.content {
                 return true
             }
             else {
                 return false
             }
         }) as? ZMClientMessage
-        else { return XCTFail()}
+            else { return XCTFail()}
 
-        let deleteMessage = clientMessage.genericMessage
+        let deleteMessage = clientMessage.underlyingMessage
 
-        XCTAssertNotEqual(deleteMessage, message)
+        XCTAssertNotEqual(deleteMessage, message.underlyingMessage)
         XCTAssertNotNil(message.sender)
         XCTAssertNil(message.underlyingMessage)
         XCTAssertNil(message.destructionDate)
@@ -418,9 +428,9 @@ extension ZMClientMessageTests_Ephemeral {
     func hasDeleteMessage(for message: ZMMessage) -> Bool {
          for enumeratedMessage in conversation.hiddenMessages {
             if let clientMessage = enumeratedMessage as? ZMClientMessage,
-                let genericMessage = clientMessage.genericMessage,
-                genericMessage.hasDeleted(),
-                genericMessage.deleted.messageId == message.nonce!.transportString()  {
+                let genericMessage = clientMessage.underlyingMessage,
+                case .deleted? = genericMessage.content,
+                genericMessage.deleted.messageID == message.nonce!.transportString()  {
                     return true
             }
         }

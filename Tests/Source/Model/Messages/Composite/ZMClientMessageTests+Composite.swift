@@ -116,14 +116,11 @@ class ZMClientMessageTests_Composite: BaseCompositeMessageTests {
             buttonState.state = .selected
             uiMOC.saveOrRollback()
         }
-        
-        let builder = ZMButtonActionBuilder()
-        builder.setReferenceMessageId(nonce.transportString())
-        builder.setButtonId("1")
-        let buttonAction = builder.build()
+                
+        let buttonAction = ButtonAction(buttonId: "1", referenceMessageId: nonce)
         
         // WHEN
-        ZMClientMessage.expireButtonState(forButtonAction: buttonAction!, forConversation: conversation, inContext: uiMOC)
+        ZMClientMessage.expireButtonState(forButtonAction: buttonAction, forConversation: conversation, inContext: uiMOC)
         _ = waitForAllGroupsToBeEmpty(withTimeout: 0.5)
         
         // THEN

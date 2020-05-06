@@ -452,7 +452,7 @@ extension ZMClientMessageTests_Deletion {
         assertDeletedContent(ofMessage: sut as! ZMOTRMessage, inConversation: conversation)
 
         //when
-        let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: name), nonce: nonce)
+        let genericMessage = GenericMessage(content: Text(content: name), nonce: nonce)
         let nextEvent = createUpdateEvent(nonce, conversationID: conversation.remoteIdentifier!, genericMessage: genericMessage)
         performPretendingUiMocIsSyncMoc {
             ZMOTRMessage.createOrUpdate(from: nextEvent, in: self.uiMOC, prefetchResult: nil)
@@ -561,7 +561,7 @@ extension ZMClientMessageTests_Deletion {
 extension ZMClientMessageTests_Deletion {
 
     func createMessageDeletedUpdateEvent(_ nonce: UUID, conversationID: UUID, senderID: UUID = .create()) -> ZMUpdateEvent {
-        let genericMessage = ZMGenericMessage.message(content: ZMMessageDelete(messageID: nonce))
+        let genericMessage = GenericMessage(content: MessageDelete(messageId: nonce))
         return createUpdateEvent(nonce, conversationID: conversationID, genericMessage: genericMessage, senderID: senderID)
     }
     

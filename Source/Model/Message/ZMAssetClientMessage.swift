@@ -191,6 +191,19 @@ import Foundation
         setObfuscationTimerIfNeeded()
     }
     
+    public override var isUpdatingExistingMessage: Bool {
+        guard let genericMessage = underlyingMessage,
+            let content = genericMessage.content else {
+                return false
+        }
+        switch content {
+        case .edited, .reaction:
+            return true
+        default:
+            return false
+        }
+    }
+    
     func setObfuscationTimerIfNeeded() {
         guard self.isEphemeral else {
             return
@@ -548,4 +561,3 @@ public protocol Asset {
     func encrypt()
     
 }
-

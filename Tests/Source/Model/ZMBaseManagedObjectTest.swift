@@ -16,22 +16,25 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
 
-import Foundation
+import XCTest
 
-extension ZMClientMessage {
+@testable import WireDataModel
+
+extension ZMBaseManagedObjectTest {
     
-    func deleteContent() {
-        cachedUnderlyingMessage = nil
-        dataSet.compactMap { $0 as? ZMGenericMessageData }.forEach {
-            $0.managedObjectContext?.delete($0)
-        }
-        dataSet = NSOrderedSet()
-        normalizedText = nil
-        quote = nil
+    func createClientTextMessage() -> ZMClientMessage? {
+        return createClientTextMessage(withText: self.name)
     }
-    
-    public override func removeClearingSender(_ clearingSender: Bool) {
-        deleteContent()
-        super.removeClearingSender(clearingSender)
+
+    func createClientTextMessage(withText text: String) -> ZMClientMessage? {
+        let nonce = UUID.create()
+        let message = ZMClientMessage.init(nonce: nonce, managedObjectContext: self.uiMOC)
+        let textMessage = GenericMessage(content: Text(content: text, mentions: [], linkPreviews: [], replyingTo: nil), nonce: nonce)
+        do {
+            try message.add(textMessage.serializedData())
+        } catch {
+            XCTFail()
+        }
+        return message
     }
 }

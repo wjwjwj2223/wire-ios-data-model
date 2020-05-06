@@ -34,7 +34,7 @@ public extension GenericMessage {
             $0.messageID = nonce.transportString()
             let messageContent: MessageCapable
             if let timeout = timeout, timeout > 0 {
-                messageContent = Ephemeral.ephemeral(content: content, expiresAfter: timeout)
+                messageContent = Ephemeral(content: content, expiresAfter: timeout)
             } else {
                 messageContent = content
             }
@@ -66,7 +66,7 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
-    func hasConfirmation() -> Bool {
+    var hasConfirmation: Bool {
         guard let content = content else { return false }
         switch content {
         case .confirmation:
@@ -216,8 +216,8 @@ extension GenericMessage {
 }
 
 extension Ephemeral {
-    public static func ephemeral(content: EphemeralMessageCapable, expiresAfter timeout: TimeInterval) -> Ephemeral {
-        return Ephemeral.with() { 
+    public init(content: EphemeralMessageCapable, expiresAfter timeout: TimeInterval) {
+        self = Ephemeral.with() {
             $0.expireAfterMillis = Int64(timeout * 1000)
             content.setEphemeralContent(on: &$0)
         }
@@ -291,25 +291,17 @@ extension Text {
             }
         }
     }
-
+    
     public func applyEdit(from text: Text) -> Text {
-        do {
-            let data = try text.serializedData()
-            var updatedText = try Text(serializedData: data)
-            
-            // Transfer read receipt expectation
-            updatedText.expectsReadConfirmation = expectsReadConfirmation
-            
-            // We always keep the quote from the original message
-            if hasQuote {
-                updatedText.quote = quote
-            } else {
-                updatedText.clearQuote()
-            }
-            return updatedText
-        } catch {
-            return self
-        }
+        var updatedText = text
+        // Transfer read receipt expectation
+        updatedText.expectsReadConfirmation = expectsReadConfirmation
+        
+        // We always keep the quote from the original message
+        hasQuote
+            ? updatedText.quote = quote
+            : updatedText.clearQuote()
+        return updatedText
     }
     
     public func updateLinkPreview(from text: Text) -> Text {
@@ -329,7 +321,7 @@ extension Text {
 
 extension WireProtos.Reaction {
     
-    init(emoji: String, messageID: UUID) {
+    public init(emoji: String, messageID: UUID) {
         self = WireProtos.Reaction.with({
             $0.emoji = emoji
             $0.messageID = messageID.transportString()
@@ -339,7 +331,7 @@ extension WireProtos.Reaction {
 
 extension LastRead {
     
-    init(conversationID: UUID, lastReadTimestamp: Date) {
+    public init(conversationID: UUID, lastReadTimestamp: Date) {
         self = LastRead.with {
             $0.conversationID = conversationID.transportString()
             $0.lastReadTimestamp = Int64(lastReadTimestamp.timeIntervalSince1970 * 1000)
@@ -394,7 +386,7 @@ extension MessageDelete {
 
 extension WireProtos.Confirmation {
     
-    init?(messageIds: [UUID], type: Confirmation.TypeEnum) {
+     public init?(messageIds: [UUID], type: Confirmation.TypeEnum) {
         guard let firstMessageID = messageIds.first else {
             return nil
         }
@@ -487,6 +479,18 @@ public extension LinkPreview {
                 $0.username = username
             })
         }
+    }
+    
+    mutating func update(withOtrKey otrKey: Data, sha256: Data, original: WireProtos.Asset.Original?) {
+        image.uploaded = WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256)
+        if let original = original {
+            image.original = original
+        }
+    }
+    
+    mutating func update(withAssetKey assetKey: String, assetToken: String?) {
+        image.uploaded.assetID = assetKey
+        image.uploaded.assetToken = assetToken ?? ""
     }
 }
 

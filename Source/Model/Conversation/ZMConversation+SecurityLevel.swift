@@ -447,7 +447,9 @@ extension ZMConversation {
     /// Expire all pending messages
     fileprivate func expireAllPendingMessagesBecauseOfSecurityLevelDegradation() {
         for message in undeliveredMessages {
-            if let clientMessage = message as? ZMClientMessage, let genericMessage = clientMessage.genericMessage, genericMessage.hasConfirmation() {
+            if let clientMessage = message as? ZMClientMessage,
+                let genericMessage = clientMessage.underlyingMessage,
+                genericMessage.hasConfirmation {
                 // Delivery receipt: just expire it
                 message.expire()
             } else {
@@ -708,15 +710,6 @@ extension ZMSystemMessage {
         let fetchRequest = ZMSystemMessage.sortedFetchRequest(with: compound)!
         let result = conversation.managedObjectContext!.executeFetchRequestOrAssert(fetchRequest)!
         return result.first as? ZMSystemMessage
-    }
-}
-
-extension ZMOTRMessage {
-    
-    fileprivate var isUpdatingExistingMessage: Bool {
-        guard let genericMessage = genericMessage else { return false }
-        
-        return genericMessage.hasEdited() || genericMessage.hasReaction()
     }
 }
 

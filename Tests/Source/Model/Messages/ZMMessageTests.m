@@ -197,36 +197,6 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
                                0.01);
 }
 
-- (void)testThatItDoesNotSetTheServerTimestampFromEventDataEvenIfMessageAlreadyExists
-{
-    [self.syncMOC performGroupedBlockAndWait:^{
-        // given
-        ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.syncMOC];
-        conversation.remoteIdentifier = [NSUUID createUUID];
-
-        
-        
-        NSUUID *nonce = [NSUUID createUUID];
-        ZMGenericMessage *textMessage = [ZMGenericMessage messageWithContent:[ZMText textWith:self.name mentions:@[] linkPreviews:@[] replyingTo:nil] nonce:nonce];
-        ZMClientMessage *msg = [[ZMClientMessage alloc] initWithNonce:nonce managedObjectContext:self.syncMOC];
-        [msg addData:textMessage.data];
-        
-        msg.visibleInConversation = conversation;
-        msg.serverTimestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:400000000];
-        NSDictionary *data = @{@"content" : self.name,
-                               @"nonce" : msg.nonce.transportString};
-        NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAdd data:data time:[NSDate dateWithTimeIntervalSinceReferenceDate:450000000]];
-        ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-        XCTAssertNotNil(event);
-        
-        // when
-        [msg updateWithUpdateEvent:event forConversation:conversation];
-        
-        // then
-        XCTAssertEqualWithAccuracy(msg.serverTimestamp.timeIntervalSinceReferenceDate, 400000000, 1);
-    }];
-}
-
 - (void)testThatItAlwaysReturnsZMDeliveryStateDeliveredForNonOTRMessages
 {
     // given
@@ -1411,54 +1381,10 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     XCTAssertNil(message);
 }
 
-- (void)testThatItCreatesOtrKnockMessageFromAnUpdateEvent
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    NSString *senderClientID = [NSString createAlphanumericalString];
-    NSUUID *nonce = [NSUUID createUUID];
-    ZMGenericMessage *knockMessage = [ZMGenericMessage messageWithContent:[ZMKnock knock] nonce:nonce];
-
-    NSDictionary *data = @{ @"sender" : senderClientID, @"text" : knockMessage.data.base64String };
-    NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddOTRMessage data:data time:[NSDate dateWithTimeIntervalSinceReferenceDate:450000000]];
-    ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-    
-    // when
-    __block ZMClientMessage *message;
-    [self performPretendingUiMocIsSyncMoc:^{
-        message = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    
-    // then
-    XCTAssertNotNil(message);
-    XCTAssertEqualObjects(message.conversation, conversation);
-    XCTAssertEqualObjects(message.sender.remoteIdentifier.transportString, payload[@"from"]);
-    XCTAssertEqualObjects(message.serverTimestamp.transportString, payload[@"time"]);
-    XCTAssertEqualObjects(message.senderClientID, senderClientID);
-    XCTAssertEqualObjects(message.nonce, nonce);
-}
-
-
 - (void)testThatAKnockMessageHasKnockMessageData
 {
     // given
     ZMKnockMessage *message = [[ZMKnockMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
-    
-    // then
-    XCTAssertNil(message.textMessageData.messageText);
-    XCTAssertNil(message.systemMessageData);
-    XCTAssertNil(message.imageMessageData);
-    XCTAssertNotNil(message.knockMessageData);
-}
-
-- (void)testThatAClientMessageHasKnockMessageData
-{
-    // given
-    ZMGenericMessage *knock = [ZMGenericMessage messageWithContent:[ZMKnock knock] nonce:NSUUID.createUUID];
-    ZMClientMessage *message = [[ZMClientMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
-    [message addData:knock.data];
     
     // then
     XCTAssertNil(message.textMessageData.messageText);
@@ -1510,17 +1436,6 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     // when
     BOOL removed = [self checkThatAMessageIsRemoved:^ZMMessage *{
         return [[ZMTextMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
-    }];
-    
-    // then
-    XCTAssertTrue(removed);
-}
-
-- (void)testThatAClientMessageIsRemovedWhenAskForDeletion;
-{
-    // when
-    BOOL removed = [self checkThatAMessageIsRemoved:^ZMMessage *{
-        return [[ZMClientMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
     }];
     
     // then
@@ -1611,83 +1526,10 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     XCTAssertNil(message2.quote);
 }
 
-- (void)testThatATextMessageGenericDataIsRemoved
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    // when
-    ZMOTRMessage *message = (ZMOTRMessage *)[conversation appendMessageWithText:@"Test"];
-    
-    NSOrderedSet *dataSet = message.dataSet;
-
-    XCTAssertNotNil(message.managedObjectContext);
-
-    [message hideForSelfUser];
-    
-    [self.uiMOC saveOrRollback];
-    
-    // then
-    XCTAssertEqual(dataSet.count, (unsigned long)1);
-    for(ZMGenericMessageData *messageData in dataSet) {
-        XCTAssertNil(messageData.managedObjectContext);
-    }
-    XCTAssertNil(message.managedObjectContext);
-}
-
-- (void)testThatATextMessageGenericDataIsRemoved_Asset
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    // when
-    ZMOTRMessage *message = (ZMOTRMessage *)[conversation appendMessageWithImageData:[self verySmallJPEGData]];
-    
-    NSOrderedSet *dataSet = message.dataSet;
-    
-    XCTAssertNotNil(message.managedObjectContext);
-    
-    [message hideForSelfUser];
-    
-    [self.uiMOC saveOrRollback];
-    
-    // then
-    XCTAssertEqual(dataSet.count, (unsigned long)1);
-    for(ZMGenericMessageData *messageData in dataSet) {
-        XCTAssertNil(messageData.managedObjectContext);
-    }
-    XCTAssertNil(message.managedObjectContext);
-}
 
 @end
 
 @implementation ZMMessageTests (Reaction)
-
-- (void)testThatAddingAReactionAddsAReactionGenericMessage_fromUI;
-{
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-
-    ZMMessage *message = (id)[conversation appendMessageWithText:self.name];
-    [message markAsSent];
-    [self.uiMOC saveOrRollback];
-    XCTAssertEqual(message.deliveryState, ZMDeliveryStateSent);
-
-    // when
-    // this is the UI facing call to add reaction
-    
-    [ZMMessage addReaction:MessageReactionLike toMessage:message];
-    [self.uiMOC saveOrRollback];
-
-    //then
-    XCTAssertEqual(conversation.hiddenMessages.count, 1lu);
-    ZMClientMessage *reactionMessage = (ZMClientMessage *)[conversation.hiddenMessages anyObject];
-    XCTAssertNotNil(reactionMessage.genericMessage);
-    XCTAssertTrue(reactionMessage.genericMessage.hasReaction);
-    XCTAssertEqualObjects(reactionMessage.genericMessage.reaction.emoji, @"❤️");
-}
 
 - (void)testThatAUnSentMessageCanNotBeLiked;
 {

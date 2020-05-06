@@ -179,7 +179,7 @@ extension GenericMessage {
         
         func recipientForConfirmationMessage() -> Set<ZMUser>? {
             guard
-                hasConfirmation(),
+                hasConfirmation,
                 let managedObjectContext = conversation.managedObjectContext,
                 let message = ZMMessage.fetch(withNonce:UUID(uuidString:self.confirmation.firstMessageID), for:conversation, in:managedObjectContext),
                 let sender = message.sender else {
@@ -270,7 +270,7 @@ extension GenericMessage {
                                 sessionDirectory: EncryptionSessionsDirectory) -> NewOtrMessage {
         
         let userEntries = recipientsWithEncryptedData(selfClient, recipients: recipients, sessionDirectory: sessionDirectory)
-        let nativePush = !hasConfirmation() // We do not want to send pushes for delivery receipts
+        let nativePush = !hasConfirmation // We do not want to send pushes for delivery receipts
         
         var message = NewOtrMessage(withSender: selfClient, nativePush: nativePush, recipients: userEntries, blob: externalData)
         

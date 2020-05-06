@@ -26,7 +26,7 @@ final class ClientMessageTests_OTR: BaseZMClientMessageTests {}
 extension ClientMessageTests_OTR {
 
     func testThatCreatesEncryptedDataAndAddsItToGenericMessageAsBlob() {
-        self.syncMOC.performGroupedBlockAndWait { 
+        self.syncMOC.performGroupedBlockAndWait {
             let otherUser = ZMUser.insertNewObject(in:self.syncMOC)
             otherUser.remoteIdentifier = UUID.create()
             let firstClient = self.createClient(for: otherUser, createSessionWithSelfUser: true, onMOC: self.syncMOC)
@@ -384,9 +384,13 @@ extension ClientMessageTests_OTR {
             connection.status = .accepted
             conversation.connection = connection
             
-            let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: "yo"), nonce: UUID.create())
+            let genericMessage = GenericMessage(content: Text(content: "yo"), nonce: UUID.create())
             let clientmessage = ZMClientMessage(nonce: UUID(), managedObjectContext: self.syncMOC)
-            clientmessage.add(genericMessage.data())
+            do {
+                clientmessage.add(try genericMessage.serializedData())
+            } catch {
+                XCTFail()
+            }
             clientmessage.visibleInConversation = conversation
             
             self.syncMOC.saveOrRollback()
@@ -407,9 +411,13 @@ extension ClientMessageTests_OTR {
             conversation.remoteIdentifier = UUID.create()
             conversation.addParticipantAndUpdateConversationState(user: self.syncUser1, role: nil)
             
-            let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: "yo"), nonce: UUID.create())
+            let genericMessage = GenericMessage(content: Text(content: "yo"), nonce: UUID.create())
             let clientmessage = ZMClientMessage(nonce: UUID(), managedObjectContext: self.syncMOC)
-            clientmessage.add(genericMessage.data())
+            do {
+                clientmessage.add(try genericMessage.serializedData())
+            } catch {
+                XCTFail()
+            }
             clientmessage.visibleInConversation = conversation
             
             self.syncMOC.saveOrRollback()
