@@ -215,69 +215,44 @@ extension GenericMessage {
     }
     
     public mutating func updatePreview(assetId: String, token: String?) {
-        guard let content = content else {
-            return
-        }
-        switch content {
-        case .asset:
-            self.asset.preview.remote.assetID = assetId
-            if let token = token {
-                self.asset.preview.remote.assetToken = token
-            }
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                self.ephemeral.asset.preview.remote.assetID = assetId
-                if let token = token {
-                    self.ephemeral.asset.preview.remote.assetToken = token
-                }
-            default:
-                return
-            }
-        default:
-            return
+        updateAsset {
+            $0.preview.remote.update(assetId: assetId, token: token)
         }
     }
-    
+
     public mutating func updateUploaded(assetId: String, token: String?) {
-        guard let content = content else {
-            return
-        }
-        switch content {
-        case .asset:
-            self.asset.uploaded.assetID = assetId
-            if let token = token {
-                self.asset.uploaded.assetToken = token
-            }
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                self.ephemeral.asset.uploaded.assetID = assetId
-                if let token = token {
-                    self.ephemeral.asset.uploaded.assetToken = token
-                }
-            default:
-                return
-            }
-        default:
-            return
+        updateAsset {
+            $0.uploaded.update(assetId: assetId, token: token)
         }
     }
     
     public mutating func update(asset: WireProtos.Asset) {
-        guard let content = content else { return }
+        updateAsset { $0 = asset }
+    }
+    
+    mutating func updateAsset(_ block: (inout WireProtos.Asset) -> Void) {
+        guard let content = content else {
+            return
+        }
         switch content {
         case .asset:
-            asset.setContent(on: &self)
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                asset.setEphemeralContent(on: &ephemeral)
-            default:
+            block(&asset)
+        case .ephemeral:
+            guard case .asset = ephemeral.content else {
                 return
             }
+            block(&ephemeral.asset)
         default:
             return
+        }
+    }
+}
+
+extension WireProtos.Asset.RemoteData {
+    mutating func update(assetId: String, token: String?) {
+        assetID = assetId
+        if let token = token {
+            assetToken = token
         }
     }
 }
