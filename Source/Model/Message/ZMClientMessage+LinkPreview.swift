@@ -171,7 +171,8 @@ extension ZMClientMessage: ZMImageOwner {
             }
             
             let messageUpdate: MessageCapable
-            guard let content = genericMessage.content,
+            guard 
+                let content = genericMessage.content,
                 let nonce = nonce else {
                     return
             }
@@ -202,4 +203,3 @@ extension ZMClientMessage: ZMImageOwner {
         moc.enqueueDelayedSave()
     }
 }
-
