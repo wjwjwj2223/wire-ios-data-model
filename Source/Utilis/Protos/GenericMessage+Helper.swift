@@ -302,7 +302,7 @@ extension WireProtos.Reaction {
 
 extension LastRead {
     
-    init(conversationID: UUID, lastReadTimestamp: Date) {
+    public init(conversationID: UUID, lastReadTimestamp: Date) {
         self = LastRead.with {
             $0.conversationID = conversationID.transportString()
             $0.lastReadTimestamp = Int64(lastReadTimestamp.timeIntervalSince1970 * 1000)
@@ -357,7 +357,7 @@ extension MessageDelete {
 
 extension WireProtos.Confirmation {
     
-    init?(messageIds: [UUID], type: Confirmation.TypeEnum) {
+     public init?(messageIds: [UUID], type: Confirmation.TypeEnum) {
         guard let firstMessageID = messageIds.first else {
             return nil
         }
