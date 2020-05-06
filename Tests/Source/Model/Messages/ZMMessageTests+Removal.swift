@@ -151,4 +151,46 @@ class ZMMessageTests_Removal: BaseZMClientMessageTests {
         textMessage = ZMTextMessage.fetch(withNonce: nonce, for: conversation, in: uiMOC)
         XCTAssertTrue(textMessage?.hasBeenDeleted ?? false)
     }
+    
+    func testThatAClientMessageIsRemovedWhenAskForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMClientMessage.init(nonce: UUID.create(), managedObjectContext: self.uiMOC)
+        }
+        // then
+        XCTAssertTrue(removed)
+    }
+    
+    // Returns whether the message was deleted
+    private func checkThatAMessageIsRemoved(messageCreationBlock: (() -> ZMMessage)) -> Bool {
+        // given
+        let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+        conversation.remoteIdentifier = UUID.create()
+        
+        let testMessage = messageCreationBlock()
+        testMessage.visibleInConversation = conversation
+        
+        //sanity check
+        XCTAssertNotNil(conversation)
+        XCTAssertNotNil(testMessage)
+        self.uiMOC.saveOrRollback()
+        
+        //when
+        self.performPretendingUiMocIsSyncMoc {
+            testMessage.removeClearingSender(true)
+        }
+        self.uiMOC.saveOrRollback()
+        
+        //then
+        let fetchedMessage = ZMMessage.fetch(withNonce: testMessage.nonce, for: conversation, in: self.uiMOC) as! ZMMessage
+        var removed = fetchedMessage.visibleInConversation == nil && fetchedMessage.hiddenInConversation == conversation && fetchedMessage.sender == nil
+        
+        if fetchedMessage.isKind(of: ZMClientMessage.self) {
+            let clientMessage = fetchedMessage as! ZMClientMessage
+            removed = clientMessage.dataSet.count == 0 && clientMessage.underlyingMessage == nil
+        }
+        
+        return removed
+    }
+
 }

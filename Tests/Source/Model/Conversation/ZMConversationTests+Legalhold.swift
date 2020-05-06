@@ -617,7 +617,7 @@ class ZMConversationTests_Legalhold: ZMConversationTestsBase {
 
     func testThatItUpdatesFromMessageHint_EnabledToDisabled_Ephemeral() {
         assertLegalHoldHintBehavior(initiallyEnabled: true, receivedStatus: .disabled, expectedStatus: .disabled, expectSystemMessage: true, expectLegalHoldVerification: true, messageContent: {
-            Ephemeral.ephemeral(content: Text(content: "Legal hold is coming to town!"), expiresAfter: 60)
+            Ephemeral(content: Text(content: "Legal hold is coming to town!"), expiresAfter: 60)
         })
     }
 
@@ -629,7 +629,7 @@ class ZMConversationTests_Legalhold: ZMConversationTestsBase {
 
     func testThatItUpdatesFromMessageHint_DisabledToEnabled_Ephemeral() {
         assertLegalHoldHintBehavior(initiallyEnabled: false, receivedStatus: .enabled, expectedStatus: .pendingApproval, expectSystemMessage: true, expectLegalHoldVerification: true, messageContent: {
-            Ephemeral.ephemeral(content: Text(content: "🙈🙉🙊"), expiresAfter: 60)
+            Ephemeral(content: Text(content: "🙈🙉🙊"), expiresAfter: 60)
         })
     }
 

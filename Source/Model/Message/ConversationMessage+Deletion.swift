@@ -76,13 +76,20 @@ extension ZMMessage {
 
 extension ZMClientMessage {
     override var isEditableMessage : Bool {
-        guard let genericMessage = genericMessage,
-              let sender = sender, sender.isSelfUser
-        else {
+        guard
+            let genericMessage = underlyingMessage,
+            let sender = sender, sender.isSelfUser,
+            let content = genericMessage.content else {
+                return false
+        }
+        switch content {
+        case .edited:
+            return true
+        case .text:
+            return !isEphemeral && isSent
+        default:
             return false
         }
-        
-        return genericMessage.hasEdited() || genericMessage.hasText() && !isEphemeral && isSent
     }
 }
 

@@ -33,6 +33,7 @@ extern NSString * const DeliveredKey;
 @property (nonatomic) NSOrderedSet *dataSet;
 @property (nonatomic, readonly) NSSet *missingRecipients;
 @property (nonatomic, readonly, nullable) ZMGenericMessage *genericMessage;
+@property (nonatomic, readonly) BOOL isUpdatingExistingMessage;
 
 - (void)missesRecipient:(UserClient *)recipient;
 - (void)missesRecipients:(NSSet<UserClient *> *)recipients;

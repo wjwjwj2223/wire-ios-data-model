@@ -350,7 +350,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
         conversation.conversationType = .oneOnOne
         message.sender = ZMUser.insertNewObject(in: uiMOC)
         message.sender?.remoteIdentifier = UUID.create()
-        message.add(ZMGenericMessage.message(content: ZMAsset.asset(withUploadedOTRKey: Data(), sha256: Data()), nonce: message.nonce!))
+        message.add(GenericMessage(content: WireProtos.Asset(withUploadedOTRKey: Data(), sha256: Data()) , nonce: message.nonce!))
         XCTAssertTrue(message.genericAssetMessage!.assetData!.hasUploaded())
         
         // when
@@ -362,8 +362,10 @@ extension ZMAssetClientMessageTests_Ephemeral {
         // then
         guard let deleteMessage = conversation.hiddenMessages.first(where: { $0 is ZMClientMessage }) as? ZMClientMessage else { return XCTFail()}
         
-        guard let genericMessage = deleteMessage.genericMessage, genericMessage.hasDeleted()
-            else {return XCTFail()}
+        guard let genericMessage = deleteMessage.underlyingMessage,
+            case .deleted? = genericMessage.content else {
+                return XCTFail()
+        }
         
         XCTAssertNotEqual(deleteMessage, message)
         XCTAssertNotNil(message.sender)

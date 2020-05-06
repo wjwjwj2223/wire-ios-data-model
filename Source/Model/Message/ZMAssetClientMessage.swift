@@ -558,4 +558,3 @@ public protocol Asset {
     func encrypt()
     
 }
-

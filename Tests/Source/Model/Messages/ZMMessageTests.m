@@ -1516,17 +1516,6 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
     XCTAssertTrue(removed);
 }
 
-- (void)testThatAClientMessageIsRemovedWhenAskForDeletion;
-{
-    // when
-    BOOL removed = [self checkThatAMessageIsRemoved:^ZMMessage *{
-        return [[ZMClientMessage alloc] initWithNonce:NSUUID.createUUID managedObjectContext:self.uiMOC];
-    }];
-    
-    // then
-    XCTAssertTrue(removed);
-}
-
 - (void)testThatAnAssetClientMessageIsRemovedWhenAskForDeletion;
 {
     // when
@@ -1664,30 +1653,6 @@ NSUInteger const ZMClientMessageByteSizeExternalThreshold = 128000;
 @end
 
 @implementation ZMMessageTests (Reaction)
-
-- (void)testThatAddingAReactionAddsAReactionGenericMessage_fromUI;
-{
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-
-    ZMMessage *message = (id)[conversation appendMessageWithText:self.name];
-    [message markAsSent];
-    [self.uiMOC saveOrRollback];
-    XCTAssertEqual(message.deliveryState, ZMDeliveryStateSent);
-
-    // when
-    // this is the UI facing call to add reaction
-    
-    [ZMMessage addReaction:MessageReactionLike toMessage:message];
-    [self.uiMOC saveOrRollback];
-
-    //then
-    XCTAssertEqual(conversation.hiddenMessages.count, 1lu);
-    ZMClientMessage *reactionMessage = (ZMClientMessage *)[conversation.hiddenMessages anyObject];
-    XCTAssertNotNil(reactionMessage.genericMessage);
-    XCTAssertTrue(reactionMessage.genericMessage.hasReaction);
-    XCTAssertEqualObjects(reactionMessage.genericMessage.reaction.emoji, @"❤️");
-}
 
 - (void)testThatAUnSentMessageCanNotBeLiked;
 {
