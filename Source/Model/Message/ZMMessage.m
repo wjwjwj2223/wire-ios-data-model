@@ -366,29 +366,6 @@ NSString * const ZMMessageButtonStatesKey = @"buttonStates";
     }];
 }
 
-- (void)removePendingDeliveryReceipts
-{
-    // Pending receipt can exist only in new inserted messages since it is deleted locally after it is sent to the backend
-    NSFetchRequest *requestForInsertedMessages = [ZMClientMessage sortedFetchRequestWithPredicate:[ZMClientMessage predicateForObjectsThatNeedToBeInsertedUpstream]];
-    NSArray *possibleMatches = [self.managedObjectContext executeFetchRequestOrAssert:requestForInsertedMessages];
-    
-    NSArray *confirmationReceipts = [possibleMatches filterWithBlock:^BOOL(ZMClientMessage *candidateConfirmationReceipt) {
-        if (candidateConfirmationReceipt.genericMessage.hasConfirmation &&
-            candidateConfirmationReceipt.genericMessage.confirmation.hasFirstMessageId &&
-            [candidateConfirmationReceipt.genericMessage.confirmation.firstMessageId isEqual:self.nonce.transportString]) {
-            return YES;
-        }
-        return NO;
-    }];
-    
-    // TODO: Re-enable
-//    NSAssert(confirmationReceipts.count <= 1, @"More than one confirmation receipt");
-    
-    for (ZMClientMessage *confirmationReceipt in confirmationReceipts) {
-        [self.managedObjectContext deleteObject:confirmationReceipt];
-    }
-}
-
 - (NSUUID *)nonceFromPostPayload:(NSDictionary *)payload
 {
     ZMUpdateEventType eventType = [ZMUpdateEvent updateEventTypeForEventTypeString:[payload optionalStringForKey:@"type"]];

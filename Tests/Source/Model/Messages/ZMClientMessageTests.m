@@ -156,77 +156,7 @@
 
 @end
 
-
-
 @implementation ZMClientMessageTests (CreateClientMessageFromUpdateEvent)
-
-- (void)testThatItCreatesClientMessagesFromUpdateEvent
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    NSUUID *nonce = [NSUUID createUUID];
-    ZMGenericMessage *message = [ZMGenericMessage messageWithContent:[ZMText textWith:self.name mentions:@[] linkPreviews:@[] replyingTo:nil] nonce:nonce];
-    NSData *contentData = message.data;
-    
-    NSString *data = [contentData base64EncodedStringWithOptions:0];
-    
-    NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddClientMessage data:data];
-    
-    ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-    XCTAssertNotNil(event);
-    
-    // when
-    __block ZMClientMessage *sut;
-    [self performPretendingUiMocIsSyncMoc:^{
-        sut = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    
-    // then
-    XCTAssertNotNil(sut);
-    XCTAssertEqualObjects(sut.conversation, conversation);
-    XCTAssertEqualObjects(sut.sender.remoteIdentifier.transportString, payload[@"from"]);
-    XCTAssertEqualObjects(sut.serverTimestamp.transportString, payload[@"time"]);
-    
-    XCTAssertEqualObjects(sut.nonce, nonce);
-    AssertEqualData(sut.genericMessage.data, contentData);
-}
-
-- (void)testThatItCreatesOTRMessagesFromUpdateEvent
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    NSString *senderClientID = [NSString createAlphanumericalString];
-    NSUUID *nonce = [NSUUID createUUID];
-    ZMGenericMessage *message = [ZMGenericMessage messageWithContent:[ZMText textWith:self.name mentions:@[] linkPreviews:@[] replyingTo:nil] nonce:nonce];
-    NSData *contentData = message.data;
-    
-    NSDictionary *data = @{ @"sender": senderClientID, @"text" : [contentData base64EncodedStringWithOptions:0] };
-    NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddOTRMessage data:data];
-    
-    ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-    XCTAssertNotNil(event);
-    
-    // when
-    __block ZMClientMessage *sut;
-    [self performPretendingUiMocIsSyncMoc:^{
-        sut = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    
-    // then
-    XCTAssertNotNil(sut);
-    XCTAssertEqualObjects(sut.conversation, conversation);
-    XCTAssertEqualObjects(sut.sender.remoteIdentifier.transportString, payload[@"from"]);
-    XCTAssertEqualObjects(sut.serverTimestamp.transportString, payload[@"time"]);
-    XCTAssertEqualObjects(sut.senderClientID, senderClientID);
-    
-    XCTAssertEqualObjects(sut.nonce, nonce);
-    AssertEqualData(sut.genericMessage.data, contentData);
-}
-
 - (void)testThatItDoesNotCreateOTRMessageIfItsIdentifierIsInvalid
 {
     // given
@@ -265,24 +195,24 @@
     NSUUID *nonce = [NSUUID createUUID];
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.remoteIdentifier = [NSUUID createUUID];
-    
+
     ZMClientMessage *existingMessage = [[ZMClientMessage alloc] initWithNonce:nonce managedObjectContext:self.uiMOC];
     ZMGenericMessage *message = [ZMGenericMessage messageWithContent:[ZMKnock knock] nonce:NSUUID.createUUID];
     [existingMessage addData:message.data];
     existingMessage.visibleInConversation = conversation;
-    
+
     NSDictionary *data = @{@"nonce": nonce.transportString};
     NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationKnock data:data];
-    
+
     ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
     XCTAssertNotNil(event);
-    
+
     // when
     __block ZMKnockMessage *sut;
     [self performPretendingUiMocIsSyncMoc:^{
         sut = [ZMKnockMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
     }];
-    
+
     // then
     XCTAssertNil(sut);
     XCTAssertEqual(conversation.lastMessage, existingMessage);
@@ -295,18 +225,18 @@
     NSUUID *nonce = [NSUUID createUUID];
     ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
     conversation.remoteIdentifier = [NSUUID createUUID];
-    
+
     NSDictionary *data = @{ @"sender": senderClientID, @"text" : [ZMGenericMessage clientAction:ZMClientActionRESETSESSION nonce:nonce].data.base64String };
     NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddOTRMessage data:data];
     ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
     XCTAssertNotNil(event);
-    
+
     // when
     __block ZMClientMessage *sut;
     [self performPretendingUiMocIsSyncMoc:^{
         sut = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
     }];
-    
+
     // then
     XCTAssertNil(sut);
     XCTAssertEqual(conversation.allMessages.count, 0u);
@@ -563,90 +493,6 @@
     XCTAssertEqualObjects(existingMessage.textMessageData.messageText, initialText);
 }
 
-- (void)testThatItIgnores_AnyAdditionalFieldsInTheLinkPreviewUpdate
-{
-    // given
-    NSString *initialText = @"initial text";
-    
-    NSUUID *nonce = [NSUUID createUUID];
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-    
-    UserClient *selfClient = [self createSelfClient];
-    
-    ZMClientMessage *existingMessage = [[ZMClientMessage alloc] initWithNonce:nonce managedObjectContext:self.uiMOC];
-    ZMGenericMessage *message = [ZMGenericMessage messageWithContent:[ZMText textWith:initialText mentions:@[] linkPreviews:@[] replyingTo:nil] nonce:nonce];
-    [existingMessage addData:message.data];
-    existingMessage.visibleInConversation = conversation;
-    existingMessage.sender = self.selfUser;
-    existingMessage.senderClientID = selfClient.remoteIdentifier;
-    
-    // We add a quote to the link preview update
-    ZMLinkPreview *linkPreview = [ZMLinkPreview linkPreviewWithOriginalURL:@"http://www.sunet.se" permanentURL:@"http://www.sunet.se" offset:0 title:@"Test" summary:nil imageAsset:nil];
-    ZMGenericMessage *modifiedMessage = [ZMGenericMessage messageWithContent:[ZMText textWith:initialText mentions:@[] linkPreviews:@[linkPreview] replyingTo:existingMessage] nonce:nonce];
-    
-    NSDictionary *data = @{ @"sender" : selfClient.remoteIdentifier, @"recipient": selfClient.remoteIdentifier, @"text": modifiedMessage.data.base64String };
-    NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddOTRMessage data:data time:[NSDate date] fromUser:self.selfUser];
-    
-    ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-    XCTAssertNotNil(event);
-    
-    // when
-    __block ZMClientMessage *sut;
-    [self performPretendingUiMocIsSyncMoc:^{
-        sut = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-    
-    // then
-    XCTAssertNotNil(sut);
-    XCTAssertNotNil(existingMessage.linkPreview);
-    XCTAssertFalse(existingMessage.genericMessage.textData.hasQuote);
-    XCTAssertEqualObjects(existingMessage.textMessageData.messageText, initialText);
-}
-
-- (void)testThatItIgnoresBlacklistedLinkPreview
-{
-    // given
-    NSString *initialText = @"initial text";
-
-    NSUUID *nonce = [NSUUID createUUID];
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    conversation.remoteIdentifier = [NSUUID createUUID];
-
-    UserClient *selfClient = [self createSelfClient];
-
-    ZMClientMessage *existingMessage = [[ZMClientMessage alloc] initWithNonce:nonce managedObjectContext:self.uiMOC];
-    ZMGenericMessage *message = [ZMGenericMessage messageWithContent:[ZMText textWith:initialText mentions:@[] linkPreviews:@[] replyingTo:nil] nonce:nonce];
-    [existingMessage addData:message.data];
-    existingMessage.visibleInConversation = conversation;
-    existingMessage.sender = self.selfUser;
-    existingMessage.senderClientID = selfClient.remoteIdentifier;
-
-    // We add a quote to the link preview update
-    ZMLinkPreview *linkPreview = [ZMLinkPreview linkPreviewWithOriginalURL:@"http://www.youtube.com/watch" permanentURL:@"http://www.youtube.com/watch" offset:0 title:@"YouTube" summary:nil imageAsset:nil];
-    ZMGenericMessage *modifiedMessage = [ZMGenericMessage messageWithContent:[ZMText textWith:initialText mentions:@[] linkPreviews:@[linkPreview] replyingTo:existingMessage] nonce:nonce];
-
-    NSDictionary *data = @{ @"sender" : selfClient.remoteIdentifier, @"recipient": selfClient.remoteIdentifier, @"text": modifiedMessage.data.base64String };
-    NSDictionary *payload = [self payloadForMessageInConversation:conversation type:EventConversationAddOTRMessage data:data time:[NSDate date] fromUser:self.selfUser];
-
-    ZMUpdateEvent *event = [ZMUpdateEvent eventFromEventStreamPayload:payload uuid:nil];
-    XCTAssertNotNil(event);
-
-    // when
-    __block ZMClientMessage *sut;
-    [self performPretendingUiMocIsSyncMoc:^{
-        sut = [ZMClientMessage createOrUpdateMessageFromUpdateEvent:event inManagedObjectContext:self.uiMOC prefetchResult:nil];
-    }];
-
-    // then
-    XCTAssertNotNil(sut);
-    XCTAssertNotNil(existingMessage.firstZMLinkPreview);
-    XCTAssertNil(existingMessage.linkPreview); // do not return a link preview even if it's included in the protobuf
-    XCTAssertFalse(existingMessage.genericMessage.textData.hasQuote);
-    XCTAssertEqualObjects(existingMessage.textMessageData.messageText, initialText);
-}
-
-
 - (void)testThatItReturnsNilIfTheClientMessageIsZombie
 {
     // given
@@ -698,10 +544,7 @@
 
 @end
 
-
 @implementation ZMClientMessageTests (ExternalMessage)
-
-
 - (void)testThatItDecryptsMessageWithExternalBlobCorrectly
 {
     // given
@@ -724,80 +567,6 @@
         // then
         XCTAssertNotNil(message);
         XCTAssertEqualObjects(message.text.content, self.expectedExternalMessageText);
-    }];
-}
-
-
-@end
-
-
-@implementation ZMClientMessageTests (DataSet)
-
-- (void)testThatItCanUpdateAnExistingLinkPreviewInTheDataSetWithoutCreatingMultipleOnes
-{
-    [self.syncMOC performGroupedBlockAndWait:^{
-        // given
-        NSUUID *nonce = NSUUID.createUUID;
-        ZMClientMessage *message = [[ZMClientMessage alloc] initWithNonce:nonce managedObjectContext:self.syncMOC];
-        NSData *otrKey = NSData.randomEncryptionKey, *sha256 = NSData.zmRandomSHA256Key;
-        
-        // when
-        {
-            ZMTextBuilder *builder = ZMText.builder;
-            [builder setContent:self.name];
-            ZMLinkPreviewBuilder *previewBuilder = ZMLinkPreview.builder;
-            [previewBuilder setUrl:self.name];
-            [previewBuilder setUrlOffset:0];
-            ZMArticleBuilder *articleBuilder = ZMArticle.builder;
-            [articleBuilder setTitle:@"Title"];
-            [articleBuilder setSummary:@"Summary"];
-            ZMAssetBuilder *assetBuilder = ZMAsset.builder;
-            ZMAssetRemoteDataBuilder *remoteBuilder = ZMAssetRemoteData.builder;
-            [remoteBuilder setOtrKey:otrKey];
-            [remoteBuilder setSha256:sha256];
-            [assetBuilder setUploadedBuilder:remoteBuilder];
-            [articleBuilder setImageBuilder:assetBuilder];
-            [articleBuilder setPermanentUrl:@"www.example.de"];
-            [previewBuilder setArticleBuilder:articleBuilder];
-            [builder setLinkPreviewArray:@[previewBuilder.build]];
-            ZMGenericMessageBuilder *messageBuilder = ZMGenericMessage.builder;
-            [messageBuilder setText:builder.build];
-            [messageBuilder setMessageId:nonce.transportString];
-            ZMGenericMessage *firstMessage = messageBuilder.build;
-            [message addData:firstMessage.data];
-            
-            // then
-            XCTAssertEqual(message.dataSet.count, 1lu);
-            XCTAssertTrue(message.genericMessage.hasText);
-            XCTAssertEqual(message.genericMessage.text.linkPreview.count, 1lu);
-        }
-        
-        // when
-        {
-            ZMGenericMessageBuilder *secondBuilder = [[ZMGenericMessage builder] mergeFrom:message.genericMessage];
-            ZMTextBuilder *builder = secondBuilder.text.toBuilder;
-            ZMLinkPreviewBuilder *linkBuilder = [(ZMLinkPreview *)secondBuilder.text.linkPreview.firstObject toBuilder];
-            ZMArticleBuilder *articleBuilder = linkBuilder.article.toBuilder;
-            ZMAssetBuilder *assetBuilder = linkBuilder.article.image.toBuilder;
-            ZMAssetRemoteDataBuilder *remoteBuilder = linkBuilder.article.image.uploaded.toBuilder;
-            [remoteBuilder setAssetId:@"Asset ID"];
-            [remoteBuilder setAssetToken:@"Asset Token"];
-            [assetBuilder setUploadedBuilder:remoteBuilder];
-            [articleBuilder setImageBuilder:assetBuilder];
-            [linkBuilder setArticleBuilder:articleBuilder];
-            [builder setLinkPreviewArray:@[linkBuilder.build]];
-            [secondBuilder setTextBuilder:builder];
-            [message addData:secondBuilder.build.data];
-            
-            // then
-            XCTAssertEqual(message.dataSet.count, 1lu);
-            XCTAssertTrue(message.genericMessage.hasText);
-            XCTAssertEqual(message.genericMessage.text.linkPreview.count, 1lu);
-            ZMAssetRemoteData *remote = [(ZMLinkPreview *)message.genericMessage.text.linkPreview.firstObject article].image.uploaded;
-            XCTAssertEqualObjects(remote.assetId, @"Asset ID");
-            XCTAssertEqualObjects(remote.assetToken, @"Asset Token");
-        }
-
     }];
 }
 

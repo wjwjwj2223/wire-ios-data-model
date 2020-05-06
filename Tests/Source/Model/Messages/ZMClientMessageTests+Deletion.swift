@@ -561,7 +561,7 @@ extension ZMClientMessageTests_Deletion {
 extension ZMClientMessageTests_Deletion {
 
     func createMessageDeletedUpdateEvent(_ nonce: UUID, conversationID: UUID, senderID: UUID = .create()) -> ZMUpdateEvent {
-        let genericMessage = ZMGenericMessage.message(content: ZMMessageDelete(messageID: nonce))
+        let genericMessage = GenericMessage(content: MessageDelete(messageId: nonce))
         return createUpdateEvent(nonce, conversationID: conversationID, genericMessage: genericMessage, senderID: senderID)
     }
     

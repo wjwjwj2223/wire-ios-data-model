@@ -54,10 +54,10 @@ extension ZMClientMessage {
         message?.updateButtonStates(withConfirmation: confirmation)
     }
     
-    @objc static func expireButtonState(forButtonAction buttonAction: ZMButtonAction,
+    static func expireButtonState(forButtonAction buttonAction: ButtonAction,
                                         forConversation conversation: ZMConversation,
                                         inContext moc: NSManagedObjectContext) {
-        let nonce = UUID(uuidString: buttonAction.referenceMessageId)
+        let nonce = UUID(uuidString: buttonAction.referenceMessageID)
         let message = ZMClientMessage.fetch(withNonce: nonce, for: conversation, in: moc)
         message?.expireButtonState(withButtonAction: buttonAction)
     }
@@ -78,8 +78,8 @@ extension ZMClientMessage {
         return buttonStates?.contains(where: { $0.remoteIdentifier == buttonId }) ?? false
     }
     
-    private func expireButtonState(withButtonAction buttonAction: ZMButtonAction) {
-        let state = buttonStates?.first(where: { $0.remoteIdentifier == buttonAction.buttonId })
+    private func expireButtonState(withButtonAction buttonAction: ButtonAction) {
+        let state = buttonStates?.first(where: { $0.remoteIdentifier == buttonAction.buttonID })
         managedObjectContext?.performGroupedBlock { [managedObjectContext] in
             state?.isExpired = true
             state?.state = .unselected

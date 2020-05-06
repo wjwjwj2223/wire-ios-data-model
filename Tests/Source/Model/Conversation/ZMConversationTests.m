@@ -1835,23 +1835,6 @@
     XCTAssertNotNil(newMessage);
 }
 
-- (void)testThatItReturnsMessageIfLastMessageIsEditedTextAndSentBySelfUser;
-{
-    // given
-    ZMConversation *conversation = [ZMConversation insertNewObjectInManagedObjectContext:self.uiMOC];
-    
-    // when
-    ZMMessage *message = (id)[conversation appendMessageWithText:@"Test Message"];
-    message.sender = self.selfUser;
-    [message markAsSent];
-    [message.textMessageData editText:@"Edited Test Message" mentions:@[] fetchLinkPreview:YES];
-
-    WaitForAllGroupsToBeEmpty(0.5);
-    
-    // then
-    XCTAssertEqualObjects(conversation.lastEditableMessage, message);
-}
-
 - (void)testThatItReturnsMessageIfLastMessageIsTextAndSentBySelfUser;
 {
     // given

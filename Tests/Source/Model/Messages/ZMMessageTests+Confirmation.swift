@@ -201,7 +201,7 @@ extension ZMMessageTests_Confirmation {
             return
         }
         
-        XCTAssertTrue(hiddenMessage.genericMessage?.hasConfirmation() == true)
+        XCTAssertTrue(hiddenMessage.underlyingMessage?.hasConfirmation == true)
         // when
         
         sut.removePendingDeliveryReceipts()
