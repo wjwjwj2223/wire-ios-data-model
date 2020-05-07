@@ -166,6 +166,35 @@ extension GenericMessage {
     }
 }
 
+
+extension GenericMessage {
+    var v3_isImage: Bool {
+        return assetData?.original.hasRasterImage ?? false
+    }
+    
+    var v3_uploadedAssetId: String? {
+        guard
+            let assetData = assetData,
+            case .uploaded? = assetData.status
+        else {
+            return nil
+        }
+        return assetData.uploaded.assetID
+    }
+    
+    var previewAssetId: String? {
+        guard
+            let assetData = assetData,
+            assetData.hasPreview,
+            assetData.preview.hasRemote,
+            assetData.preview.remote.hasAssetID
+        else {
+            return nil
+        }
+        return assetData.preview.remote.assetID
+    }
+}
+
 extension GenericMessage {
     var linkPreviews: [LinkPreview] {
         guard let content = content else { return [] }
@@ -463,79 +492,6 @@ public extension LinkPreview {
         image.uploaded.assetID = assetKey
         image.uploaded.assetToken = assetToken ?? ""
     }
-}
-
-// MARK:- Update assets
-
-extension GenericMessage {
-    
-    public mutating func updatePreview(assetId: String, token: String?) {
-        guard let content = content else {
-            return
-        }
-        switch content {
-        case .asset:
-            self.asset.preview.remote.assetID = assetId
-            if let token = token {
-                self.asset.preview.remote.assetToken = token
-            }
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                self.ephemeral.asset.preview.remote.assetID = assetId
-                if let token = token {
-                    self.ephemeral.asset.preview.remote.assetToken = token
-                }
-            default:
-                return
-            }
-        default:
-            return
-        }
-    }
-    
-    public mutating func updateUploaded(assetId: String, token: String?) {
-        guard let content = content else {
-            return
-        }
-        switch content {
-        case .asset:
-            self.asset.uploaded.assetID = assetId
-            if let token = token {
-                self.asset.uploaded.assetToken = token
-            }
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                self.ephemeral.asset.uploaded.assetID = assetId
-                if let token = token {
-                    self.ephemeral.asset.uploaded.assetToken = token
-                }
-            default:
-                return
-            }
-        default:
-            return
-        }
-    }
-    
-    public mutating func update(asset: WireProtos.Asset) {
-        guard let content = content else { return }
-        switch content {
-        case .asset:
-            self.asset = asset
-        case .ephemeral(let data):
-            switch data.content {
-            case .asset?:
-                self.ephemeral.asset = asset
-            default:
-                return
-            }
-        default:
-            return
-        }
-    }
-
 }
 
 // MARK:- Set message flags

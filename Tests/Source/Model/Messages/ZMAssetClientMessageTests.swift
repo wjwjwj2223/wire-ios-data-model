@@ -63,11 +63,12 @@ class BaseZMAssetClientMessageTests : BaseZMClientMessageTests {
         
         let keys = ZMImageAssetEncryptionKeys(otrKey: Data.randomEncryptionKey(), macKey: Data.zmRandomSHA256Key(), mac: Data.zmRandomSHA256Key())
         
-        let mediumMessage = ZMImageAsset(mediumProperties: properties, processedProperties: properties, encryptionKeys: keys, format: .medium)
-        let previewMessage = ZMImageAsset(mediumProperties: properties, processedProperties: properties, encryptionKeys: keys, format: .preview)
         
-        message.add(ZMGenericMessage.message(content: mediumMessage, nonce: messageNonce))
-        message.add(ZMGenericMessage.message(content: previewMessage, nonce: messageNonce))
+        let mediumMessage = ImageAsset(mediumProperties: properties, processedProperties: properties, encryptionKeys: keys, format: .medium)
+        let previewMessage = ImageAsset(mediumProperties: properties, processedProperties: properties, encryptionKeys: keys, format: .preview)
+        
+        message.add(GenericMessage(content: mediumMessage, nonce: messageNonce))
+        message.add(GenericMessage(content: previewMessage, nonce: messageNonce))
     }
     
     func appendImageMessage(to conversation: ZMConversation, imageData: Data? = nil) -> ZMAssetClientMessage {
@@ -75,8 +76,8 @@ class BaseZMAssetClientMessageTests : BaseZMClientMessageTests {
         let nonce = UUID.create()
         let message = conversation.append(imageFromData: data, nonce: nonce) as! ZMAssetClientMessage
 
-        let uploaded = ZMAsset.asset(withUploadedOTRKey: .randomEncryptionKey(), sha256: .zmRandomSHA256Key())
-        message.add(ZMGenericMessage.message(content: uploaded, nonce: nonce))
+        let uploaded = WireProtos.Asset(withUploadedOTRKey: .randomEncryptionKey(), sha256: .zmRandomSHA256Key())
+        message.add(GenericMessage(content: uploaded, nonce: nonce))
         
         return message
     }
@@ -206,12 +207,11 @@ extension ZMAssetClientMessageTests {
         XCTAssertNotNil(sut)
         
         // then
-        let assetMessage = sut.genericAssetMessage
+        let assetMessage = sut.underlyingMessage
         XCTAssertNotNil(assetMessage)
-        XCTAssertEqual(assetMessage?.messageId, sut.nonce?.transportString())
-        XCTAssertTrue(assetMessage!.hasAsset())
+        XCTAssertEqual(assetMessage?.messageID, sut.nonce?.transportString())
         XCTAssertNotNil(assetMessage?.asset)
-        XCTAssertTrue(assetMessage!.asset.hasOriginal())
+        XCTAssertTrue(assetMessage!.asset.hasOriginal)
         
         let original = assetMessage?.asset.original
         XCTAssertNotNil(original)
@@ -238,28 +238,25 @@ extension ZMAssetClientMessageTests {
         let otrKey = Data.randomEncryptionKey()
         let encryptedData = data.zmEncryptPrefixingPlainTextIV(key: otrKey)
         let sha256 = encryptedData.zmSHA256Digest()
-        let builder = ZMAssetImageMetaData.builder()!
-        builder.setWidth(10)
-        builder.setHeight(10)
-        let preview = ZMAssetPreview.preview(
-            withSize: UInt64(data.count),
+        let preview = WireProtos.Asset.Preview(
+            size: UInt64(data.count),
             mimeType: mimeType,
-            remoteData: ZMAssetRemoteData.remoteData(withOTRKey: otrKey, sha256: sha256),
-            imageMetadata: builder.build()!)
-        let previewAsset = ZMAsset.asset(preview: preview)
-        let previewMessage = ZMGenericMessage.message(content: previewAsset, nonce: nonce)
-
+            remoteData: WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256),
+            imageMetadata: WireProtos.Asset.ImageMetaData(width: 10, height: 10))
+        
+        let previewAsset = WireProtos.Asset(original: nil, preview: preview)
+        let previewMessage = GenericMessage(content: previewAsset, nonce: nonce)
         
         // when
         sut.add(previewMessage)
         
         // then
-        XCTAssertEqual(sut.genericAssetMessage?.messageId, nonce.transportString())
+        XCTAssertEqual(sut.underlyingMessage?.messageID, nonce.transportString())
         
-        guard let asset = sut.genericAssetMessage?.asset else { return XCTFail() }
+        guard let asset = sut.underlyingMessage?.asset else { return XCTFail() }
         XCTAssertNotNil(asset)
-        XCTAssertTrue(asset.hasOriginal())
-        XCTAssertTrue(asset.hasPreview())
+        XCTAssertTrue(asset.hasOriginal)
+        XCTAssertTrue(asset.hasPreview)
         XCTAssertEqual(asset.original.name, filename)
         XCTAssertEqual(sut.fileMessageData?.filename, filename)
         XCTAssertEqual(asset.original.mimeType, mimeType)
@@ -412,13 +409,13 @@ extension ZMAssetClientMessageTests {
             // when
             let otrKey = Data.randomEncryptionKey()
             let sha256 = Data.zmRandomSHA256Key()
-            sut.add(ZMGenericMessage.message(content: ZMAsset.asset(withUploadedOTRKey: otrKey, sha256: sha256), nonce: sut.nonce!))
+            sut.add(GenericMessage(content: WireProtos.Asset(withUploadedOTRKey: otrKey, sha256: sha256), nonce: sut.nonce!))
             
             // then
             XCTAssertNotNil(sut)
-            guard let asset = sut.genericAssetMessage?.asset else { return XCTFail() }
-            XCTAssertTrue(asset.hasUploaded())
-            let uploaded = asset.uploaded!
+            guard let asset = sut.underlyingMessage?.asset else { return XCTFail() }
+            XCTAssertTrue(asset.hasUploaded)
+            let uploaded = asset.uploaded
             XCTAssertEqual(uploaded.otrKey, otrKey)
             XCTAssertEqual(uploaded.sha256, sha256)
         }
@@ -478,7 +475,7 @@ extension ZMAssetClientMessageTests {
             let sut = ZMAssetClientMessage(nonce: .create(), managedObjectContext: syncMOC)
             sut.sender = ZMUser.selfUser(in: syncMOC)
             sut.visibleInConversation = syncConversation
-            let original = ZMGenericMessage.message(content: ZMAsset.asset(originalWithImageSize: CGSize(width: 10, height: 10), mimeType: "text/plain", size: 256), nonce: sut.nonce!)
+            let original = GenericMessage(content: WireProtos.Asset(imageSize: CGSize(width: 10, height: 10), mimeType: "text/plain", size: 256), nonce: sut.nonce!)
             sut.add(original)
             sut.transferState = .uploaded
             XCTAssertTrue(self.syncMOC.saveOrRollback())
@@ -593,10 +590,10 @@ extension ZMAssetClientMessageTests {
             // then
             XCTAssertEqual(sut.fileMessageData?.thumbnailAssetID, uuid)
             // testing that other properties are kept
-            XCTAssertEqual(sut.genericAssetMessage?.asset.preview.remote.otrKey, remoteData.otrKey)
-            XCTAssertEqual(sut.genericAssetMessage?.asset.preview.remote.sha256, remoteData.sha256)
-            XCTAssertEqual(sut.genericAssetMessage?.asset.preview.image.width, imageMetadata.width)
-            XCTAssertEqual(sut.genericAssetMessage?.asset.original.name, sut.filename)
+            XCTAssertEqual(sut.underlyingMessage?.asset.preview.remote.otrKey, remoteData.otrKey)
+            XCTAssertEqual(sut.underlyingMessage?.asset.preview.remote.sha256, remoteData.sha256)
+            XCTAssertEqual(sut.underlyingMessage?.asset.preview.image.width, imageMetadata.width)
+            XCTAssertEqual(sut.underlyingMessage?.asset.original.name, sut.filename)
         }
     }
     
@@ -649,7 +646,7 @@ extension ZMAssetClientMessageTests {
         let uuid = UUID.create()
         let sut = appendFileMessage(to: conversation)!
 
-        XCTAssertFalse(sut.genericAssetMessage!.asset.hasPreview())
+        XCTAssertFalse(sut.underlyingMessage!.asset.hasPreview)
         XCTAssertTrue(uiMOC.saveOrRollback())
         XCTAssertTrue(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
 
@@ -816,7 +813,7 @@ extension ZMAssetClientMessageTests {
         let directory = self.uiMOC.zm_fileAssetCache
         let nonce = UUID.create()
         let imageData = imageData ?? sampleImageData()
-        var genericMessage : [ZMImageFormat : ZMGenericMessage] = [:]
+        var genericMessage : [ZMImageFormat : GenericMessage] = [:]
         let assetMessage = ZMAssetClientMessage(nonce: nonce, managedObjectContext: uiMOC)
         assetMessage.sender = selfUser
         assetMessage.visibleInConversation = conversation
@@ -827,12 +824,12 @@ extension ZMAssetClientMessageTests {
             let encryptedData = processedData.zmEncryptPrefixingPlainTextIV(key: otrKey)
             let sha256 = encryptedData.zmSHA256Digest()
             let encryptionKeys = ZMImageAssetEncryptionKeys(otrKey: otrKey, sha256: sha256)
-            let imageAsset = ZMImageAsset(mediumProperties: storeProcessed ? self.sampleImageProperties(.medium) : nil,
-                                          processedProperties: storeProcessed ? self.sampleImageProperties(format) : nil,
-                                          encryptionKeys: storeEncrypted ? encryptionKeys : nil,
-                                          format: format)
+            let imageAsset = ImageAsset(mediumProperties: storeProcessed ? self.sampleImageProperties(.medium) : nil,
+                                        processedProperties: storeProcessed ? self.sampleImageProperties(format) : nil,
+                                        encryptionKeys: storeEncrypted ? encryptionKeys : nil,
+                                        format: format)
             
-            genericMessage[format] = ZMGenericMessage.message(content: imageAsset, nonce: nonce)
+            genericMessage[format] = GenericMessage(content: imageAsset, nonce: nonce)
             
             if (storeProcessed) {
                 directory.storeAssetData(assetMessage, format: format, encrypted: false, data: processedData)
@@ -1239,7 +1236,7 @@ extension ZMAssetClientMessageTests {
         sut.update(with: uploaded, initialUpdate: false)
 
         // then
-        XCTAssertTrue(sut.genericAssetMessage!.v3_isImage)
+        XCTAssertTrue(sut.underlyingMessage!.v3_isImage)
         XCTAssertEqual(sut.imageMessageData?.originalSize, CGSize(width: 123, height: 4569))
         XCTAssertEqual(sut.version, 3)
     }
@@ -1314,7 +1311,7 @@ extension ZMAssetClientMessageTests {
         uiMOC.zm_fileAssetCache.storeAssetData(sut, format: .medium, encrypted: false, data: data)
 
         // then
-        XCTAssertTrue(sut.genericAssetMessage!.v3_isImage)
+        XCTAssertTrue(sut.underlyingMessage!.v3_isImage)
         XCTAssertTrue(sut.hasDownloadedFile)
         XCTAssertEqual(sut.imageMessageData?.imageData, data)
         XCTAssertEqual(sut.version, 3)

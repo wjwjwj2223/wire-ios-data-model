@@ -96,6 +96,20 @@ extension WireProtos.Asset {
             $0.notUploaded = notUploaded
         }
     }
+    
+    var hasUploaded: Bool {
+        guard case .uploaded? = status else {
+            return false
+        }
+        return true
+    }
+    
+    var hasNotUploaded: Bool {
+        guard case .notUploaded? = status else {
+            return false
+        }
+        return true
+    }
 }
 
 extension WireProtos.Asset.Original {
@@ -111,6 +125,25 @@ extension WireProtos.Asset.Original {
                 $0.image = imageMeta
             }
         }
+    }
+    
+    /// Returns the normalized loudness as floats between 0 and 1
+    var normalizedLoudnessLevels : [Float] {
+        
+        guard audio.hasNormalizedLoudness else { return [] }
+        guard audio.normalizedLoudness.count > 0 else { return [] }
+        
+        let data = audio.normalizedLoudness
+        let offsets = 0..<data.count
+        return offsets
+            .map { offset -> UInt8 in
+                var number : UInt8 = 0
+                data.copyBytes(to: &number, from: (0 + offset)..<(MemoryLayout<UInt8>.size+offset))
+                return number
+            }
+            .map {
+                Float(Float($0)/255.0)
+            }
     }
 }
 
@@ -148,6 +181,78 @@ extension WireProtos.Asset.RemoteData {
             if let token = assetToken {
                 $0.assetToken = token
             }
+        }
+    }
+}
+
+// MARK:- Update assets
+
+extension GenericMessage {
+    mutating func updateAssetOriginal(withImageProperties imageProperties: ZMIImageProperties) {
+        let asset = WireProtos.Asset(imageSize: imageProperties.size, mimeType: imageProperties.mimeType, size: UInt64(imageProperties.length))
+        update(asset: asset)
+    }
+    
+    mutating func updateAssetPreview(withUploadedOTRKey otrKey: Data, sha256: Data) {
+        guard var preview = assetData?.preview else { return }
+        
+        preview.remote = WireProtos.Asset.RemoteData(withOTRKey: otrKey, sha256: sha256)
+        let asset = WireProtos.Asset(original: nil, preview: preview)
+        
+        update(asset: asset)
+    }
+    
+    mutating func updateAssetPreview(withImageProperties imageProperties: ZMIImageProperties) {
+        let imageMetaData = WireProtos.Asset.ImageMetaData(width: Int32(imageProperties.size.width), height: Int32(imageProperties.size.height))
+        let preview = WireProtos.Asset.Preview(size: UInt64(imageProperties.length), mimeType: imageProperties.mimeType, remoteData: nil, imageMetadata: imageMetaData)
+        let asset = WireProtos.Asset(original: nil, preview: preview)
+        update(asset: asset)
+    }
+    
+    mutating func updateAsset(withUploadedOTRKey otrKey: Data, sha256: Data) {
+        let asset = WireProtos.Asset(withUploadedOTRKey: otrKey, sha256: sha256)
+        update(asset: asset)
+    }
+    
+    public mutating func updatePreview(assetId: String, token: String?) {
+        updateAsset {
+            $0.preview.remote.update(assetId: assetId, token: token)
+        }
+    }
+
+    public mutating func updateUploaded(assetId: String, token: String?) {
+        updateAsset {
+            $0.uploaded.update(assetId: assetId, token: token)
+        }
+    }
+    
+    public mutating func update(asset: WireProtos.Asset) {
+        updateAsset { $0 = asset }
+    }
+    
+    mutating func updateAsset(_ block: (inout WireProtos.Asset) -> Void) {
+        guard let content = content else {
+            return
+        }
+        switch content {
+        case .asset:
+            block(&asset)
+        case .ephemeral:
+            guard case .asset = ephemeral.content else {
+                return
+            }
+            block(&ephemeral.asset)
+        default:
+            return
+        }
+    }
+}
+
+extension WireProtos.Asset.RemoteData {
+    mutating func update(assetId: String, token: String?) {
+        assetID = assetId
+        if let token = token {
+            assetToken = token
         }
     }
 }

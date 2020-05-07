@@ -92,7 +92,7 @@ extension ZMAssetClientMessage: EncryptedPayloadGenerator {
     }
 
     public var debugInfo: String {
-        return "\(String(describing: genericAssetMessage))"
+        return "\(String(describing: underlyingMessage))"
     }
     
 }

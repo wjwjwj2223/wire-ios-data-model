@@ -581,7 +581,7 @@ extension ZMClientMessageTests_Deletion {
             XCTAssertNil(assetMessage.fileMessageData, line: line)
             XCTAssertNil(assetMessage.filename, line: line)
             XCTAssertNil(assetMessage.imageMessageData, line: line)
-            XCTAssertNil(assetMessage.genericAssetMessage, line: line)
+            XCTAssertNil(assetMessage.underlyingMessage, line: line)
             XCTAssertEqual(assetMessage.size, 0, line: line)
 
             let cache = uiMOC.zm_fileAssetCache

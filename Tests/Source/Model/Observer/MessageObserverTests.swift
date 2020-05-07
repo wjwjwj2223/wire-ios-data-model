@@ -118,10 +118,10 @@ class MessageObserverTests : NotificationDispatcherTestBase {
                                               macKey: Data.zmRandomSHA256Key(),
                                               mac: Data.zmRandomSHA256Key())
 
-        let imageMessage = ZMGenericMessage.message(content: ZMImageAsset(mediumProperties: properties,
-                                                                          processedProperties: properties,
-                                                                          encryptionKeys: keys,
-                                                                          format: .preview),
+        let imageMessage = GenericMessage(content: ImageAsset(mediumProperties: properties,
+                                                              processedProperties: properties,
+                                                              encryptionKeys: keys,
+                                                              format: .preview),
                                                     nonce: UUID.create())
 
         // when
