@@ -75,27 +75,6 @@
     return nil;
 }
 
-- (NSUUID *)messageNonce;
-{
-    switch (self.type) {
-        case ZMUpdateEventTypeConversationMessageAdd:
-        case ZMUpdateEventTypeConversationAssetAdd:
-        case ZMUpdateEventTypeConversationKnock:
-            return [[self.payload optionalDictionaryForKey:@"data"] optionalUuidForKey:@"nonce"];
-            
-        case ZMUpdateEventTypeConversationClientMessageAdd:
-        case ZMUpdateEventTypeConversationOtrMessageAdd:
-        case ZMUpdateEventTypeConversationOtrAssetAdd:
-        {
-            ZMGenericMessage *message = [ZMGenericMessage genericMessageFromUpdateEvent:self];
-            return [NSUUID uuidWithTransportString:message.messageId];
-        }
-        default:
-            return nil;
-            break;
-    }
-}
-
 - (NSMutableSet *)usersFromUserIDsInManagedObjectContext:(NSManagedObjectContext *)context createIfNeeded:(BOOL)createIfNeeded;
 {
     NSMutableSet *users = [NSMutableSet set];
