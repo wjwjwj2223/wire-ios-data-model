@@ -24,58 +24,6 @@
 
 @implementation ZMGenericMessage (UpdateEvent)
 
-+ (ZMGenericMessage *)genericMessageFromUpdateEvent:(ZMUpdateEvent *)updateEvent
-{
-    ZMGenericMessage *message;
-    
-    switch (updateEvent.type) {
-        case ZMUpdateEventTypeConversationClientMessageAdd: {
-            NSString *base64Content = [updateEvent.payload stringForKey:@"data"];
-            message = [self genericMessageWithBase64String:base64Content updateEvent:updateEvent];
-        }
-            break;
-        case ZMUpdateEventTypeConversationOtrMessageAdd: {
-            NSString *base64Content = [[updateEvent.payload dictionaryForKey:@"data"] stringForKey:@"text"];
-            message = [self genericMessageWithBase64String:base64Content updateEvent:updateEvent];
-        }
-            break;
-            
-        case ZMUpdateEventTypeConversationOtrAssetAdd: {
-            NSString *base64Content = [[updateEvent.payload dictionaryForKey:@"data"] stringForKey:@"info"];
-            VerifyReturnNil(base64Content != nil);
-            @try {
-                message = [ZMGenericMessage messageWithBase64String:base64Content];
-            }
-            @catch(NSException *e) {
-                message = nil;
-            }
-        }
-            break;
-            
-        default:
-            break;
-    }
-
-    if (message.hasExternal) {
-        return [self genericMessageFromUpdateEventWithExternal:updateEvent external:message.external];
-    }
-    
-    return message;
-}
-
-+ (ZMGenericMessage *)genericMessageWithBase64String:(NSString *)string updateEvent:(ZMUpdateEvent *)event
-{
-    VerifyReturnNil(nil != string);
-    ZMGenericMessage *message;
-    @try {
-        message = [ZMGenericMessage messageWithBase64String:string];
-    } @catch (NSException *exception) {
-        ZMLogError(@"Cannot create message from protobuffer: %@ event: %@", exception, event);
-        return nil;
-    }
-    return message;
-}
-
 + (Class)entityClassForGenericMessage:(ZMGenericMessage *)genericMessage
 {
     if (genericMessage.imageAssetData != nil || genericMessage.assetData != nil) {

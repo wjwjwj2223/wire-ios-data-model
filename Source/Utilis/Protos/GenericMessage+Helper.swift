@@ -58,18 +58,31 @@ public extension GenericMessage {
     }
 }
 
-public extension GenericMessage {
-    var zmMessage: ZMGenericMessage? {
-        let data = try? serializedData()
-        return ZMGenericMessage.message(fromData: data)
-    }
-}
-
 extension GenericMessage {
     var hasConfirmation: Bool {
         guard let content = content else { return false }
         switch content {
         case .confirmation:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasAsset: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .asset:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasEphemeral: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .ephemeral:
             return true
         default:
             return false
@@ -220,6 +233,15 @@ extension Ephemeral {
         self = Ephemeral.with() {
             $0.expireAfterMillis = Int64(timeout * 1000)
             content.setEphemeralContent(on: &$0)
+        }
+    }
+    
+    var hasAsset: Bool {
+        switch self.content {
+        case .asset:
+            return true
+        default:
+            return false
         }
     }
 }

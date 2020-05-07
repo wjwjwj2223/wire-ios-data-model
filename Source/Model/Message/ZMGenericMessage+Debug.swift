@@ -65,25 +65,3 @@ fileprivate extension ZMArticle {
     }
     
 }
-
-extension ZMGenericMessage {
-    
-    open override var debugDescription: String {
-        
-        guard let builder = self.toBuilder() else { return "" }
-        
-        if builder.hasText() {
-            builder.setText(builder.text().sanitize())
-        }
-        
-        if builder.hasEdited(), let editedBuilder = builder.edited().toBuilder(), editedBuilder.hasText() {
-            builder.setEdited(editedBuilder.setText(editedBuilder.text().sanitize()))
-        }
-        
-        let message = builder.build()!
-        
-        let description = NSMutableString()
-        message.writeDescription(to: description, withIndent: "")
-        return description as String
-    }
-}

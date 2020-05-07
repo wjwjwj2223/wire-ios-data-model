@@ -39,26 +39,7 @@ extension MessageContentType {
 }
 
 public extension ZMGenericMessage {
-    
-    static func message(fromData data: Data?) -> ZMGenericMessage? {
-        guard data != nil else { return nil }
         
-        let builder = ZMGenericMessageBuilder()
-        builder.merge(from: data!)
-        
-        return builder.buildAndValidate()
-    }
-    
-    @objc
-    static func message(withBase64String base64String: String) -> ZMGenericMessage? {
-        guard let data = Data(base64Encoded: base64String) else { return nil }
-        
-        let builder = ZMGenericMessageBuilder()
-        builder.merge(from: data)
-        
-        return builder.buildAndValidate()
-    }
-    
     @objc
     static func message(content: MessageContentType, nonce: UUID = UUID()) -> ZMGenericMessage {
         let builder = ZMGenericMessageBuilder()
@@ -101,75 +82,6 @@ public extension ZMGenericMessage {
     }
     
     // MARK: Updating assets with asset ID and token
-    
-    @objc func updatedUploaded(withAssetId assetId: String, token: String?) -> ZMGenericMessage? {
-        guard let asset = assetData, let remote = asset.uploaded, asset.hasUploaded() else { return nil }
-        let newRemote = remote.updated(withId: assetId, token: token)
-        let builder = toBuilder()!
-        if hasAsset() {
-            let assetBuilder = asset.toBuilder()
-            _ = assetBuilder?.setUploaded(newRemote)
-            builder.setAsset(assetBuilder)
-        } else if hasEphemeral() && ephemeral.hasAsset() {
-            let ephemeralBuilder = ephemeral.toBuilder()
-            let assetBuilder = ephemeral.asset.toBuilder()
-            _ = assetBuilder?.setUploaded(newRemote)
-            _ = ephemeralBuilder?.setAsset(assetBuilder)
-            builder.setEphemeral(ephemeralBuilder)
-        } else {
-            return nil
-        }
-
-        return builder.buildAndValidate()
-    }
-
-    @objc func updatedPreview(withAssetId assetId: String, token: String?) -> ZMGenericMessage? {
-        guard let asset = assetData, let preview = asset.preview, let remote = preview.remote, preview.hasRemote() else { return nil }
-        let newRemote = remote.updated(withId: assetId, token: token)
-        let previewBuilder = preview.toBuilder()
-        _ = previewBuilder?.setRemote(newRemote)
-        let builder = toBuilder()!
-        if hasAsset() {
-            let assetBuilder = asset.toBuilder()
-            _ = assetBuilder?.setPreview(previewBuilder)
-            builder.setAsset(assetBuilder)
-        } else if hasEphemeral() && ephemeral.hasAsset() {
-            let ephemeralBuilder = ephemeral.toBuilder()
-            let assetBuilder = ephemeral.asset.toBuilder()
-            _ = assetBuilder?.setPreview(previewBuilder)
-            _ = ephemeralBuilder?.setAsset(assetBuilder)
-            builder.setEphemeral(ephemeralBuilder)
-        } else {
-            return nil
-        }
-
-        return builder.buildAndValidate()
-    }
-    
-    @objc func setExpectsReadConfirmation(_ value: Bool) -> ZMGenericMessage? {
-        guard let builder = toBuilder() else { return nil }
-        
-        if hasEphemeral(), let content = ephemeral?.updateExpectsReadConfirmation(value) {
-            content.setContent(on: builder)
-        } else if let content = content?.updateExpectsReadConfirmation(value) {
-            content.setContent(on: builder)
-        }
-        
-        return builder.buildAndValidate()
-    }
-
-    @objc func setLegalHoldStatus(_ status: ZMLegalHoldStatus) -> ZMGenericMessage? {
-        guard let builder = toBuilder() else { return nil }
-
-        if hasEphemeral(), let content = ephemeral?.updateLegalHoldStatus(status) {
-            content.setContent(on: builder)
-        } else if let content = content?.updateLegalHoldStatus(status) {
-            content.setContent(on: builder)
-        }
-
-        return builder.buildAndValidate()
-    }
-
 }
 
 @objc

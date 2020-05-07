@@ -116,66 +116,6 @@ extension GenericMessage {
     }
 }
 
-extension ZMGenericMessage {
-    @objc public func validatingFields() -> ZMGenericMessage? {
-        // Validate the message itself
-        guard UUID.isValid(object: messageId) else { return nil }
-
-        // Validate the mentions in the text
-        if self.hasText() {
-            guard self.text!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the last read
-        if self.hasLastRead() {
-            guard self.lastRead!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the cleared
-        if self.hasCleared() {
-            guard self.cleared!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the hide
-        if self.hasHidden() {
-            guard self.hidden!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the delete
-        if self.hasDeleted() {
-            guard self.deleted!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the edit
-        if self.hasEdited() {
-            guard self.edited!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the confirmation
-        if self.hasConfirmation() {
-            guard self.confirmation!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the reaction
-        if self.hasReaction() {
-            guard self.reaction!.validatingFields() != nil else { return nil }
-        }
-
-        // Validate the asset
-        if self.hasAsset() {
-            guard self.asset!.validatingFields() != nil else { return nil }
-        }
-
-        return self
-    }
-}
-
-extension ZMGenericMessageBuilder {
-    @objc public func buildAndValidate() -> ZMGenericMessage? {
-        return self.build()?.validatingFields()
-    }
-}
-
 // MARK: - Text
 
 extension Text {
