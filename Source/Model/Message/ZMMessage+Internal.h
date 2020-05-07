@@ -75,7 +75,6 @@ extern NSString * _Nonnull const ZMMessageNeedsLinkAttachmentsUpdateKey;
 // Use these for sorting:
 + (NSArray<NSSortDescriptor *> * _Nonnull)defaultSortDescriptors;
 - (NSComparisonResult)compare:(ZMMessage * _Nonnull)other;
-- (NSUUID * _Nullable)nonceFromPostPayload:(NSDictionary * _Nonnull)payload;
 - (void)updateWithPostPayload:(NSDictionary * _Nonnull)payload updatedKeys:(__unused NSSet * _Nullable)updatedKeys;
 - (void)resend;
 - (BOOL)shouldGenerateUnreadCount;
@@ -225,9 +224,9 @@ extern NSString * _Nonnull const ZMMessageNeedsLinkAttachmentsUpdateKey;
 
 @property (nonatomic, copy) NSString * _Nullable text;
 
-+ (instancetype _Nullable)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent * _Nonnull)updateEvent
-                               decodedGenericMessage:(ZMGenericMessage * _Nonnull)genericMessage
-                              inManagedObjectContext:(NSManagedObjectContext * _Nonnull)moc;
+//+ (instancetype _Nullable)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent * _Nonnull)updateEvent
+//                               decodedGenericMessage:(ZMGenericMessage * _Nonnull)genericMessage
+//                              inManagedObjectContext:(NSManagedObjectContext * _Nonnull)moc;
 
 @end
 

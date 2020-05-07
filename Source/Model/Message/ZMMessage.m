@@ -366,36 +366,6 @@ NSString * const ZMMessageButtonStatesKey = @"buttonStates";
     }];
 }
 
-- (NSUUID *)nonceFromPostPayload:(NSDictionary *)payload
-{
-    ZMUpdateEventType eventType = [ZMUpdateEvent updateEventTypeForEventTypeString:[payload optionalStringForKey:@"type"]];
-    switch (eventType) {
-            
-        case ZMUpdateEventTypeConversationMessageAdd:
-        case ZMUpdateEventTypeConversationKnock:
-            return [[payload dictionaryForKey:@"data"] uuidForKey:@"nonce"];
-
-        case ZMUpdateEventTypeConversationClientMessageAdd:
-        case ZMUpdateEventTypeConversationOtrMessageAdd:
-        {
-            //if event is otr message then payload should be already decrypted and should contain generic message data
-            NSString *base64Content = [payload stringForKey:@"data"];
-            ZMGenericMessage *message;
-            @try {
-                message = [ZMGenericMessage messageWithBase64String:base64Content];
-            }
-            @catch(NSException *e) {
-                ZMLogError(@"Cannot create message from protobuffer: %@ event payload: %@", e, payload);
-                return nil;
-            }
-            return [NSUUID uuidWithTransportString:message.messageId];
-        }
-            
-        default:
-            return nil;
-    }
-}
-
 - (void)updateWithPostPayload:(NSDictionary *)payload updatedKeys:(__unused NSSet *)updatedKeys
 {
     NSUUID *nonce = [self nonceFromPostPayload:payload];

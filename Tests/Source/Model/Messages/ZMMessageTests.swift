@@ -20,12 +20,12 @@ import XCTest
 
 @testable import WireDataModel
 
-class ZMMessageTests: BaseZMClientMessageTests {
+class ZMMessageTests_genericMessage: BaseZMClientMessageTests {
     
    func testThatItDoesNotSetTheServerTimestampFromEventDataEvenIfMessageAlreadyExists() {
         self.syncMOC.performGroupedAndWait {_ in
             // given
-            let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
+            let conversation = ZMConversation.insertNewObject(in: self.syncMOC)
             conversation.remoteIdentifier = UUID.create()
 
                     let nonce = UUID.create()
@@ -40,7 +40,7 @@ class ZMMessageTests: BaseZMClientMessageTests {
 
             msg.visibleInConversation = conversation
             msg.serverTimestamp = Date(timeIntervalSinceReferenceDate: 400000000)
-            
+
             let data: NSDictionary = [
                 "content": self.name,
                 "nonce": msg.nonce?.transportString()
@@ -61,7 +61,7 @@ class ZMMessageTests: BaseZMClientMessageTests {
 
 // MARK: - KnockMessage
 
-extension ZMMessageTests {
+extension ZMMessageTests_genericMessage {
     
     func testThatItCreatesOtrKnockMessageFromAnUpdateEvent() {
         // given
@@ -94,7 +94,7 @@ extension ZMMessageTests {
         XCTAssertEqual(message?.senderClientID, senderClientID)
         XCTAssertEqual(message?.nonce, nonce)
     }
-    
+
     func testThatAClientMessageHasKnockMessageData() {
         // given
         let knock = GenericMessage(content: Knock.with { $0.hotKnock = false }, nonce: UUID.create())
@@ -104,7 +104,7 @@ extension ZMMessageTests {
         } catch {
             XCTFail()
         }
-        
+
         // then
         XCTAssertNil(message.textMessageData?.messageText)
         XCTAssertNil(message.systemMessageData)
@@ -113,15 +113,15 @@ extension ZMMessageTests {
     }
 }
 
-// MARK: - Deletion
+ //MARK: - Deletion
 
-extension ZMMessageTests {
-    
+extension ZMMessageTests_genericMessage {
+
     func testThatATextMessageGenericDataIsRemoved() {
         // given
         let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
         conversation.remoteIdentifier = UUID.create()
-        
+
         // when
         let message = conversation.append(text: "Test") as! ZMOTRMessage
         let dataSet = message.dataSet
@@ -130,7 +130,7 @@ extension ZMMessageTests {
 
         message.hideForSelfUser()
         self.uiMOC.saveOrRollback()
-        
+
         // then
         XCTAssertEqual(dataSet.count, 1)
         dataSet.compactMap { $0 as? ZMGenericMessageData }.forEach { (messageData) in
@@ -138,21 +138,21 @@ extension ZMMessageTests {
         }
         XCTAssertNil(message.managedObjectContext)
     }
-    
+
     func testThatATextMessageGenericDataIsRemoved_Asset() {
         // given
         let conversation = ZMConversation.insertNewObject(in: self.uiMOC)
         conversation.remoteIdentifier = UUID.create()
-        
+
         // when
-        let message = conversation.append(imageFromData: self.verySmallJPEGData()) as! ZMOTRMessage        
+        let message = conversation.append(imageFromData: self.verySmallJPEGData()) as! ZMOTRMessage
         let dataSet = message.dataSet
-        
+
         XCTAssertNotNil(message.managedObjectContext)
-        
+
         message.hideForSelfUser()
         self.uiMOC.saveOrRollback()
-        
+
         // then
         XCTAssertEqual(dataSet.count, 1)
         dataSet.compactMap { $0 as? ZMGenericMessageData }.forEach { (messageData) in
