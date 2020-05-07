@@ -247,17 +247,6 @@ extension ZMGenericMessage {
         
        return nil
     }
-    
-    // Accessor helpers for ephemeral images
-    @objc public var imageAssetData : ZMImageAsset? {
-        if hasRasterImage {
-            return image
-        }
-        if hasEphemeral() && ephemeral.hasRasterImage {
-            return ephemeral.image
-        }
-        return nil
-    }
 
     @objc public var locationData : ZMLocation? {
         if hasLocation() {
