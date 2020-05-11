@@ -38,11 +38,7 @@ class GenericMessageTests: XCTestCase {
             { return GenericMessage(content: Location(latitude: 1, longitude: 2)) },
             { return GenericMessage(content: MessageDelete(messageId: UUID.create())) },
             { return GenericMessage(content: WireProtos.Reaction(emoji: "test", messageID: UUID.create())) },
-            {
-                return GenericMessage(content: WireProtos.Availability.with {
-                    $0.type = .away
-                })
-            }
+            { return GenericMessage(content: WireProtos.Availability(type: .away)) }
         ]
         
         generators.forEach { generator in

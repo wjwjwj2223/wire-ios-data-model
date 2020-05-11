@@ -163,7 +163,7 @@ extension GenericMessage {
         return assetData.uploaded.assetID
     }
     
-    var previewAssetId: String? {
+    public var previewAssetId: String? {
         guard
             let assetData = assetData,
             assetData.hasPreview,
@@ -440,6 +440,14 @@ extension WireProtos.Mention {
     }
 }
 
+extension WireProtos.Availability {
+    public init(type: TypeEnum) {
+        self = WireProtos.Availability.with {
+            $0.type = type
+        }
+    }
+}
+
 public extension LinkPreview {
 
     init(_ linkMetadata: LinkMetadata) {
@@ -636,6 +644,17 @@ extension GenericMessage {
         guard let content = content else { return false }
         switch content {
         case .external:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    
+    var hasAvailability: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .availability:
             return true
         default:
             return false
