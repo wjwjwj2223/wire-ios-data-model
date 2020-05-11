@@ -107,31 +107,6 @@ class ProtosTests: XCTestCase {
         XCTAssertEqual(message.image.mac, Data())
         XCTAssertEqual(message.image.macKey, Data())
     }
-
-//    func testThatItCreatesGenericMessageFromImageData() {
-//
-//        // given
-//        let bundle = Bundle(for: type(of: self))
-//        let url = bundle.url(forResource: "medium", withExtension: "jpg")!
-//        let data = NSData(contentsOf: url)!
-//        let nonce = UUID.create()
-//
-//        // when
-//
-//        let message = ZMGenericMessage.message(content: ZMImageAsset(data: data as Data, format: .medium)!, nonce: nonce)
-//
-//        // then
-//        XCTAssertEqual(message.image.width, 0)
-//        XCTAssertEqual(message.image.height, 0)
-//        XCTAssertGreaterThan(message.image.originalWidth, 0)
-//        XCTAssertGreaterThan(message.image.originalHeight, 0)
-//        XCTAssertEqual(message.image.size, 0)
-//        XCTAssertEqual(message.image.mimeType, "image/jpeg")
-//        XCTAssertEqual(message.image.tag, StringFromImageFormat(.medium))
-//        XCTAssertEqual(message.image.otrKey.count, 0)
-//        XCTAssertEqual(message.image.mac.count, 0)
-//        XCTAssertEqual(message.image.macKey.count, 0)
-//    }
     
     func testThatItCanCreateKnock() {
         let nonce = UUID()

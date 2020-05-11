@@ -17,7 +17,7 @@
 // 
 
 
-#import "ZMGenericMessage+Utils.h"
+#import "ZMImageAssetEncryptionKeys.h"
 #import <WireDataModel/WireDataModel-Swift.h>
 
 @import ImageIO;

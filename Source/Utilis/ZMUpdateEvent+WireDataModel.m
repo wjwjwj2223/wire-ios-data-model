@@ -22,7 +22,6 @@
 #import "ZMConversation+Internal.h"
 #import "ZMMessage+Internal.h"
 #import "ZMUser+Internal.h"
-#import "ZMGenericMessage+UpdateEvent.h"
 
 @implementation ZMUpdateEvent (WireDataModel)
 

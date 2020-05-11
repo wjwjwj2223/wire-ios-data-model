@@ -502,22 +502,16 @@ class ModelValidationTests: XCTestCase {
 
     func testThatItCreatesUserIDWithValidFields() {
 
-        let builder = ZMUserId.builder()!
-        builder.setUuid(NSUUID().data())
-
-        let userID = builder.build().validatingFields()
-        XCTAssertNotNil(userID)
-
+        let userId = UserId.with { $0.uuid = NSUUID().data() }
+        
+        XCTAssertNotNil(userId.validatingFields())
     }
 
     func testThatItDoesNotCreateUserIDWithInvalidFields() {
 
-        let tooSmallBuilder = ZMUserId.builder()!
-        tooSmallBuilder.setUuid(Data())
-
-        let tooSmall = tooSmallBuilder.build().validatingFields()
-        XCTAssertNil(tooSmall)
-
+        let userId = UserId.with { $0.uuid = Data() }
+               
+        XCTAssertNil(userId.validatingFields())
     }
 
     // MARK: - Assets
@@ -594,18 +588,4 @@ class ModelValidationTests: XCTestCase {
         
         return GenericMessage(content: asset).validatingFields()
     }
-
-    private func assetRemoteData(id: String, token: String?) -> ZMAssetRemoteData {
-
-        let dataBuilder = ZMAssetRemoteData.builder()!
-        dataBuilder.setAssetId(id)
-        dataBuilder.setAssetToken(token)
-        dataBuilder.setOtrKey(Data("pFHd6iVTvOVP2wFAd2yVlA==".utf8))
-        dataBuilder.setSha256(Data("8fab1b98a5b5ac2b07f0f77c739980bd4c895db23a09a3bed9ecec584d3ed3e0".utf8))
-        dataBuilder.setEncryption(.AESCBC)
-
-        return dataBuilder.build()
-
-    }
-
 }

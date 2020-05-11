@@ -224,10 +224,6 @@ extern NSString * _Nonnull const ZMMessageNeedsLinkAttachmentsUpdateKey;
 
 @property (nonatomic, copy) NSString * _Nullable text;
 
-//+ (instancetype _Nullable)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent * _Nonnull)updateEvent
-//                               decodedGenericMessage:(ZMGenericMessage * _Nonnull)genericMessage
-//                              inManagedObjectContext:(NSManagedObjectContext * _Nonnull)moc;
-
 @end
 
 
