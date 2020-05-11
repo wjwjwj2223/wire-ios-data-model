@@ -59,98 +59,6 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
-    var hasConfirmation: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .confirmation:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasReaction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .reaction:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasAsset: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .asset:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasEphemeral: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .ephemeral:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasClientAction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .clientAction:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasCleared: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .cleared:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasLastRead: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .lastRead:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasKnock: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .knock:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasExternal: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .external:
-            return true
-        default:
-            return false
-        }
-    }
-}
-
-extension GenericMessage {
     var locationData: Location? {
         guard let content = content else { return nil }
         switch content {
@@ -640,5 +548,97 @@ extension GenericMessage {
 extension ImageAsset {
     public func imageFormat() -> ZMImageFormat {
         return ImageFormatFromString(self.tag)
+    }
+}
+
+extension GenericMessage {
+    var hasConfirmation: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .confirmation:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasReaction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .reaction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasAsset: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .asset:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasEphemeral: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .ephemeral:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasClientAction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .clientAction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasCleared: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .cleared:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLastRead: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .lastRead:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasKnock: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .knock:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasExternal: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .external:
+            return true
+        default:
+            return false
+        }
     }
 }
