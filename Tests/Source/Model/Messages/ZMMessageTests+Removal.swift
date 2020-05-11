@@ -193,4 +193,52 @@ class ZMMessageTests_Removal: BaseZMClientMessageTests {
         return removed
     }
 
+    func testThatATextMessageIsRemovedWhenAskForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMTextMessage(nonce: UUID.create(), managedObjectContext: uiMOC)
+        }
+        // then
+        XCTAssertTrue(removed)
+    }
+
+    func testThatAnAssetClientMessageIsRemovedWhenAskForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMAssetClientMessage(nonce: UUID.create(), managedObjectContext: uiMOC)
+        }
+        
+        // then
+        XCTAssertTrue(removed)
+    }
+
+    func testThatAnPreE2EETextMessageIsRemovedWhenAskedForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMTextMessage(nonce: UUID.create(), managedObjectContext: uiMOC)
+        }
+        // then
+        XCTAssertTrue(removed)
+    }
+
+    func testThatAnPreE2EEImageMessageIsRemovedWhenAskedForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMImageMessage(nonce: UUID.create(), managedObjectContext: uiMOC)
+        }
+        
+        // then
+        XCTAssertTrue(removed)
+    }
+
+    func testThatAnPreE2EEKnockMessageIsRemovedWhenAskedForDeletion() {
+        // when
+        let removed = checkThatAMessageIsRemoved { () -> ZMMessage in
+            return ZMKnockMessage(nonce: UUID.create(), managedObjectContext: uiMOC)
+        }
+        
+        // then
+        XCTAssertTrue(removed)
+    }
+    
 }

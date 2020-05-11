@@ -109,7 +109,7 @@ extension ZMClientMessageTests_Ephemeral {
     func testItCreatesAnEphemeralMessageForKnock(){
         checkItCreatesAnEphemeralMessage { (conv) -> ZMMessage in
             let message = conv.appendKnock() as! ZMClientMessage
-            XCTAssertTrue(message.genericMessage!.ephemeral.hasKnock())
+            XCTAssertTrue(message.underlyingMessage!.ephemeral.hasKnock)
             return message
         }
     }
@@ -118,7 +118,7 @@ extension ZMClientMessageTests_Ephemeral {
         checkItCreatesAnEphemeralMessage { (conv) -> ZMMessage in
             let location = LocationData(latitude: 1.0, longitude: 1.0, name: "foo", zoomLevel: 1)
             let message = conv.append(location: location, nonce: UUID.create()) as? ZMClientMessage
-            XCTAssertTrue((message?.genericMessage!.ephemeral.hasLocation())!)
+            XCTAssertTrue((message?.underlyingMessage!.ephemeral.hasLocation)!)
             return message!
         }
     }

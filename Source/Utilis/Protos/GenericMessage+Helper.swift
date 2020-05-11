@@ -69,6 +69,16 @@ extension GenericMessage {
         }
     }
     
+    var hasReaction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .reaction:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var hasAsset: Bool {
         guard let content = content else { return false }
         switch content {
@@ -123,6 +133,16 @@ extension GenericMessage {
         guard let content = content else { return false }
         switch content {
         case .knock:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasExternal: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .external:
             return true
         default:
             return false
@@ -288,6 +308,15 @@ extension Ephemeral {
     var hasKnock: Bool {
         switch self.content {
         case .knock:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLocation: Bool {
+        switch self.content {
+        case .location:
             return true
         default:
             return false

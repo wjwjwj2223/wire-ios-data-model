@@ -61,7 +61,7 @@
 #import <WireDataModel/NSString+ZMPersonName.h>
 
 #import <WireDataModel/ZMGenericMessage+Utils.h>
-#import <WireDataModel/ZMGenericMessage+PropertyUtils.h>
+//#import <WireDataModel/ZMGenericMessage+PropertyUtils.h>
 #import <WireDataModel/ZMMessageTimer.h>
 #import <WireDataModel/NSPredicate+ZMSearch.h>
 #import <WireDataModel/ZMTestSession.h>
