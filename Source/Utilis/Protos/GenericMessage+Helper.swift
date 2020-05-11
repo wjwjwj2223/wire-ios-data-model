@@ -88,6 +88,46 @@ extension GenericMessage {
             return false
         }
     }
+    
+    var hasClientAction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .clientAction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasCleared: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .cleared:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLastRead: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .lastRead:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasKnock: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .knock:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 extension GenericMessage {
@@ -239,6 +279,15 @@ extension Ephemeral {
     var hasAsset: Bool {
         switch self.content {
         case .asset:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasKnock: Bool {
+        switch self.content {
+        case .knock:
             return true
         default:
             return false

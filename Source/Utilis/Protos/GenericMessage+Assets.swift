@@ -127,6 +127,21 @@ extension WireProtos.Asset.Original {
         }
     }
     
+    init(withSize size: UInt64, mimeType: String, name: String?, audioDurationInMillis: UInt, normalizedLoudness: [Float]) {
+        self = WireProtos.Asset.Original.with {
+            $0.size = size
+            $0.mimeType = mimeType
+            if let name = name {
+                $0.name = name
+            }
+            $0.audio = WireProtos.Asset.AudioMetaData.with {
+                $0.durationInMillis = UInt64(audioDurationInMillis)
+                let loudnessArray = normalizedLoudness.map { UInt8(roundf($0*255)) }
+                $0.normalizedLoudness = Data(bytes: loudnessArray, count: loudnessArray.count)
+            }
+        }
+    }
+    
     /// Returns the normalized loudness as floats between 0 and 1
     var normalizedLoudnessLevels : [Float] {
         

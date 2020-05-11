@@ -445,7 +445,6 @@
 		F963E9701D9ADD5A00098AD3 /* ZMGenericMessage+Utils.h in Headers */ = {isa = PBXBuildFile; fileRef = F963E96B1D9ADD5A00098AD3 /* ZMGenericMessage+Utils.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F963E9711D9ADD5A00098AD3 /* ZMGenericMessage+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E96C1D9ADD5A00098AD3 /* ZMGenericMessage+Utils.m */; };
 		F963E9741D9BF9ED00098AD3 /* ProtosTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F963E9721D9BF9E300098AD3 /* ProtosTests.swift */; };
-		F963E9761D9C002000098AD3 /* ZMGenericMessage+Assets.swift in Sources */ = {isa = PBXBuildFile; fileRef = F963E9751D9C002000098AD3 /* ZMGenericMessage+Assets.swift */; };
 		F963E9801D9C09E700098AD3 /* ZMMessageTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = F963E97E1D9C09E700098AD3 /* ZMMessageTimer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F963E9811D9C09E700098AD3 /* ZMMessageTimer.m in Sources */ = {isa = PBXBuildFile; fileRef = F963E97F1D9C09E700098AD3 /* ZMMessageTimer.m */; };
 		F963E9831D9C0DC400098AD3 /* ZMMessageDestructionTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F963E9821D9C0DC400098AD3 /* ZMMessageDestructionTimer.swift */; };
@@ -1138,7 +1137,6 @@
 		F963E96B1D9ADD5A00098AD3 /* ZMGenericMessage+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ZMGenericMessage+Utils.h"; sourceTree = "<group>"; };
 		F963E96C1D9ADD5A00098AD3 /* ZMGenericMessage+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ZMGenericMessage+Utils.m"; sourceTree = "<group>"; };
 		F963E9721D9BF9E300098AD3 /* ProtosTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProtosTests.swift; sourceTree = "<group>"; };
-		F963E9751D9C002000098AD3 /* ZMGenericMessage+Assets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ZMGenericMessage+Assets.swift"; sourceTree = "<group>"; };
 		F963E97E1D9C09E700098AD3 /* ZMMessageTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZMMessageTimer.h; sourceTree = "<group>"; };
 		F963E97F1D9C09E700098AD3 /* ZMMessageTimer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZMMessageTimer.m; sourceTree = "<group>"; };
 		F963E9821D9C0DC400098AD3 /* ZMMessageDestructionTimer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ZMMessageDestructionTimer.swift; sourceTree = "<group>"; };
@@ -1610,7 +1608,6 @@
 				F963E9681D9ADD5A00098AD3 /* ZMGenericMessage+Helper.swift */,
 				F1FDF2F621B152BC00E037A1 /* GenericMessage+Hashing.swift */,
 				63B658DF243789DE00EF463F /* GenericMessage+Assets.swift */,
-				F963E9751D9C002000098AD3 /* ZMGenericMessage+Assets.swift */,
 				F963E9691D9ADD5A00098AD3 /* ZMGenericMessage+PropertyUtils.h */,
 				F963E96A1D9ADD5A00098AD3 /* ZMGenericMessage+PropertyUtils.m */,
 				F1FDF2FF21B1580400E037A1 /* GenericMessage+Utils.swift */,
@@ -2896,7 +2893,6 @@
 				A9676D7623A30BEF001CD41D /* ZMTestSession.swift in Sources */,
 				A95E7BF5239134E600935B88 /* ZMConversation+Participants.swift in Sources */,
 				546D3DE61CE5D0B100A6047F /* RichAssetFileType.swift in Sources */,
-				F963E9761D9C002000098AD3 /* ZMGenericMessage+Assets.swift in Sources */,
 				D5FA30CF2063F8EC00716618 /* Version.swift in Sources */,
 				F9DBA5201E28EA8B00BE23C0 /* DependencyKeyStore.swift in Sources */,
 				F125BAD71EE9849B0018C2F8 /* ZMConversation+SystemMessages.swift in Sources */,

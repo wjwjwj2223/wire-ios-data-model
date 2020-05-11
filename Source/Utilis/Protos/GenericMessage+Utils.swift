@@ -35,8 +35,12 @@ extension ImageAsset {
             $0.size = Int32(processedProperties?.length ?? 0)
             $0.originalWidth = Int32(mediumProperties?.size.width ?? 0)
             $0.originalHeight = Int32(mediumProperties?.size.height ?? 0)
-            $0.otrKey = encryptionKeys?.otrKey ?? Data()
-            $0.sha256 = encryptionKeys?.sha256 ?? Data()
+            if let otrKey = encryptionKeys?.otrKey {
+                $0.otrKey = otrKey
+            }
+            if let sha256 = encryptionKeys?.sha256 {
+                $0.sha256 = sha256
+            }
             $0.mimeType = processedProperties?.mimeType ?? ""
             $0.tag = StringFromImageFormat(format)
         }

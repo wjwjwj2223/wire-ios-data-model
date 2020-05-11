@@ -22,63 +22,62 @@ import Foundation
 
 class ZMGenericMessageTests: ZMTBaseTest {
     func testThatItChecksTheCommonMessageTypesAsKnownMessage() {
-        let generators: [()->(ZMGenericMessage)] = [
+        let generators: [()->(GenericMessage)] = [
             {
-                return ZMGenericMessage.message(content: ZMText.text(with: "hello"))
+                return GenericMessage(content: Text(content: "hello"))
+            },
+//            {
+//                return GenericMessage(content: ZMImageAsset(data: self.verySmallJPEGData(), format: .medium)!)
+//            },
+            {
+                return GenericMessage(content: Knock())
             },
             {
-                return ZMGenericMessage.message(content: ZMImageAsset(data: self.verySmallJPEGData(), format: .medium)!)
+                return GenericMessage(content: LastRead(conversationID: UUID.create(), lastReadTimestamp: Date()))
             },
             {
-                return ZMGenericMessage.message(content: ZMKnock.knock())
+                return GenericMessage(content: Cleared(timestamp: Date(), conversationID: UUID.create()))
             },
             {
-                return ZMGenericMessage.message(content: ZMLastRead(timestamp: Date(), conversationRemoteID: UUID.create()))
-            },
-            {
-                return ZMGenericMessage.message(content: ZMCleared(timestamp: Date(), conversationRemoteID: UUID.create()))
-            },
-            {
-                var externalBuilder = ZMExternal.builder()!
                 let base64SHA = "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="
                 let base64OTRKey = "4H1nD6bG2sCxC/tZBnIG7avLYhkCsSfv0ATNqnfug7w="
-                externalBuilder = externalBuilder.setOtrKey(Data(base64Encoded: base64OTRKey))
-                externalBuilder = externalBuilder.setSha256(Data(base64Encoded: base64SHA))
-                
-                let messageBuilder = ZMGenericMessageBuilder()
-                messageBuilder.setExternal(externalBuilder.build()!)
-                messageBuilder.setMessageId(UUID.create().transportString())
-                return messageBuilder.build()!
+                let external = External(withOTRKey: Data(base64Encoded: base64OTRKey)!, sha256: Data(base64Encoded: base64SHA)!)
+                var message = GenericMessage()
+                message.external = external
+                message.messageID = UUID.create().transportString()
+                return message
             },
             {
-                return ZMGenericMessage.clientAction(.RESETSESSION)
+                return GenericMessage(clientAction: .resetSession)
             },
             {
-                return ZMGenericMessage.message(content: ZMCalling.calling(message: "Calling"))
+                return GenericMessage(content: Calling(content: "Calling"))
             },
             {
-                return ZMGenericMessage.message(content: ZMAsset.asset(originalWithImageSize: .zero, mimeType: "image/jpeg", size: 0))
+                return GenericMessage(content: WireProtos.Asset(imageSize: .zero, mimeType: "image/jpeg", size: 0))
             },
             {
-                return ZMGenericMessage.message(content: ZMMessageHide.hide(conversationId: UUID.create(), messageId: UUID.create()))
+                return GenericMessage(content: MessageHide(conversationId: UUID.create(), messageId: UUID.create()))
             },
             {
-                return ZMGenericMessage.message(content: ZMLocation.location(withLatitude: 1, longitude: 2))
+                return GenericMessage(content: Location(latitude: 1, longitude: 2))
             },
             {
-                return ZMGenericMessage.message(content: ZMMessageDelete.delete(messageId: UUID.create()))
+                return GenericMessage(content: MessageDelete(messageId: UUID.create()))
             },
             {
-                return ZMGenericMessage.message(content: ZMText.text(with: "Test"))
+                return GenericMessage(content: Text(content: "Test"))
             },
             {
-                return ZMGenericMessage.message(content: ZMReaction(emoji: "test", messageID: UUID.create()))
+                return GenericMessage(content: WireProtos.Reaction(emoji: "test", messageID: UUID.create()))
             },
             {
-                return ZMGenericMessage.message(content: ZMKnock.knock(), expiresAfter: 10)
+                return GenericMessage(content: Knock(), expiresAfter: 10)
             },
             {
-                return ZMGenericMessage.message(content: ZMAvailability.availability(.away))
+                return GenericMessage(content: WireProtos.Availability.with {
+                    $0.type = .away
+                })
             }
         ]
         
@@ -86,7 +85,7 @@ class ZMGenericMessageTests: ZMTBaseTest {
             // GIVEN
             let message = generator()
             // WHEN & THEN
-            XCTAssertTrue(message.knownMessage())
+            XCTAssertTrue(message.knownMessage)
         }
     }
 

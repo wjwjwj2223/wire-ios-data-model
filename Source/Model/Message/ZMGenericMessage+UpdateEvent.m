@@ -26,9 +26,9 @@
 
 + (Class)entityClassForGenericMessage:(ZMGenericMessage *)genericMessage
 {
-    if (/*genericMessage.imageAssetData != nil || */genericMessage.assetData != nil) {
-        return [ZMAssetClientMessage class];
-    }
+//    if (genericMessage.imageAssetData != nil || genericMessage.assetData != nil) {
+//        return [ZMAssetClientMessage class];
+//    }
     
     return ZMClientMessage.class;
 }
