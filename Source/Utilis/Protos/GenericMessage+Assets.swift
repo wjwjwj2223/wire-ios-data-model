@@ -97,14 +97,14 @@ extension WireProtos.Asset {
         }
     }
     
-    var hasUploaded: Bool {
+    public var hasUploaded: Bool {
         guard case .uploaded? = status else {
             return false
         }
         return true
     }
     
-    var hasNotUploaded: Bool {
+    public var hasNotUploaded: Bool {
         guard case .notUploaded? = status else {
             return false
         }

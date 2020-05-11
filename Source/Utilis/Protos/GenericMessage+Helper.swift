@@ -127,7 +127,7 @@ extension GenericMessage {
         }
     }
     
-    var textData: Text? {
+    public var textData: Text? {
         guard let content = content else { return nil }
         switch content {
         case .text(let data):
@@ -177,7 +177,7 @@ extension GenericMessage {
 }
 
 extension GenericMessage {
-    var linkPreviews: [LinkPreview] {
+    public var linkPreviews: [LinkPreview] {
         guard let content = content else { return [] }
         switch content {
         case .text:
@@ -559,7 +559,7 @@ extension ImageAsset {
     }
 }
 
-extension GenericMessage {
+public extension GenericMessage {
     var hasConfirmation: Bool {
         guard let content = content else { return false }
         switch content {
