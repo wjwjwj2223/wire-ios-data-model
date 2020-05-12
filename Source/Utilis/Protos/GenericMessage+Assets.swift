@@ -162,7 +162,7 @@ extension WireProtos.Asset.Original {
     }
 }
 
-extension WireProtos.Asset.Preview {
+public extension WireProtos.Asset.Preview {
     
     init(size: UInt64, mimeType: String, remoteData: WireProtos.Asset.RemoteData?, imageMetadata: WireProtos.Asset.ImageMetaData) {
         self = WireProtos.Asset.Preview.with({
