@@ -17,7 +17,7 @@
 //
 
 public extension WireProtos.Asset.Original {
-    var hasRasterImage: Bool {
+    public var hasRasterImage: Bool {
         guard case .image? = self.metaData,
             UTType(mimeType: mimeType)?.isSVG == false else { return false }
         return true

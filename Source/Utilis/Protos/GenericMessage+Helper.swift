@@ -441,9 +441,18 @@ extension WireProtos.Mention {
 }
 
 extension WireProtos.Availability {
-    public init(type: TypeEnum) {
+    public init(_ availability: Availability) {
         self = WireProtos.Availability.with {
-            $0.type = type
+            switch availability {
+            case .none:
+                $0.type = .none
+            case .available:
+                $0.type = .available
+            case .away:
+                $0.type = .away
+            case .busy:
+                $0.type = .busy
+            }
         }
     }
 }
