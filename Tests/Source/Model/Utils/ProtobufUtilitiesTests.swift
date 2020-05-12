@@ -41,7 +41,7 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
     
     func testThatItDoesNotReturnTheLoudnessIfEmpty() {
         
-        // given(
+        // given
         let sut = WireProtos.Asset.Original(withSize: 234, mimeType: "foo/bar", name: "boo.bar")
         
         // then
