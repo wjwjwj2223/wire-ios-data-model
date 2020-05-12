@@ -54,11 +54,11 @@ class ProtosTests: XCTestCase {
         let processedProperties = ZMIImageProperties(size: CGSize(width: 640, height: 480), length: 200, mimeType: "downsized image")!
 
         // when
-        let message = GenericMessage(content: ImageAsset(mediumProperties: mediumProperties,
-                                                                processedProperties: processedProperties,
-                                                                encryptionKeys: nil,
-                                                                format: format),
-                                            nonce: nonce)
+        let message = GenericMessage(content:
+            ImageAsset(mediumProperties: mediumProperties,
+                       processedProperties: processedProperties,
+                       encryptionKeys: nil,
+                       format: format), nonce: nonce)
 
         //then
         XCTAssertEqual(message.image.width, Int32(processedProperties.size.width))
@@ -88,11 +88,10 @@ class ProtosTests: XCTestCase {
         let keys = ZMImageAssetEncryptionKeys(otrKey: otrKey, macKey: macKey, mac: mac)
 
         // when
-        let message = GenericMessage(content: ImageAsset(mediumProperties: mediumProperties,
-                                                         processedProperties: processedProperties,
-                                                         encryptionKeys: keys,
-                                                         format: format),
-                                     nonce: nonce)
+        let message = GenericMessage(content:
+            ImageAsset(mediumProperties: mediumProperties,
+                       processedProperties: processedProperties,
+                       encryptionKeys: keys, format: format), nonce: nonce)
 
         //then
         XCTAssertEqual(message.image.width, Int32(processedProperties.size.width))

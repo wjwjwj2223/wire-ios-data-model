@@ -19,7 +19,7 @@
 import Foundation
 
 extension ZMUpdateEvent {
-    public func messageNonce() -> UUID? {
+    public var messageNonce: UUID? {
         switch type {
         case .conversationMessageAdd,
              .conversationAssetAdd,

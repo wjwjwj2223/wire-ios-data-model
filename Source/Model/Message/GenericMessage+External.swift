@@ -21,15 +21,15 @@ import Foundation
 private let zmLog = ZMSLog(tag: "GenericMessage")
 
 extension GenericMessage {
-    /// @abstract Helper to generate the payload for a generic message of type @c external
-    /// @discussion In case the payload of a regular (text) message is to large,
+    /// Helper to generate the payload for a generic message of type an external
+    /// In case the payload of a regular (text) message is to large,
     /// we need to symmetrically encrypt the original generic message using a generated
-    /// symmetric key. A generic message of type @c external which contains the key
+    /// symmetric key. A generic message of type an external which contains the key
     /// used for the symmetric encryption and the sha-256 checksum og the encoded data needs to be created.
-    /// When sending the @c external message the encrypted original message should be attached to the payload
-    /// in the @c blob field of the protocol buffer.
-    /// @param message The message that should be encrypted to sent it as attached payload in a @c external message
-    /// @return The encrypted original message, the encryption key and checksum warpped in a @c ZMExternalEncryptedDataWithKeys
+    /// When sending the an external message the encrypted original message should be attached to the payload
+    /// in the  blob field of the protocol buffer.
+    /// - Parameter message: the message that should be encrypted to sent it as attached payload in an external message
+    /// - Returns: the encrypted original message, the encryption key and checksum warpped in a  ZMExternalEncryptedDataWithKeys
     static func encryptedDataWithKeys(from message: GenericMessage) -> ZMExternalEncryptedDataWithKeys? {
         guard
             let aesKey = NSData.randomEncryptionKey(),
@@ -42,12 +42,12 @@ extension GenericMessage {
         return ZMExternalEncryptedDataWithKeys(data: encryptedData, keys: keys)
     }
     
-    /// @abstract Creates a genericMessage from a @c ZMUpdateEvent and @c External
-    /// @discussion The symetrically encrypted data (representing the original @c GenericMessage)
-    /// contained in the update event will be decrypted using the encryption keys in the @c External
-    /// @param updateEvent The decrypted @c ZMUpdateEvent containing the external data
-    /// @param external @c The @c External containing the otrKey used for the symmetric encryption and the sha256 checksum
-    /// @return The decrypted original @c GenericMessage that was contained in the update event
+    /// Creates a genericMessage from a ZMUpdateEvent and  External
+    /// The symetrically encrypted data (representing the original GenericMessage)
+    /// contained in the update event will be decrypted using the encryption keys in the External
+    /// - Parameters:
+    ///   - updateEvent: the decrypted  ZMUpdateEvent containing the external data
+    ///   - external: the External containing the otrKey used for the symmetric encryption and the sha256 checksum
     init?(from updateEvent: ZMUpdateEvent, withExternal external: External) {
         guard let externalDataString = updateEvent.payload.optionalString(forKey: "external") else { return nil }
         let externalData = Data(base64Encoded: externalDataString)
