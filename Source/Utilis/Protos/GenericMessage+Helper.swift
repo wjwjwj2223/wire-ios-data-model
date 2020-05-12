@@ -427,7 +427,7 @@ extension External {
     }
 }
 
-extension WireProtos.Mention {
+public extension WireProtos.Mention {
     
     init?(_ mention: WireDataModel.Mention) {
         guard let userID = (mention.user as? ZMUser)?.remoteIdentifier.transportString() else { return nil }
