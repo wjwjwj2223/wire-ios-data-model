@@ -954,7 +954,6 @@ extension ZMAssetClientMessageTests {
         let nonce = UUID.create()
         let thumbnailId = "uuid"
         let asset = WireProtos.Asset(withNotUploaded: .failed)
-//        let asset = ZMAsset.asset(withOriginal: original, preview: nil)
 
         let genericMessage = GenericMessage(content: asset, nonce: nonce)
 
