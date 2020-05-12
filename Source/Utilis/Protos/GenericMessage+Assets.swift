@@ -112,7 +112,7 @@ public extension WireProtos.Asset {
     }
 }
 
-extension WireProtos.Asset.Original {
+public extension WireProtos.Asset.Original {
  
     init(withSize size: UInt64, mimeType: String, name: String?, imageMetaData: WireProtos.Asset.ImageMetaData? = nil) {
         self = WireProtos.Asset.Original.with {
