@@ -19,7 +19,7 @@
 
 import Foundation
 
-extension WireProtos.Asset {
+public extension WireProtos.Asset {
     init(_ metadata: ZMFileMetadata) {
         self = WireProtos.Asset.with({
             $0.original = WireProtos.Asset.Original.with({
@@ -176,7 +176,7 @@ extension WireProtos.Asset.Preview {
     }
 }
 
-extension WireProtos.Asset.ImageMetaData {
+public extension WireProtos.Asset.ImageMetaData {
     init(width: Int32, height: Int32) {
         self = WireProtos.Asset.ImageMetaData.with {
             $0.width = width
@@ -185,7 +185,7 @@ extension WireProtos.Asset.ImageMetaData {
     }
 }
 
-extension WireProtos.Asset.RemoteData {
+public extension WireProtos.Asset.RemoteData {
     init(withOTRKey otrKey: Data, sha256: Data, assetId: String? = nil, assetToken: String? = nil) {
         self = WireProtos.Asset.RemoteData.with {
             $0.otrKey = otrKey

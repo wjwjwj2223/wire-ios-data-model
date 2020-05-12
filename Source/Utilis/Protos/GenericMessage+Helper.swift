@@ -569,6 +569,16 @@ extension ImageAsset {
 }
 
 public extension GenericMessage {
+    var hasText: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .text:
+            return true
+        default:
+            return false
+        }
+    }
+    
     var hasConfirmation: Bool {
         guard let content = content else { return false }
         switch content {

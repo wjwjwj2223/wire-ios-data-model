@@ -302,7 +302,7 @@ extension ZMManagedObject {
         self.fireAllNotifications()
     }
     
-    public func process(note: Notification) {
+    func process(note: Notification) {
         guard let userInfo = note.userInfo as? [String : Any] else { return }
 
         let updatedObjects = self.extractObjects(for: NSUpdatedObjectsKey, from: userInfo)
