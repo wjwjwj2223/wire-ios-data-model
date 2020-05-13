@@ -517,6 +517,15 @@ public extension LinkPreview {
         image.uploaded.assetID = assetKey
         image.uploaded.assetToken = assetToken ?? ""
     }
+    
+    var hasTweet: Bool {
+        switch metaData {
+        case .tweet:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 // MARK:- Set message flags
@@ -604,8 +613,6 @@ public extension GenericMessage {
         switch content {
         case .asset:
             return true
-        case .ephemeral(let data):
-            return data.hasAsset
         default:
             return false
         }

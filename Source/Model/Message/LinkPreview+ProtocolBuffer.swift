@@ -20,12 +20,27 @@
 import Foundation
 import WireLinkPreview
 
-extension LinkMetadata {
-    
+extension ArticleMetadata {
     public convenience init(protocolBuffer: LinkPreview) {
         self.init(originalURLString: protocolBuffer.url,
                   permanentURLString: protocolBuffer.permanentURL,
                   resolvedURLString: protocolBuffer.permanentURL,
                   offset: Int(protocolBuffer.urlOffset))
+        title = protocolBuffer.title.removingExtremeCombiningCharacters
+        summary = protocolBuffer.summary.removingExtremeCombiningCharacters
+    }
+}
+
+extension TwitterStatusMetadata {
+    public convenience init(protocolBuffer: LinkPreview) {
+        self.init(originalURLString: protocolBuffer.url,
+                  permanentURLString: protocolBuffer.permanentURL,
+                  resolvedURLString: protocolBuffer.permanentURL,
+                  offset: Int(protocolBuffer.urlOffset))
+        message = protocolBuffer.title.removingExtremeCombiningCharacters
+        let newAuthor = protocolBuffer.hasTweet ? protocolBuffer.tweet.author : nil
+        author = newAuthor?.removingExtremeCombiningCharacters
+        let newUsername = protocolBuffer.hasTweet ? protocolBuffer.tweet.username : nil
+        username = newUsername?.removingExtremeCombiningCharacters
     }
 }
