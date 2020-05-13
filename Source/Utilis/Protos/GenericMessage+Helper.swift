@@ -604,6 +604,8 @@ public extension GenericMessage {
         switch content {
         case .asset:
             return true
+        case .ephemeral(let data):
+            return data.hasAsset
         default:
             return false
         }
