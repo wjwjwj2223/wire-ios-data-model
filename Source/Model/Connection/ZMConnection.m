@@ -243,36 +243,6 @@ struct stringAndStatus {
     }
 }
 
-+ (instancetype)connectionWithUserUUID:(NSUUID *)UUID inContext:(NSManagedObjectContext *)moc
-{
-    VerifyReturnNil(UUID != nil);
-    
-    // We must only ever call this on the sync context. Otherwise, there's a race condition
-    // where the UI and sync contexts could both insert the same conversation (same UUID) and we'd end up
-    // having two duplicates of that connection, and we'd have a really hard time recovering from that.
-    //
-    RequireString(moc.zm_isSyncContext, "Race condition!");
-    
-    ZMConnection *result = [self fetchConnectionWithUserUUID:UUID managedObjectContext:moc];
-    
-    if (result != nil) {
-        return result;
-    } else {
-        ZMConnection *connection = [ZMConnection insertNewObjectInManagedObjectContext:moc];
-        ZMUser *user = [ZMUser userWithRemoteID:UUID createIfNeeded:NO inContext:moc];
-        
-        if (user == nil) {
-            user = [ZMUser userWithRemoteID:UUID createIfNeeded:YES inContext:moc];
-            user.needsToBeUpdatedFromBackend = YES;
-        }
-        
-        connection.to = user;
-        connection.existsOnBackend = YES;
-        return connection;
-    }
-    return nil;
-}
-
 + (ZMConnection *)connectionFromTransportData:(NSDictionary *)transportData managedObjectContext:(NSManagedObjectContext *)moc
 {
     NSUUID *conversationID = [transportData uuidForKey:@"conversation"];
