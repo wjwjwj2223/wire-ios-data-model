@@ -947,32 +947,32 @@ extension ZMAssetClientMessageTests {
 
         
     func testThatItCreatesOTRAssetMessagesFromAssetNotUploadedFailedUpdateEvent() {
-        
+
         // given
         let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         conversation.remoteIdentifier = UUID.create()
         let nonce = UUID.create()
         let thumbnailId = "uuid"
-        let asset = ZMAsset.asset(withNotUploaded: ZMAssetNotUploaded.FAILED)
-//        let asset = ZMAsset.asset(withOriginal: original, preview: nil)
-        
-        let genericMessage = ZMGenericMessage.message(content: asset, nonce: nonce)
-        
+        let asset = WireProtos.Asset(withNotUploaded: .failed)
+
+        let genericMessage = GenericMessage(content: asset, nonce: nonce)
+
+        let genericMessageData = try? genericMessage.serializedData()
         let dataPayload = [
-            "info" : genericMessage.data().base64String(),
+            "info" : genericMessageData!.base64String(),
             "id" : thumbnailId
             ] as [String : Any]
-        
+
         let payload = self.payloadForMessage(in: conversation, type: EventConversationAddOTRAsset, data: dataPayload)
         let updateEvent = ZMUpdateEvent(fromEventStreamPayload: payload, uuid: nil)!
-        
+
         // when
         var sut: ZMAssetClientMessage!
         performPretendingUiMocIsSyncMoc {
             sut = ZMAssetClientMessage.createOrUpdate(from: updateEvent, in: self.uiMOC, prefetchResult: nil)
         }
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
-        
+
         // then
         XCTAssertNotNil(sut)
         XCTAssertEqual(sut.conversation?.remoteIdentifier, conversation.remoteIdentifier)
@@ -981,35 +981,36 @@ extension ZMAssetClientMessageTests {
         XCTAssertEqual(sut.nonce, nonce)
         XCTAssertNotNil(sut.fileMessageData)
     }
-    
+
     func testThatItCreatesOTRAssetMessagesFromAssetOriginalUpdateEvent() {
-        
+
         // given
         let conversation = ZMConversation.insertNewObject(in:self.uiMOC)
         conversation.remoteIdentifier = UUID.create()
         let nonce = UUID.create()
         let thumbnailId = "uuid"
-        let imageMetadata = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
-        let original  = ZMAssetOriginal.original(withSize: 12321, mimeType: "image/jpeg", name: nil, imageMetaData: imageMetadata)
-        let asset = ZMAsset.asset(withOriginal: original, preview: nil)
-        
-        let genericMessage = ZMGenericMessage.message(content: asset, nonce: nonce)
-        
+        let imageMetadata = WireProtos.Asset.ImageMetaData(width: 4235, height: 324)
+        let original  = WireProtos.Asset.Original(withSize: 12321, mimeType: "image/jpeg", name: nil, imageMetaData: imageMetadata)
+        let asset = WireProtos.Asset(original: original, preview: nil)
+
+        let genericMessage = GenericMessage(content: asset, nonce: nonce)
+
+        let genericMessageData = try? genericMessage.serializedData()
         let dataPayload = [
-            "info" : genericMessage.data().base64String(),
+            "info" : genericMessageData!.base64String(),
             "id" : thumbnailId
             ] as [String : Any]
-        
+
         let payload = self.payloadForMessage(in: conversation, type: EventConversationAddOTRAsset, data: dataPayload)
         let updateEvent = ZMUpdateEvent(fromEventStreamPayload: payload, uuid: nil)!
-        
+
         // when
         var sut: ZMAssetClientMessage!
         performPretendingUiMocIsSyncMoc {
             sut = ZMAssetClientMessage.createOrUpdate(from: updateEvent, in: self.uiMOC, prefetchResult: nil)
         }
         XCTAssert(waitForAllGroupsToBeEmpty(withTimeout: 0.5))
-        
+
         // then
         XCTAssertNotNil(sut)
         XCTAssertEqual(sut.conversation?.remoteIdentifier, conversation.remoteIdentifier)
@@ -1026,16 +1027,17 @@ extension ZMAssetClientMessageTests {
             conversation.remoteIdentifier = UUID.create()
             let nonce = UUID.create()
             let thumbnailId = UUID.create()
-            let remoteData = ZMAssetRemoteData.remoteData(withOTRKey: Data.zmRandomSHA256Key(), sha256: Data.zmRandomSHA256Key())
-            let imageMetadata = ZMAssetImageMetaData.imageMetaData(withWidth: 4235, height: 324)
-            let asset = ZMAsset.asset(withOriginal: nil, preview: ZMAssetPreview.preview(withSize: 256, mimeType: "video/mp4", remoteData: remoteData, imageMetadata: imageMetadata))
+            let remoteData = WireProtos.Asset.RemoteData(withOTRKey: Data.zmRandomSHA256Key(), sha256: Data.zmRandomSHA256Key())
+            let imageMetadata = WireProtos.Asset.ImageMetaData(width: 4235, height: 324)
+            let asset = WireProtos.Asset(original: nil, preview: WireProtos.Asset.Preview(size: 256, mimeType: "video/mp4", remoteData: remoteData, imageMetadata: imageMetadata))
             let firstDate = Date(timeIntervalSince1970: 12334)
             let secondDate = firstDate.addingTimeInterval(234444)
             
-            let genericMessage = ZMGenericMessage.message(content: asset, nonce: nonce)
+            let genericMessage = GenericMessage(content: asset, nonce: nonce)
             
+            let genericMessageData = try? genericMessage.serializedData()
             let dataPayload = [
-                "info" : genericMessage.data().base64String(),
+                "info" : genericMessageData!.base64String(),
                 "id" : thumbnailId.transportString()
             ]
             

@@ -79,7 +79,6 @@ class MessageObserverTests : NotificationDispatcherTestBase {
                 #keyPath(MessageChangeInfo.reactionsChanged),
                 #keyPath(MessageChangeInfo.transferStateChanged),
                 #keyPath(MessageChangeInfo.confirmationsChanged),
-                #keyPath(MessageChangeInfo.genericMessageChanged),
                 #keyPath(MessageChangeInfo.underlyingMessageChanged),
                 #keyPath(MessageChangeInfo.linkAttachmentsChanged)
             ]

@@ -150,10 +150,6 @@ extension ZMSystemMessage {
     public var confirmationsChanged : Bool {
         return changedKeysContain(keys: #keyPath(ZMMessage.confirmations))
     }
-
-    public var genericMessageChanged : Bool {
-        return changedKeysContain(keys: #keyPath(ZMClientMessage.genericMessage))
-    }
     
     public var underlyingMessageChanged : Bool {
         return changedKeysContain(keys: MessageKey.underlyingMessage.rawValue)

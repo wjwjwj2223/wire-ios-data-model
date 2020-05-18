@@ -34,7 +34,6 @@
 @class ZMCleared;
 @class ZMUpdateEvent;
 @class ZMLocationData;
-@class ZMGenericMessage;
 @class ZMSystemMessage;
 @class Team;
 
@@ -139,14 +138,6 @@ NS_ASSUME_NONNULL_END
 - (nullable ZMAssetClientMessage *)appendAssetClientMessageWithNonce:(nonnull NSUUID *)nonce imageData:(nonnull NSData *)imageData;
 
 - (void)unarchiveIfNeeded;
-
-@end
-
-
-@interface ZMConversation (SelfConversation)
-
-+ (void)updateConversationWithZMLastReadFromSelfConversation:(nonnull ZMLastRead *)lastRead inContext:(nonnull NSManagedObjectContext *)context;
-+ (void)updateConversationWithZMClearedFromSelfConversation:(nonnull ZMCleared *)cleared inContext:(nonnull NSManagedObjectContext *)context;
 
 @end
 

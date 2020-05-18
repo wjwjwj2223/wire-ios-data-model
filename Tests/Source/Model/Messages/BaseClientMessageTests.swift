@@ -187,15 +187,6 @@ class BaseZMClientMessageTests : BaseZMMessageTests {
         }
     }
     
-    func createUpdateEvent(_ nonce: UUID, conversationID: UUID, timestamp: Date = .init(), genericMessage: ZMGenericMessage, senderID: UUID = .create(), eventSource: ZMUpdateEventSource = .download) -> ZMUpdateEvent {
-        return createUpdateEvent(nonce,
-                                 conversationID: conversationID,
-                                 timestamp: timestamp,
-                                 genericMessageData: genericMessage.data().base64String(),
-                                 senderID: senderID,
-                                 eventSource: eventSource)
-    }
-    
     func createUpdateEvent(_ nonce: UUID, conversationID: UUID, timestamp: Date = .init(), genericMessage: GenericMessage, senderID: UUID = .create(), eventSource: ZMUpdateEventSource = .download) -> ZMUpdateEvent {
         let data = try? genericMessage.serializedData().base64String()
         return createUpdateEvent(nonce,

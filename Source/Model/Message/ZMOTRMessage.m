@@ -18,7 +18,6 @@
 
 
 #import "ZMOTRMessage.h"
-#import "ZMGenericMessage+UpdateEvent.h"
 #import "ZMConversation+Internal.h"
 #import <WireDataModel/WireDataModel-Swift.h>
 
@@ -118,12 +117,6 @@ NSString * const DeliveredKey = @"delivered";
 - (BOOL)isUpdatingExistingMessage
 {
     return NO;
-}
-
-- (ZMGenericMessage *)genericMessage
-{
-    NSAssert(FALSE, @"Subclasses should override this method: [%@ %@]", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
-    return nil;
 }
 
 - (void)updateWithUpdateEvent:(__unused ZMUpdateEvent *)updateEvent initialUpdate:(__unused BOOL)initialUpdate {

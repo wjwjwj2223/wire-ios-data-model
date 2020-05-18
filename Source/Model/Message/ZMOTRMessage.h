@@ -32,7 +32,6 @@ extern NSString * const DeliveredKey;
 @property (nonatomic, nullable) NSSet<ButtonState *> *buttonStates;
 @property (nonatomic) NSOrderedSet *dataSet;
 @property (nonatomic, readonly) NSSet *missingRecipients;
-@property (nonatomic, readonly, nullable) ZMGenericMessage *genericMessage;
 @property (nonatomic, readonly) BOOL isUpdatingExistingMessage;
 
 - (void)missesRecipient:(UserClient *)recipient;

@@ -58,25 +58,6 @@ public extension GenericMessage {
     }
 }
 
-public extension GenericMessage {
-    var zmMessage: ZMGenericMessage? {
-        let data = try? serializedData()
-        return ZMGenericMessage.message(fromData: data)
-    }
-}
-
-extension GenericMessage {
-    var hasConfirmation: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .confirmation:
-            return true
-        default:
-            return false
-        }
-    }
-}
-
 extension GenericMessage {
     var locationData: Location? {
         guard let content = content else { return nil }
@@ -146,7 +127,7 @@ extension GenericMessage {
         }
     }
     
-    var textData: Text? {
+    public var textData: Text? {
         guard let content = content else { return nil }
         switch content {
         case .text(let data):
@@ -182,7 +163,7 @@ extension GenericMessage {
         return assetData.uploaded.assetID
     }
     
-    var previewAssetId: String? {
+    public var previewAssetId: String? {
         guard
             let assetData = assetData,
             assetData.hasPreview,
@@ -196,7 +177,7 @@ extension GenericMessage {
 }
 
 extension GenericMessage {
-    var linkPreviews: [LinkPreview] {
+    public var linkPreviews: [LinkPreview] {
         guard let content = content else { return [] }
         switch content {
         case .text:
@@ -220,6 +201,33 @@ extension Ephemeral {
         self = Ephemeral.with() {
             $0.expireAfterMillis = Int64(timeout * 1000)
             content.setEphemeralContent(on: &$0)
+        }
+    }
+    
+    var hasAsset: Bool {
+        switch self.content {
+        case .asset:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasKnock: Bool {
+        switch self.content {
+        case .knock:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLocation: Bool {
+        switch self.content {
+        case .location:
+            return true
+        default:
+            return false
         }
     }
 }
@@ -419,7 +427,7 @@ extension External {
     }
 }
 
-extension WireProtos.Mention {
+public extension WireProtos.Mention {
     
     init?(_ mention: WireDataModel.Mention) {
         guard let userID = (mention.user as? ZMUser)?.remoteIdentifier.transportString() else { return nil }
@@ -428,6 +436,23 @@ extension WireProtos.Mention {
             $0.start = Int32(mention.range.location)
             $0.length = Int32(mention.range.length)
             $0.userID = userID
+        }
+    }
+}
+
+extension WireProtos.Availability {
+    public init(_ availability: Availability) {
+        self = WireProtos.Availability.with {
+            switch availability {
+            case .none:
+                $0.type = .none
+            case .available:
+                $0.type = .available
+            case .away:
+                $0.type = .away
+            case .busy:
+                $0.type = .busy
+            }
         }
     }
 }
@@ -492,6 +517,15 @@ public extension LinkPreview {
         image.uploaded.assetID = assetKey
         image.uploaded.assetToken = assetToken ?? ""
     }
+    
+    var hasTweet: Bool {
+        switch metaData {
+        case .tweet:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 // MARK:- Set message flags
@@ -540,5 +574,118 @@ extension GenericMessage {
 extension ImageAsset {
     public func imageFormat() -> ZMImageFormat {
         return ImageFormatFromString(self.tag)
+    }
+}
+
+public extension GenericMessage {
+    var hasText: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .text:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasConfirmation: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .confirmation:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasReaction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .reaction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasAsset: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .asset:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasEphemeral: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .ephemeral:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasClientAction: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .clientAction:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasCleared: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .cleared:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLastRead: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .lastRead:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasKnock: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .knock:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var hasExternal: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .external:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    
+    var hasAvailability: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .availability:
+            return true
+        default:
+            return false
+        }
     }
 }
