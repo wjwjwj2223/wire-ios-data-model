@@ -26,6 +26,8 @@ public extension GenericMessage {
         switch content {
         case .text:
             return true
+        case .ephemeral(let data):
+            return data.hasText
         default:
             return false
         }
@@ -56,6 +58,8 @@ public extension GenericMessage {
         switch content {
         case .asset:
             return true
+        case .ephemeral(let data):
+            return data.hasAsset
         default:
             return false
         }
@@ -106,6 +110,8 @@ public extension GenericMessage {
         switch content {
         case .knock:
             return true
+        case .ephemeral(let data):
+            return data.hasKnock
         default:
             return false
         }
@@ -166,6 +172,18 @@ public extension GenericMessage {
         switch content {
         case .hidden:
             return true
+        default:
+            return false
+        }
+    }
+    
+    var hasLocation: Bool {
+        guard let content = content else { return false }
+        switch content {
+        case .location:
+            return true
+        case .ephemeral(let data):
+            return data.hasLocation
         default:
             return false
         }

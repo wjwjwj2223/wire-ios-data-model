@@ -135,7 +135,7 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
 
         // then
         XCTAssert(sut.hasEphemeral)
-        XCTAssertFalse(sut.hasAsset)
+        XCTAssertTrue(sut.ephemeral.hasAsset)
         XCTAssertEqual(sut.ephemeral.asset.uploaded.assetID, assetId)
         XCTAssertEqual(sut.ephemeral.asset.uploaded.assetToken, token)
         XCTAssertEqual(sut.ephemeral.asset.uploaded.otrKey, otrKey)
