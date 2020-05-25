@@ -66,6 +66,7 @@ extension ZMAssetClientMessageTests_Ephemeral {
         
         // then
         XCTAssertTrue(message.underlyingMessage!.hasEphemeral)
+        XCTAssertTrue(message.underlyingMessage!.hasAsset)
         XCTAssertTrue(message.underlyingMessage!.ephemeral.hasAsset)
         XCTAssertEqual(message.underlyingMessage!.ephemeral.expireAfterMillis, Int64(10*1000))
     }
