@@ -61,6 +61,52 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
+    public var messageContent: OneOf_Content? {
+        guard let content = content else {
+            return nil
+        }
+        return content
+    }
+    
+    public var messageData: MessageCapable? {
+        switch messageContent {
+        case .text(let data):
+            return data
+        case .confirmation(let data):
+            return data
+        case .reaction(let data):
+            return data
+        case .asset(let data):
+            return data
+        case .ephemeral(let data):
+            return data
+        case .clientAction(let data):
+            return data
+        case .cleared(let data):
+            return data
+        case .lastRead(let data):
+            return data
+        case .knock(let data):
+            return data
+        case .external(let data):
+            return data
+        case .availability(let data):
+            return data
+        case .edited(let data):
+            return data
+        case .deleted(let data):
+            return data
+        case .calling(let data):
+            return data
+        case .hidden(let data):
+            return data
+        case .location(let data):
+            return data
+        default:
+            return nil
+        }        
+    }
+    
     var locationData: Location? {
         guard let content = content else { return nil }
         switch content {
@@ -78,7 +124,7 @@ extension GenericMessage {
         }        
     }
     
-    public var imageAssetData : ImageAsset? {
+    public var imageAssetData: ImageAsset? {
         guard let content = content else { return nil }
         switch content {
         case .image(let data):
@@ -112,7 +158,7 @@ extension GenericMessage {
         }
     }
     
-    public var knockData : Knock? {
+    public var knockData: Knock? {
         guard let content = content else { return nil }
         switch content {
         case .knock(let data):
@@ -207,6 +253,22 @@ extension Ephemeral {
             content.setEphemeralContent(on: &$0)
         }
     }
+    
+    public var messageData: MessageCapable? {
+        guard let content = content else { return nil }
+        switch content {
+        case .text(let data):
+            return data
+        case .asset(let data):
+            return data
+        case .knock(let data):
+            return data
+        case .location(let data):
+            return data
+        default:
+            return nil
+        }
+    }
 }
 
 // MARK: - ClientEntry
@@ -261,17 +323,16 @@ extension ButtonAction {
 
 extension Location {
     init(latitude: Float, longitude: Float) {
-        self = WireProtos.Location.with({
+        self = WireProtos.Location.with {
             $0.latitude = latitude
             $0.longitude = longitude
-        })
+        }
     }
 }
 
 // MARK: - Text
 
 extension Text {
-    
     public init(content: String, mentions: [Mention] = [], linkPreviews: [LinkMetadata] = [], replyingTo: ZMOTRMessage? = nil) {
         self = Text.with {
             $0.content = content
@@ -279,8 +340,8 @@ extension Text {
             $0.linkPreview = linkPreviews.map { WireProtos.LinkPreview($0) }
             
             if let quotedMessage = replyingTo,
-               let quotedMessageNonce = quotedMessage.nonce,
-               let quotedMessageHash = quotedMessage.hashOfContent {
+                let quotedMessageNonce = quotedMessage.nonce,
+                let quotedMessageHash = quotedMessage.hashOfContent {
                 $0.quote = Quote.with({
                     $0.quotedMessageID = quotedMessageNonce.transportString()
                     $0.quotedMessageSha256 = quotedMessageHash
@@ -319,7 +380,6 @@ extension Text {
 // MARK: - Reaction
 
 extension WireProtos.Reaction {
-    
     public init(emoji: String, messageID: UUID) {
         self = WireProtos.Reaction.with({
             $0.emoji = emoji
@@ -331,7 +391,6 @@ extension WireProtos.Reaction {
 // MARK: - LastRead
 
 extension LastRead {
-    
     public init(conversationID: UUID, lastReadTimestamp: Date) {
         self = LastRead.with {
             $0.conversationID = conversationID.transportString()
@@ -343,7 +402,6 @@ extension LastRead {
 // MARK: - Calling
 
 extension Calling {
-    
     public init(content: String) {
         self = Calling.with {
             $0.content = content
@@ -354,7 +412,6 @@ extension Calling {
 // MARK: - MessageEdit
 
 extension WireProtos.MessageEdit {
-    
     public init(replacingMessageID: UUID, text: Text) {
         self = MessageEdit.with {
             $0.replacingMessageID = replacingMessageID.transportString()
@@ -398,7 +455,6 @@ extension MessageDelete {
 // MARK: - Confirmation
 
 extension WireProtos.Confirmation {
-    
     public init?(messageIds: [UUID], type: Confirmation.TypeEnum = .delivered) {
         guard let firstMessageID = messageIds.first else {
             return nil
@@ -437,7 +493,6 @@ extension External {
 // MARK: - Mention
 
 public extension WireProtos.Mention {
-    
     init?(_ mention: WireDataModel.Mention) {
         guard let userID = (mention.user as? ZMUser)?.remoteIdentifier.transportString() else { return nil }
         
@@ -471,7 +526,6 @@ extension WireProtos.Availability {
 // MARK: - LinkPreview
 
 public extension LinkPreview {
-
     init(_ linkMetadata: LinkMetadata) {
         if let articleMetadata = linkMetadata as? ArticleMetadata {
             self = LinkPreview(articleMetadata: articleMetadata)

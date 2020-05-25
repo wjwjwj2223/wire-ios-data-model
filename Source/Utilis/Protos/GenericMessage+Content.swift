@@ -22,171 +22,83 @@ import Foundation
 
 public extension GenericMessage {
     var hasText: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .text:
-            return true
-        case .ephemeral(let data):
-            return data.hasText
-        default:
-            return false
+        guard let _ = messageData as? Text else {
+            let ephemeral = messageData as? Ephemeral
+            return ephemeral?.hasText ?? false
         }
+        return true
     }
     
     var hasConfirmation: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .confirmation:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Confirmation) != nil ? true : false
     }
     
     var hasReaction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .reaction:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Reaction) != nil ? true : false
     }
     
     var hasAsset: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .asset:
-            return true
-        case .ephemeral(let data):
-            return data.hasAsset
-        default:
-            return false
+        guard let _ = messageData as? WireProtos.Asset else {
+            let ephemeral = messageData as? Ephemeral
+            return ephemeral?.hasAsset ?? false
         }
+        return true
     }
     
     var hasEphemeral: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .ephemeral:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Ephemeral) != nil ? true : false
     }
     
     var hasClientAction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .clientAction:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? ClientAction) != nil ? true : false
     }
     
     var hasCleared: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .cleared:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Cleared) != nil ? true : false
     }
     
     var hasLastRead: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .lastRead:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? LastRead) != nil ? true : false
     }
     
     var hasKnock: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .knock:
-            return true
-        case .ephemeral(let data):
-            return data.hasKnock
-        default:
-            return false
+        guard let _ = messageData as? Knock else {
+            let ephemeral = messageData as? Ephemeral
+            return ephemeral?.hasKnock ?? false
         }
+        return true
     }
     
     var hasExternal: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .external:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? External) != nil ? true : false
     }
     
     var hasAvailability: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .availability:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? WireProtos.Availability) != nil ? true : false
     }
     
     var hasEdited: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .edited:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? MessageEdit) != nil ? true : false
     }
     
     var hasDeleted: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .deleted:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? MessageDelete) != nil ? true : false
     }
     
     var hasCalling: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .calling:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Calling) != nil ? true : false
     }
     
     var hasHidden: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .hidden:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? MessageHide) != nil ? true : false
     }
     
     var hasLocation: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .location:
-            return true
-        case .ephemeral(let data):
-            return data.hasLocation
-        default:
-            return false
+        guard let _ = messageData as? Location else {
+            let ephemeral = messageData as? Ephemeral
+            return ephemeral?.hasLocation ?? false
         }
+        return true
     }
 }
 
@@ -194,38 +106,18 @@ public extension GenericMessage {
 
 public extension Ephemeral {
     var hasAsset: Bool {
-        switch content {
-        case .asset:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? WireProtos.Asset) != nil ? true : false
     }
     
     var hasKnock: Bool {
-        switch content {
-        case .knock:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Knock) != nil ? true : false
     }
-    
+
     var hasLocation: Bool {
-        switch content {
-        case .location:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Location) != nil ? true : false
     }
     
     var hasText: Bool {
-        switch content {
-        case .text:
-            return true
-        default:
-            return false
-        }
+        return (messageData as? Text) != nil ? true : false
     }
 }
