@@ -30,7 +30,7 @@ public extension GenericMessage {
     }
     
     var hasConfirmation: Bool {
-        return (messageData as? Confirmation) != nil ? true : false
+        return messageData is Confirmation
     }
     
     var hasReaction: Bool {
