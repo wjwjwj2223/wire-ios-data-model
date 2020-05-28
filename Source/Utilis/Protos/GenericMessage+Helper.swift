@@ -61,15 +61,9 @@ public extension GenericMessage {
 }
 
 extension GenericMessage {
-    public var messageContent: OneOf_Content? {
-        guard let content = content else {
-            return nil
-        }
-        return content
-    }
-    
     public var messageData: MessageCapable? {
-        switch messageContent {
+        guard let content = content else { return nil }
+        switch content {
         case .text(let data):
             return data
         case .confirmation(let data):
@@ -340,12 +334,12 @@ extension Text {
             $0.linkPreview = linkPreviews.map { WireProtos.LinkPreview($0) }
             
             if let quotedMessage = replyingTo,
-                let quotedMessageNonce = quotedMessage.nonce,
-                let quotedMessageHash = quotedMessage.hashOfContent {
-                $0.quote = Quote.with({
+               let quotedMessageNonce = quotedMessage.nonce,
+               let quotedMessageHash = quotedMessage.hashOfContent {
+                $0.quote = Quote.with {
                     $0.quotedMessageID = quotedMessageNonce.transportString()
                     $0.quotedMessageSha256 = quotedMessageHash
-                })
+                }
             }
         }
     }
