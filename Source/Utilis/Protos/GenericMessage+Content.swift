@@ -34,7 +34,7 @@ public extension GenericMessage {
     }
     
     var hasReaction: Bool {
-        return (messageData as? Reaction) != nil ? true : false
+        return messageData is Reaction
     }
     
     var hasAsset: Bool {
@@ -46,19 +46,19 @@ public extension GenericMessage {
     }
     
     var hasEphemeral: Bool {
-        return (messageData as? Ephemeral) != nil ? true : false
+        return messageData is Ephemeral
     }
     
     var hasClientAction: Bool {
-        return (messageData as? ClientAction) != nil ? true : false
+        return messageData is ClientAction
     }
     
     var hasCleared: Bool {
-        return (messageData as? Cleared) != nil ? true : false
+        return messageData is Cleared
     }
     
     var hasLastRead: Bool {
-        return (messageData as? LastRead) != nil ? true : false
+        return messageData is LastRead
     }
     
     var hasKnock: Bool {
@@ -70,27 +70,27 @@ public extension GenericMessage {
     }
     
     var hasExternal: Bool {
-        return (messageData as? External) != nil ? true : false
+        return messageData is External
     }
     
     var hasAvailability: Bool {
-        return (messageData as? WireProtos.Availability) != nil ? true : false
+        return messageData is WireProtos.Availability
     }
     
     var hasEdited: Bool {
-        return (messageData as? MessageEdit) != nil ? true : false
+        return messageData is MessageEdit
     }
     
     var hasDeleted: Bool {
-        return (messageData as? MessageDelete) != nil ? true : false
+        return messageData is MessageDelete
     }
     
     var hasCalling: Bool {
-        return (messageData as? Calling) != nil ? true : false
+        return messageData is Calling
     }
     
     var hasHidden: Bool {
-        return (messageData as? MessageHide) != nil ? true : false
+        return messageData is MessageHide
     }
     
     var hasLocation: Bool {
@@ -106,18 +106,18 @@ public extension GenericMessage {
 
 public extension Ephemeral {
     var hasAsset: Bool {
-        return (messageData as? WireProtos.Asset) != nil ? true : false
+        return messageData is WireProtos.Asset
     }
     
     var hasKnock: Bool {
-        return (messageData as? Knock) != nil ? true : false
+        return messageData is Knock
     }
 
     var hasLocation: Bool {
-        return (messageData as? Location) != nil ? true : false
+        return messageData is Location
     }
     
     var hasText: Bool {
-        return (messageData as? Text) != nil ? true : false
+        return messageData is Text
     }
 }
