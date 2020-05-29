@@ -115,7 +115,9 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
         sut.updateUploaded(assetId: assetId, token: token)
 
         // then
-        XCTAssertFalse(sut.hasEphemeral)
+        if case .ephemeral? = sut.content  {
+            return XCTFail()
+        }
         XCTAssert(sut.hasAsset)
         XCTAssertEqual(sut.asset.uploaded.assetID, assetId)
         XCTAssertEqual(sut.asset.uploaded.assetToken, token)
@@ -134,7 +136,9 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
         sut.updateUploaded(assetId: assetId, token: token)
 
         // then
-        XCTAssert(sut.hasEphemeral)
+        guard case .ephemeral? = sut.content else {
+            return XCTFail()
+        }
         XCTAssertTrue(sut.ephemeral.hasAsset)
         XCTAssertEqual(sut.ephemeral.asset.uploaded.assetID, assetId)
         XCTAssertEqual(sut.ephemeral.asset.uploaded.assetToken, token)
@@ -161,7 +165,9 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
         sut.updatePreview(assetId: assetId, token: token)
 
         // then
-        XCTAssertFalse(sut.hasEphemeral)
+        if case .ephemeral? = sut.content  {
+            return XCTFail()
+        }
         XCTAssert(sut.hasAsset)
         XCTAssertEqual(sut.asset.preview.remote.assetID, assetId)
         XCTAssertEqual(sut.asset.preview.remote.assetToken, token)
@@ -190,7 +196,9 @@ class ProtobufUtilitiesTests: BaseZMClientMessageTests {
         sut.updatePreview(assetId: assetId, token: token)
 
         // then
-        XCTAssertTrue(sut.hasEphemeral)
+        guard case .ephemeral? = sut.content else {
+            return XCTFail()
+        }
         XCTAssert(sut.ephemeral.hasAsset)
         XCTAssertEqual(sut.ephemeral.asset.preview.remote.assetID, assetId)
         XCTAssertEqual(sut.ephemeral.asset.preview.remote.assetToken, token)

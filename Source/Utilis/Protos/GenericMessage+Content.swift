@@ -22,11 +22,7 @@ import Foundation
 
 public extension GenericMessage {
     var hasText: Bool {
-        guard let _ = messageData as? Text else {
-            let ephemeral = messageData as? Ephemeral
-            return ephemeral?.hasText ?? false
-        }
-        return true
+        return messageData is Text
     }
     
     var hasConfirmation: Bool {
@@ -38,15 +34,7 @@ public extension GenericMessage {
     }
     
     var hasAsset: Bool {
-        guard let _ = messageData as? WireProtos.Asset else {
-            let ephemeral = messageData as? Ephemeral
-            return ephemeral?.hasAsset ?? false
-        }
-        return true
-    }
-    
-    var hasEphemeral: Bool {
-        return messageData is Ephemeral
+        return messageData is WireProtos.Asset
     }
     
     var hasClientAction: Bool {
@@ -62,11 +50,7 @@ public extension GenericMessage {
     }
     
     var hasKnock: Bool {
-        guard let _ = messageData as? Knock else {
-            let ephemeral = messageData as? Ephemeral
-            return ephemeral?.hasKnock ?? false
-        }
-        return true
+        return messageData is Knock
     }
     
     var hasExternal: Bool {
@@ -94,11 +78,7 @@ public extension GenericMessage {
     }
     
     var hasLocation: Bool {
-        guard let _ = messageData as? Location else {
-            let ephemeral = messageData as? Ephemeral
-            return ephemeral?.hasLocation ?? false
-        }
-        return true
+        return messageData is Location
     }
 }
 

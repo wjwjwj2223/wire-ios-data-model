@@ -73,7 +73,7 @@ extension GenericMessage {
         case .asset(let data):
             return data
         case .ephemeral(let data):
-            return data
+            return data.messageData
         case .clientAction(let data):
             return data
         case .cleared(let data):
@@ -96,9 +96,15 @@ extension GenericMessage {
             return data
         case .location(let data):
             return data
-        default:
-            return nil
-        }        
+        case .image(let data):
+            return data
+        case .composite(let data):
+            return data
+        case .buttonAction(let data):
+            return data
+        case .buttonActionConfirmation(let data):
+            return data
+        }
     }
     
     var locationData: Location? {
@@ -259,8 +265,8 @@ extension Ephemeral {
             return data
         case .location(let data):
             return data
-        default:
-            return nil
+        case .image(let data):
+            return data
         }
     }
 }
