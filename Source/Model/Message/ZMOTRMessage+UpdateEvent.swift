@@ -27,23 +27,25 @@ extension ZMOTRMessage {
                                      prefetchResult: ZMFetchRequestBatchResult) -> ZMOTRMessage? {
         
         let selfUser = ZMUser.selfUser(in: moc)
-
+        
         guard
             let senderID = updateEvent.senderUUID(),
             let conversation = self.conversation(for: updateEvent, in: moc, prefetchResult: prefetchResult),
             !isSelf(conversation: conversation, andIsSenderID: senderID, differentFromSelfUserID: selfUser.remoteIdentifier)
-        else {
-            return nil
+            else {
+                zmLog.debug("Illegal sender or conversation, abort processing.")
+                return nil
         }
         
         guard
             let message = GenericMessage(from: updateEvent),
             let content = message.content
-        else {
-            appendInvalidSystemMessage(forUpdateEvent: updateEvent, toConversation: conversation, inContext: moc)
-            return nil
+            else {
+                zmLog.debug("Can't read protobuf, abort processing:\n\(updateEvent.payload)")
+                appendInvalidSystemMessage(forUpdateEvent: updateEvent, toConversation: conversation, inContext: moc)
+                return nil
         }
-        zmLog.debug("processing:\n\(message.debugDescription)")
+        zmLog.debug("Processing:\n\(message.debugDescription)")
         
         // Update the legal hold state in the conversation
         conversation.updateSecurityLevelIfNeededAfterReceiving(message: message, timestamp: updateEvent.timeStamp() ?? Date())
