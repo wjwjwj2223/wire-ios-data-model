@@ -73,7 +73,7 @@ extension GenericMessage {
         case .asset(let data):
             return data
         case .ephemeral(let data):
-            return data.messageData
+            return data
         case .clientAction(let data):
             return data
         case .cleared(let data):
