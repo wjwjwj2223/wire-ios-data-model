@@ -22,153 +22,63 @@ import Foundation
 
 public extension GenericMessage {
     var hasText: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .text:
-            return true
-        default:
-            return false
-        }
+        return messageData is Text
     }
     
     var hasConfirmation: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .confirmation:
-            return true
-        default:
-            return false
-        }
+        return messageData is Confirmation
     }
     
     var hasReaction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .reaction:
-            return true
-        default:
-            return false
-        }
+        return messageData is Reaction
     }
     
     var hasAsset: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .asset:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    var hasEphemeral: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .ephemeral:
-            return true
-        default:
-            return false
-        }
+        return messageData is WireProtos.Asset
     }
     
     var hasClientAction: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .clientAction:
-            return true
-        default:
-            return false
-        }
+        return messageData is ClientAction
     }
     
     var hasCleared: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .cleared:
-            return true
-        default:
-            return false
-        }
+        return messageData is Cleared
     }
     
     var hasLastRead: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .lastRead:
-            return true
-        default:
-            return false
-        }
+        return messageData is LastRead
     }
     
     var hasKnock: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .knock:
-            return true
-        default:
-            return false
-        }
+        return messageData is Knock
     }
     
     var hasExternal: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .external:
-            return true
-        default:
-            return false
-        }
+        return messageData is External
     }
     
     var hasAvailability: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .availability:
-            return true
-        default:
-            return false
-        }
+        return messageData is WireProtos.Availability
     }
     
     var hasEdited: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .edited:
-            return true
-        default:
-            return false
-        }
+        return messageData is MessageEdit
     }
     
     var hasDeleted: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .deleted:
-            return true
-        default:
-            return false
-        }
+        return messageData is MessageDelete
     }
     
     var hasCalling: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .calling:
-            return true
-        default:
-            return false
-        }
+        return messageData is Calling
     }
     
     var hasHidden: Bool {
-        guard let content = content else { return false }
-        switch content {
-        case .hidden:
-            return true
-        default:
-            return false
-        }
+        return messageData is MessageHide
+    }
+    
+    var hasLocation: Bool {
+        return messageData is Location
     }
 }
 
@@ -176,38 +86,18 @@ public extension GenericMessage {
 
 public extension Ephemeral {
     var hasAsset: Bool {
-        switch content {
-        case .asset:
-            return true
-        default:
-            return false
-        }
+        return messageData is WireProtos.Asset
     }
     
     var hasKnock: Bool {
-        switch content {
-        case .knock:
-            return true
-        default:
-            return false
-        }
+        return messageData is Knock
     }
-    
+
     var hasLocation: Bool {
-        switch content {
-        case .location:
-            return true
-        default:
-            return false
-        }
+        return messageData is Location
     }
     
     var hasText: Bool {
-        switch content {
-        case .text:
-            return true
-        default:
-            return false
-        }
+        return messageData is Text
     }
 }

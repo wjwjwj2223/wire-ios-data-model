@@ -166,7 +166,9 @@ class ProtosTests: XCTestCase {
         
         XCTAssertNotNil(message)
         XCTAssertEqual(message.messageID, nonce.transportString())
-        XCTAssertTrue(message.hasEphemeral)
+        guard case .ephemeral? = message.content else {
+            return XCTFail()
+        }
         XCTAssertTrue(message.ephemeral.hasKnock)
         XCTAssertEqual(message.ephemeral.expireAfterMillis, 1000);
     }

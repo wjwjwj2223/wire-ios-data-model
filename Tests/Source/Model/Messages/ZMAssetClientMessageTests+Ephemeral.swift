@@ -65,12 +65,11 @@ extension ZMAssetClientMessageTests_Ephemeral {
         let message = conversation.append(file: fileMetadata) as! ZMAssetClientMessage
         
         // then
-        guard
-            case .ephemeral? = message.underlyingMessage?.content,
-            case .asset? = message.underlyingMessage?.ephemeral.content
-        else {
+        guard case .ephemeral? = message.underlyingMessage!.content else {
             return XCTFail()
         }
+        XCTAssertTrue(message.underlyingMessage!.hasAsset)
+        XCTAssertTrue(message.underlyingMessage!.ephemeral.hasAsset)
         XCTAssertEqual(message.underlyingMessage!.ephemeral.expireAfterMillis, Int64(10*1000))
     }
     
@@ -110,12 +109,10 @@ extension ZMAssetClientMessageTests_Ephemeral {
         message.update(with: event, initialUpdate: true)
     
         // then
-        guard case .ephemeral? = message.underlyingMessage?.content else {
+        guard case .ephemeral? = message.underlyingMessage!.content else {
             return XCTFail()
         }
-        guard case .asset? = message.underlyingMessage?.ephemeral.content else {
-            return XCTFail()
-        }
+        XCTAssertTrue(message.underlyingMessage!.ephemeral.hasAsset)
         XCTAssertEqual(message.underlyingMessage!.ephemeral.expireAfterMillis, Int64(10*1000))
     }
     
