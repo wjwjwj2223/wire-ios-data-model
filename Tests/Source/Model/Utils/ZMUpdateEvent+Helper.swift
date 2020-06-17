@@ -23,7 +23,7 @@ import WireTransport
 public protocol UpdateEventProcessor: class {
     
     @objc(processUpdateEvents:ignoreBuffer:)
-    func process(updateEvents: [ZMUpdateEvent], ignoreBuffer: Bool)
+    public func process(updateEvents: [ZMUpdateEvent], ignoreBuffer: Bool)
     
 }
 
