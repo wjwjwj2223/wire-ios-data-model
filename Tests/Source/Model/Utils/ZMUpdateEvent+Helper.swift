@@ -19,6 +19,14 @@
 import Foundation
 import WireTransport
 
+@objc
+public protocol UpdateEventProcessor: class {
+    
+    @objc(processUpdateEvents:ignoreBuffer:)
+    func process(updateEvents: [ZMUpdateEvent], ignoreBuffer: Bool)
+    
+}
+
 extension ZMUpdateEvent {
     public convenience override init() {
         self.init(uuid: nil, payload: ["type": "conversation.create"], transient: false, decrypted: false, source: .download)!
