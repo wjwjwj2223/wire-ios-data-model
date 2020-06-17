@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		060D194F2462A9EC00623376 /* ZMMessageTests+GenericMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D194D2462A9D000623376 /* ZMMessageTests+GenericMessage.swift */; };
+		060ED6D12499E97200412C4A /* NSManagedObjectContext+ServerTimeDelta.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060ED6D02499E97200412C4A /* NSManagedObjectContext+ServerTimeDelta.swift */; };
 		0612D241243DC134008811A7 /* store2-81-0.wiredatabase in Resources */ = {isa = PBXBuildFile; fileRef = 0612D240243DC12E008811A7 /* store2-81-0.wiredatabase */; };
 		0617001323E2FC14005C262D /* GenericMessageTests+LinkMetaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0617001123E2FBC0005C262D /* GenericMessageTests+LinkMetaData.swift */; };
 		0634C3A924643A400006081D /* ZMUpdateEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0634C3A824643A400006081D /* ZMUpdateEvent.swift */; };
@@ -620,6 +621,7 @@
 
 /* Begin PBXFileReference section */
 		060D194D2462A9D000623376 /* ZMMessageTests+GenericMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ZMMessageTests+GenericMessage.swift"; sourceTree = "<group>"; };
+		060ED6D02499E97200412C4A /* NSManagedObjectContext+ServerTimeDelta.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSManagedObjectContext+ServerTimeDelta.swift"; sourceTree = "<group>"; };
 		0612D23F243DBE9F008811A7 /* zmessaging2.81.0.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = zmessaging2.81.0.xcdatamodel; sourceTree = "<group>"; };
 		0612D240243DC12E008811A7 /* store2-81-0.wiredatabase */ = {isa = PBXFileReference; lastKnownFileType = file; path = "store2-81-0.wiredatabase"; sourceTree = "<group>"; };
 		0617001123E2FBC0005C262D /* GenericMessageTests+LinkMetaData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GenericMessageTests+LinkMetaData.swift"; sourceTree = "<group>"; };
@@ -1607,6 +1609,7 @@
 				D5FA30C42063DC2D00716618 /* BackupMetadata.swift */,
 				54D7B83E1E12774600C1B347 /* NSPersistentStore+Metadata.swift */,
 				5473CC721E14245C00814C03 /* NSManagedObjectContext+Debugging.swift */,
+				060ED6D02499E97200412C4A /* NSManagedObjectContext+ServerTimeDelta.swift */,
 			);
 			name = ManagedObjectContext;
 			path = Source/ManagedObjectContext;
@@ -2771,6 +2774,7 @@
 				F9A7065C1CAEE01D00C2F5FE /* ZMConnection.m in Sources */,
 				EF2CBDA720061E2D0004F65E /* ServiceUser.swift in Sources */,
 				A995F05C23968D8500FAC3CF /* ParticipantRoleChangeInfo.swift in Sources */,
+				060ED6D12499E97200412C4A /* NSManagedObjectContext+ServerTimeDelta.swift in Sources */,
 				F929C1751E41EBE20018ADA4 /* PersonName.swift in Sources */,
 				16BA4303233CD8E50018E883 /* Label.swift in Sources */,
 				F9A706B61CAEE01D00C2F5FE /* UserClientChangeInfo.swift in Sources */,
