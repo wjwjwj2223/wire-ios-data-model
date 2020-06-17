@@ -18,6 +18,14 @@
 
 import Foundation
 
+@objc
+public protocol UpdateEventProcessor: class {
+    
+    @objc(processUpdateEvents:ignoreBuffer:)
+    func process(updateEvents: [ZMUpdateEvent], ignoreBuffer: Bool)
+    
+}
+
 extension ZMUpdateEvent {
     public var messageNonce: UUID? {
         switch type {
