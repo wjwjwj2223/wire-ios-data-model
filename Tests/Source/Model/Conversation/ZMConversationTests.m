@@ -1704,8 +1704,6 @@
     conversation.conversationType = ZMConversationTypeConnection;
     conversation.remoteIdentifier = NSUUID.createUUID;
 
-//    [self.uiMOC saveOrRollback];
-
     ZMMessage* unreadMessage = [self insertDownloadedMessageAfterMessageIntoConversation:conversation];
     unreadMessage.sender = self.createUser;
     [self.uiMOC saveOrRollback];
