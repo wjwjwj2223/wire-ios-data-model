@@ -20,14 +20,13 @@
 import XCTest
 @testable import WireDataModel
 
-class ClientMessageTests_OTR: BaseZMClientMessageTests {
-}
+final class ClientMessageTests_OTR: BaseZMClientMessageTests {}
 
 // MARK: - Payload creation
 extension ClientMessageTests_OTR {
 
     func testThatCreatesEncryptedDataAndAddsItToGenericMessageAsBlob() {
-        self.syncMOC.performGroupedBlockAndWait { 
+        self.syncMOC.performGroupedBlockAndWait {
             let otherUser = ZMUser.insertNewObject(in:self.syncMOC)
             otherUser.remoteIdentifier = UUID.create()
             let firstClient = self.createClient(for: otherUser, createSessionWithSelfUser: true, onMOC: self.syncMOC)
@@ -36,13 +35,8 @@ extension ClientMessageTests_OTR {
             let selfClient = ZMUser.selfUser(in: self.syncMOC).selfClient()
             let notSelfClients = selfClients.filter { $0 != selfClient }
             
-            let nonce = UUID.create()
-            let builder = ZMGenericMessage.builder()!
-            let textBuilder = ZMText.builder()!
-            textBuilder.setContent(self.textMessageRequiringExternalMessage(2))
-            builder.setText(textBuilder.build()!)
-            builder.setMessageId(nonce.transportString())
-            let textMessage = builder.build()!
+            let nonce = UUID.create()            
+            let textMessage = GenericMessage(content: Text(content: self.textMessageRequiringExternalMessage(2)), nonce: nonce)
             
             let conversation = ZMConversation.insertNewObject(in:self.syncMOC)
             conversation.conversationType = .group
@@ -51,7 +45,7 @@ extension ClientMessageTests_OTR {
             XCTAssertTrue(self.syncMOC.saveOrRollback())
             
             // when
-            guard let dataAndStrategy = textMessage.encryptedMessagePayloadData(conversation, externalData: nil)
+            guard let dataAndStrategy = textMessage.encryptForTransport(for: conversation)
             else { return XCTFail() }
             
             // then
@@ -72,6 +66,8 @@ extension ClientMessageTests_OTR {
             notSelfClients.forEach{
                 XCTAssertTrue(clientSet.contains($0.clientId))
             }
+            
+            XCTAssertEqual(createdMessage.reportMissing.count, createdMessage.recipients.count)
         }
     }
     
@@ -83,7 +79,7 @@ extension ClientMessageTests_OTR {
             self.syncUser3Client1.failedToEstablishSession = true
             
             //when
-            guard let dataAndStrategy = message.encryptedMessagePayloadData() else {
+            guard let dataAndStrategy = message.encryptForTransport() else {
                 XCTFail()
                 return
             }
@@ -109,7 +105,7 @@ extension ClientMessageTests_OTR {
             self.syncUser3Client1.failedToEstablishSession = true
             
             //when
-            guard let dataAndStrategy = message.encryptedMessagePayloadData() else {
+            guard let dataAndStrategy = message.encryptForTransport() else {
                 XCTFail()
                 return
             }
@@ -133,7 +129,7 @@ extension ClientMessageTests_OTR {
             let message = self.syncConversation.append(text: self.name, fetchLinkPreview: true, nonce: UUID.create()) as! ZMClientMessage
             
             //when
-            guard let payloadAndStrategy = message.encryptedMessagePayloadData() else {
+            guard let payloadAndStrategy = message.encryptForTransport() else {
                 XCTFail()
                 return
             }
@@ -158,7 +154,7 @@ extension ClientMessageTests_OTR {
             XCTAssertTrue(message.isEphemeral)
             
             //when
-            guard let payloadAndStrategy = message.encryptedMessagePayloadData() else { return XCTFail() }
+            guard let payloadAndStrategy = message.encryptForTransport() else { return XCTFail() }
             
             //then
             switch payloadAndStrategy.strategy {
@@ -197,7 +193,7 @@ extension ClientMessageTests_OTR {
             let sut = syncMessage.deleteForEveryone()
 
             // when
-            guard let payloadAndStrategy = sut?.encryptedMessagePayloadData() else { return XCTFail() }
+            guard let payloadAndStrategy = sut?.encryptForTransport() else { return XCTFail() }
             
             //then
             switch payloadAndStrategy.strategy {
@@ -237,7 +233,7 @@ extension ClientMessageTests_OTR {
             syncMessage.sender = nil
             var payload : (data: Data, strategy: MissingClientsStrategy)?
             self.performIgnoringZMLogError {
-                 payload = sut?.encryptedMessagePayloadData()
+                 payload = sut?.encryptForTransport()
             }
             
             //then
@@ -262,7 +258,7 @@ extension ClientMessageTests_OTR {
             self.expectedRecipients = [self.syncSelfUser.remoteIdentifier!.transportString(): [self.syncSelfClient2.remoteIdentifier!]]
             
             // when
-            guard let payloadAndStrategy = message.encryptedMessagePayloadData() else { return XCTFail() }
+            guard let payloadAndStrategy = message.encryptForTransport() else { return XCTFail() }
             
             // then
             self.assertMessageMetadata(payloadAndStrategy.data)
@@ -285,7 +281,7 @@ extension ClientMessageTests_OTR {
             self.expectedRecipients = [self.syncSelfUser.remoteIdentifier!.transportString(): [self.syncSelfClient2.remoteIdentifier!]]
             
             // when
-            guard let payloadAndStrategy = message.encryptedMessagePayloadData() else { return XCTFail() }
+            guard let payloadAndStrategy = message.encryptForTransport() else { return XCTFail() }
             
             // then
             self.assertMessageMetadata(payloadAndStrategy.data)
@@ -323,10 +319,10 @@ extension ClientMessageTests_OTR {
             
             textMessage.sender = self.syncUser1
             textMessage.senderClientID = senderID
-            let confirmationMessage = conversation.append(message: ZMConfirmation.confirm(messageId: textMessage.nonce!, type: .DELIVERED), hidden: true)
+            let confirmationMessage = conversation.append(message: Confirmation(messageId: textMessage.nonce!, type: .delivered), hidden: true)
             
             //when
-            guard let payloadAndStrategy = confirmationMessage?.encryptedMessagePayloadData()
+            guard let payloadAndStrategy = confirmationMessage?.encryptForTransport()
             else { return XCTFail()}
             
             //then
@@ -368,10 +364,10 @@ extension ClientMessageTests_OTR {
             
             textMessage.sender = self.syncUser1
             textMessage.senderClientID = senderID
-            let confirmationMessage = conversation.append(message: ZMConfirmation.confirm(messageId: textMessage.nonce!, type: .DELIVERED), hidden: true)
+            let confirmationMessage = conversation.append(message: Confirmation(messageId: textMessage.nonce!, type: .delivered), hidden: true)
             
             //when
-            guard let _ = confirmationMessage?.encryptedMessagePayloadData()
+            guard let _ = confirmationMessage?.encryptForTransport()
                 else { return XCTFail()}
         }
     }
@@ -388,17 +384,21 @@ extension ClientMessageTests_OTR {
             connection.status = .accepted
             conversation.connection = connection
             
-            let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: "yo"), nonce: UUID.create())
+            let genericMessage = GenericMessage(content: Text(content: "yo"), nonce: UUID.create())
             let clientmessage = ZMClientMessage(nonce: UUID(), managedObjectContext: self.syncMOC)
-            clientmessage.add(genericMessage.data())
+            do {
+                clientmessage.add(try genericMessage.serializedData())
+            } catch {
+                XCTFail()
+            }
             clientmessage.visibleInConversation = conversation
             
             self.syncMOC.saveOrRollback()
             
-            let confirmationMessage = conversation.append(message: ZMConfirmation.confirm(messageId: clientmessage.nonce!, type: .DELIVERED), hidden: true)
+            let confirmationMessage = conversation.append(message: Confirmation(messageId: clientmessage.nonce!, type: .delivered), hidden: true)
 
             //when
-            guard let _ = confirmationMessage?.encryptedMessagePayloadData()
+            guard let _ = confirmationMessage?.encryptForTransport()
                 else { return XCTFail()}
         }
     }
@@ -411,17 +411,21 @@ extension ClientMessageTests_OTR {
             conversation.remoteIdentifier = UUID.create()
             conversation.addParticipantAndUpdateConversationState(user: self.syncUser1, role: nil)
             
-            let genericMessage = ZMGenericMessage.message(content: ZMText.text(with: "yo"), nonce: UUID.create())
+            let genericMessage = GenericMessage(content: Text(content: "yo"), nonce: UUID.create())
             let clientmessage = ZMClientMessage(nonce: UUID(), managedObjectContext: self.syncMOC)
-            clientmessage.add(genericMessage.data())
+            do {
+                clientmessage.add(try genericMessage.serializedData())
+            } catch {
+                XCTFail()
+            }
             clientmessage.visibleInConversation = conversation
             
             self.syncMOC.saveOrRollback()
             
-            let confirmationMessage = conversation.append(message: ZMConfirmation.confirm(messageId: clientmessage.nonce!, type: .DELIVERED), hidden: true)
+            let confirmationMessage = conversation.append(message: Confirmation(messageId: clientmessage.nonce!, type: .delivered), hidden: true)
 
             //when
-            guard let _ = confirmationMessage?.encryptedMessagePayloadData()
+            guard let _ = confirmationMessage?.encryptForTransport()
                 else { return XCTFail()}
         }
     }
@@ -454,7 +458,7 @@ extension ClientMessageTests_OTR {
     /// Returns a string large enough to have to be encoded in an external message
     fileprivate var stringLargeEnoughToRequireExternal: String {
         var text = "Hello"
-        while (text.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold)) {
+        while (text.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessage.byteSizeExternalThreshold)) {
             text.append(text)
         }
         return text
@@ -473,7 +477,7 @@ extension ClientMessageTests_OTR {
     /// Returns a string that is big enough to require external message payload
     fileprivate func textMessageRequiringExternalMessage(_ numberOfClients: UInt) -> String {
         var string = "Exponential growth!"
-        while string.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessageByteSizeExternalThreshold / numberOfClients) {
+        while string.data(using: String.Encoding.utf8)!.count < Int(ZMClientMessage.byteSizeExternalThreshold / numberOfClients) {
             string = string + string
         }
         return string

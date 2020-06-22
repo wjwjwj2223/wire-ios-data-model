@@ -21,7 +21,7 @@ import XCTest
 
 final class SignatureStatusTests: ZMBaseManagedObjectTest {
     var status: SignatureStatus!
-    var asset: ZMAsset?
+    var asset: WireProtos.Asset?
     
     override func setUp() {
         super.setUp()
@@ -55,29 +55,27 @@ final class SignatureStatusTests: ZMBaseManagedObjectTest {
     }
     
     func testThatItTakesRequiredAssetAttributesForTheRequest() {
-        XCTAssertEqual(asset?.uploaded.assetId, "id")
-        XCTAssertEqual(asset?.preview.remote.assetId, "")
+        XCTAssertEqual(asset?.uploaded.assetID, "id")
+        XCTAssertEqual(asset?.preview.remote.assetID, "")
         
-        XCTAssertEqual(status.documentID, asset?.uploaded.assetId)
+        XCTAssertEqual(status.documentID, asset?.uploaded.assetID)
         XCTAssertEqual(status.fileName, asset?.original.name)
     }
     
-    private func createAsset() -> ZMAsset {
+    private func createAsset() -> WireProtos.Asset {
         let (otrKey, sha) = (Data.randomEncryptionKey(), Data.zmRandomSHA256Key())
         let (assetId, token) = ("id", "token")
-        let original = ZMAssetOriginal.original(withSize: 200, mimeType: "application/pdf", name: "PDF test")
+        let original = WireProtos.Asset.Original(withSize: 200, mimeType: "application/pdf", name: "PDF test")
         
-        let assetBuilder = ZMAsset.builder()!
-        let remoteBuilder = ZMAssetRemoteData.builder()!
-        
-        _ = remoteBuilder.setOtrKey(otrKey)
-        _ = remoteBuilder.setSha256(sha)
-        _ = remoteBuilder.setAssetId(assetId)
-        _ = remoteBuilder.setAssetToken(token)
-        
-        assetBuilder.setUploaded(remoteBuilder)
-        assetBuilder.setOriginal(original)
-        let sut =  ZMGenericMessage.message(content: assetBuilder.build(), nonce: UUID.create())
+        let remoteData = WireProtos.Asset.RemoteData(withOTRKey: otrKey,
+                                                     sha256: sha,
+                                                     assetId: assetId,
+                                                     assetToken: token)
+        let asset = WireProtos.Asset.with {
+            $0.original = original
+            $0.uploaded = remoteData
+        }
+        let sut = GenericMessage(content: asset, nonce: UUID.create())
         
         return sut.asset
     }

@@ -546,7 +546,7 @@ static NSString *const ParticipantRolesKey = @"participantRoles";
     }
 
     NSString *name = [transportData optionalStringForKey:@"name"];
-    if (name != nil || authoritative) {
+    if (!self.isAccountDeleted && (name != nil || authoritative)) {
         self.name = name;
     }
     
@@ -562,6 +562,7 @@ static NSString *const ParticipantRolesKey = @"participantRoles";
     
     if ([transportData objectForKey:@"team"] || authoritative) {
         self.teamIdentifier = [transportData optionalUuidForKey:@"team"];
+        [self createOrDeleteMembershipIfBelongingToTeam];
     }
     
     NSString *email = [transportData optionalStringForKey:@"email"];
@@ -1068,18 +1069,6 @@ static NSString *const ParticipantRolesKey = @"participantRoles";
 - (BOOL)isSelfUserRemoteIdentifierInContext:(NSManagedObjectContext *)moc;
 {
     return [[ZMUser selfUserInContext:moc].remoteIdentifier isEqual:self];
-}
-
-@end
-
-
-@implementation ZMUser (Protobuf)
-
-- (ZMUserId *)zmUserId
-{
-    ZMUserIdBuilder *userIdBuilder = [ZMUserId builder];
-    [userIdBuilder setUuid:[self.remoteIdentifier data]];
-    return [userIdBuilder build];
 }
 
 @end

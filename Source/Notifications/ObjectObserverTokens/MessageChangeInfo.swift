@@ -27,6 +27,7 @@ enum MessageKey: String {
     case previewGenericMessage = "previewGenericMessage"
     case mediumGenericMessage = "mediumGenericMessage"
     case linkPreview = "linkPreview"
+    case underlyingMessage = "underlyingMessage"
 }
 
 extension ZMMessage : ObjectInSnapshot {
@@ -63,12 +64,13 @@ extension ZMClientMessage {
         let keys = super.observableKeys
         let additionalKeys = [#keyPath(ZMAssetClientMessage.hasDownloadedPreview),
                               #keyPath(ZMClientMessage.linkPreviewState),
-                              #keyPath(ZMClientMessage.genericMessage),
+                              MessageKey.underlyingMessage.rawValue,
                               #keyPath(ZMMessage.reactions),
                               #keyPath(ZMMessage.confirmations),
                               #keyPath(ZMClientMessage.quote),
                               MessageKey.linkPreview.rawValue,
-                              #keyPath(ZMMessage.linkAttachments)]
+                              #keyPath(ZMMessage.linkAttachments),
+                              #keyPath(ZMClientMessage.buttonStates)]
         return keys.union(additionalKeys)
     }
 }
@@ -98,7 +100,8 @@ extension ZMSystemMessage {
     
     static let UserChangeInfoKey = "userChanges"
     static let ReactionChangeInfoKey = "reactionChanges"
-
+    static let ButtonStateChangeInfoKey = "buttonStateChanges"
+    
     static func changeInfo(for message: ZMMessage, changes: Changes) -> MessageChangeInfo? {
         let originalChanges = changes.originalChanges
         
@@ -129,8 +132,9 @@ extension ZMSystemMessage {
                 "transferStateChanged: \(transferStateChanged)",
                 "senderChanged: \(senderChanged)",
                 "isObfuscatedChanged: \(isObfuscatedChanged)",
-                "genericMessageChanged: \(genericMessageChanged)",
-                "linkAttachmentsChanged: \(linkAttachmentsChanged)"
+                "underlyingMessageChanged: \(underlyingMessageChanged)",
+                "linkAttachmentsChanged: \(linkAttachmentsChanged)",
+                "buttonStatesChanged: \(buttonStatesChanged)"
                 ].joined(separator: ", ")
     }
     
@@ -146,9 +150,9 @@ extension ZMSystemMessage {
     public var confirmationsChanged : Bool {
         return changedKeysContain(keys: #keyPath(ZMMessage.confirmations))
     }
-
-    public var genericMessageChanged : Bool {
-        return changedKeysContain(keys: #keyPath(ZMClientMessage.genericMessage))
+    
+    public var underlyingMessageChanged : Bool {
+        return changedKeysContain(keys: MessageKey.underlyingMessage.rawValue)
     }
     
     public var childMessagesChanged : Bool {
@@ -199,6 +203,10 @@ extension ZMSystemMessage {
 
     public var linkAttachmentsChanged: Bool {
         return changedKeysContain(keys: #keyPath(ZMMessage.linkAttachments))
+    }
+    
+    public var buttonStatesChanged: Bool {
+        return changedKeysContain(keys: #keyPath(ZMClientMessage.buttonStates)) || changeInfos[MessageChangeInfo.ButtonStateChangeInfoKey] != nil
     }
     
     public var userChangeInfo : UserChangeInfo? {

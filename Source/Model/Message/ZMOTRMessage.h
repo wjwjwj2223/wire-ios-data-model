@@ -21,6 +21,7 @@
 
 @class UserClient;
 @class MessageUpdateResult;
+@class ButtonState;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,17 +29,17 @@ extern NSString * const DeliveredKey;
 
 @interface ZMOTRMessage : ZMMessage
 
+@property (nonatomic, nullable) NSSet<ButtonState *> *buttonStates;
 @property (nonatomic) NSOrderedSet *dataSet;
 @property (nonatomic, readonly) NSSet *missingRecipients;
-@property (nonatomic, readonly, nullable) NSString *dataSetDebugInformation;
-@property (nonatomic, readonly, nullable) ZMGenericMessage *genericMessage;
+@property (nonatomic, readonly) BOOL isUpdatingExistingMessage;
 
 - (void)missesRecipient:(UserClient *)recipient;
 - (void)missesRecipients:(NSSet<UserClient *> *)recipients;
 - (void)doesNotMissRecipient:(UserClient *)recipient;
 - (void)doesNotMissRecipients:(NSSet<UserClient *> *)recipients;
 
-- (void)updateWithGenericMessage:(ZMGenericMessage * )message updateEvent:(ZMUpdateEvent *)updateEvent initialUpdate:(BOOL)initialUpdate;
+- (void)updateWithUpdateEvent:(ZMUpdateEvent *)updateEvent initialUpdate:(BOOL)initialUpdate;
 
 + (instancetype _Nullable)createOrUpdateMessageFromUpdateEvent:(ZMUpdateEvent *)updateEvent
                                         inManagedObjectContext:(NSManagedObjectContext *)moc

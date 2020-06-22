@@ -28,21 +28,21 @@ public extension Notification.Name {
 extension ZMAssetClientMessage {
 
     func deleteContent() {
-        self.managedObjectContext?.zm_fileAssetCache.deleteAssetData(self)
+        managedObjectContext?.zm_fileAssetCache.deleteAssetData(self)
         
         if let url = temporaryDirectoryURL,
             FileManager.default.fileExists(atPath: url.path) {
             try? FileManager.default.removeItem(at: url)
         }
         
-        self.dataSet.map { $0 as! ZMGenericMessageData }.forEach {
+        dataSet.compactMap { $0 as? ZMGenericMessageData }.forEach {
             $0.managedObjectContext?.delete($0)
         }
-        self.dataSet = NSOrderedSet()
-        self.cachedGenericAssetMessage = nil
-        self.assetId = nil
-        self.associatedTaskIdentifier = nil
-        self.preprocessedSize = CGSize.zero
+        dataSet = NSOrderedSet()
+        cachedUnderlyingAssetMessage = nil
+        assetId = nil
+        associatedTaskIdentifier = nil
+        preprocessedSize = CGSize.zero
     }
     
     override public func removeClearingSender(_ clearingSender: Bool) {
@@ -54,15 +54,17 @@ extension ZMAssetClientMessage {
     }
     
     private func markRemoteAssetToBeDeleted() {
-        guard sender == ZMUser.selfUser(in: managedObjectContext!) else { return }
+        guard sender == ZMUser.selfUser(in: managedObjectContext!) else {
+            return
+        }
         
         // Request the asset to be deleted
-        if let identifier = genericAssetMessage?.v3_uploadedAssetId {
+        if let identifier = underlyingMessage?.v3_uploadedAssetId {
             NotificationCenter.default.post(name: .deleteAssetNotification, object: identifier)
         }
         
         // Request the preview asset to be deleted
-        if let previewIdentifier = genericAssetMessage?.previewAssetId {
+        if let previewIdentifier = underlyingMessage?.previewAssetId {
             NotificationCenter.default.post(name: .deleteAssetNotification, object: previewIdentifier)
         }
     }

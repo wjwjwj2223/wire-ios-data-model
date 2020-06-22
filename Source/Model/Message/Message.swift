@@ -18,7 +18,6 @@
 
 import Foundation
 
-
 public extension ZMConversationMessage {
 
     /// Returns YES, if the message has text to display.
@@ -94,7 +93,12 @@ public extension ZMConversationMessage {
         guard isSystem else { return false }
         return systemMessageData!.systemMessageType == .messageDeletedForEveryone
     }
+}
 
+public extension ConversationCompositeMessage {
+    var isComposite: Bool {
+        return compositeMessageData != nil
+    }
 }
 
 /// The `ZMConversationMessage` protocol can not be extended in Objective-C,

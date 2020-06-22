@@ -49,7 +49,7 @@ public final class SignatureStatus : NSObject {
     }
     
     // MARK: - Private Property
-    private(set) var asset: ZMAsset?
+    private(set) var asset: WireProtos.Asset?
     private(set) var managedObjectContext: NSManagedObjectContext
 
     // MARK: - Public Property
@@ -59,13 +59,13 @@ public final class SignatureStatus : NSObject {
     public var encodedHash: String?
 
     // MARK: - Init
-    public init(asset: ZMAsset?,
+    public init(asset: WireProtos.Asset?,
                 data: Data?,
                 managedObjectContext: NSManagedObjectContext) {
         self.asset = asset
         self.managedObjectContext = managedObjectContext
         
-        documentID = asset?.uploaded.assetId
+        documentID = asset?.uploaded.assetID
         fileName = asset?.original.name.removingExtremeCombiningCharacters
         
         encodedHash = data?

@@ -23,6 +23,12 @@ private let log = ZMSLog(tag: "Conversations")
 @objc 
 extension ZMConversation {
     
+    @discardableResult
+    func append(buttonActionWithId id: String, referenceMessageId: UUID, nonce: UUID = UUID()) -> ZMClientMessage? {
+        let buttonAction = ButtonAction(buttonId: id, referenceMessageId: referenceMessageId)
+        return appendClientMessage(with: GenericMessage(content: buttonAction, nonce: nonce), hidden: true)
+    }
+    
     @discardableResult @objc(appendLocation:nonce:)
     public func append(location: LocationData, nonce: UUID = UUID()) -> ZMConversationMessage? {
         let locationContent = Location.with() {
@@ -57,6 +63,26 @@ extension ZMConversation {
         
         let clientMessage = selfConversation.appendClientMessage(with: genericMessage, expires: false, hidden: false)
         return clientMessage
+    }
+    
+    /// Create and append to self conversation a ClientMessage that has generic message data built with the given data
+    @nonobjc
+    public static func appendSelfConversation(genericMessage: GenericMessage, managedObjectContext: NSManagedObjectContext) -> ZMClientMessage? {
+        let selfConversation = ZMConversation.selfConversation(in: managedObjectContext)
+        let clientMessage = selfConversation.appendClientMessage(with: genericMessage, expires: false, hidden: false)
+        return clientMessage
+    }
+    
+    @nonobjc
+    public static func appendSelfConversation(withClearedOf conversation: ZMConversation) -> ZMClientMessage? {
+        guard let convID = conversation.remoteIdentifier,
+            let cleared = conversation.clearedTimeStamp,
+            let managedObjectContext = conversation.managedObjectContext,
+            convID != ZMConversation.selfConversationIdentifier(in: managedObjectContext) else {
+                return nil
+        }
+        let message = GenericMessage(content: Cleared(timestamp: cleared, conversationID: convID), nonce: UUID())
+        return appendSelfConversation(genericMessage: message, managedObjectContext: managedObjectContext)
     }
     
     @discardableResult @objc(appendText:mentions:fetchLinkPreview:nonce:)
@@ -199,10 +225,6 @@ extension ZMConversation {
     }
     
     // MARK: - Helper methods
-    
-    func append(message: MessageContentType, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
-        return appendClientMessage(with: ZMGenericMessage.message(content: message, nonce: nonce), expires: expires, hidden: hidden)
-    }
     
     @nonobjc
     func append(message: MessageCapable, nonce: UUID = UUID(), hidden: Bool = false, expires: Bool = false) -> ZMClientMessage? {
